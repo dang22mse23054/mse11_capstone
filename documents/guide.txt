@@ -1,0 +1,10 @@
+Github: 
+- https://github.com/dang22mse23054/mse11_capstone
+- Clone: git@github.com:dang22mse23054/mse11_capstone.git
+
+Install Pytoch: (https://pytorch.org/)
+- MacOS: pip3 install torch torchvision torchaudio
+
+
+Dataset:
+- https://paperswithcode.com/dataset/hico-det

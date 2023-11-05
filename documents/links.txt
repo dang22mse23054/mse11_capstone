@@ -1,0 +1,8 @@
+Papers:
+- https://paperswithcode.com/paper/detecting-and-recognizing-human-object
+- https://paperswithcode.com/paper/mixface-improving-face-verification-focusing
+- 
+
+
+Dataset:
+- https://paperswithcode.com/dataset/hico-det
