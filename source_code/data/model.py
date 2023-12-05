@@ -96,7 +96,7 @@ class FaceDetectionModel(LightningModule):
 	def eval_step(self, batch, batch_idx, prefix: str):
 		print('-----------eval_step------')
 
-		# import random
+		import random
 		# if random.random() < 0.1:
 		images, targets = batch
 		preds = self.model(images)

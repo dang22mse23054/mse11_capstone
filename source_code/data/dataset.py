@@ -125,7 +125,6 @@ class ImageDetectionDataset(Dataset):
 
 		# normalization.
 		image /= 255.0
-		# show_img(image)
 
 		target = {}
 
@@ -139,12 +138,9 @@ class ImageDetectionDataset(Dataset):
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
 			labels = [1 for cols in rows]
-			# labels = img_info['category_id'].values
 
 			# filter easy boxes
 			selected_boxes = [id for id, cols in enumerate(rows) if max(cols[4:]) < 2]
-			# print([cols[4:10] for cols in rows]) 
-			# == [0, 0, 0, 0, 0, 0]]
 
 			boxes = [boxes[id] for id in selected_boxes]
 			labels = [labels[id] for id in selected_boxes]
