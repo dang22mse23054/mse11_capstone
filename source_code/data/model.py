@@ -92,7 +92,7 @@ class FaceDetectionModel(LightningModule):
 		selected = random.sample(range(len(images)), len(images) // 5)
 		mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
     
-	def validation_epoch_end(self, outputs) -> None:
+	def on_validation_epoch_end(self) -> None:
 		mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
 		self.print(mAPs)
 		mAPs_per_class = mAPs.pop("val_map_per_class")
