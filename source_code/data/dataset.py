@@ -137,7 +137,7 @@ class ImageDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-			labels = [1] * len(rows)
+			labels = [1] * len(boxes)
 
 			# filter small boxes
 			selected_boxes = [id for id, box in enumerate(boxes) if (box[2] >= MIN_SIZE or box[3] >= MIN_SIZE)
@@ -165,7 +165,7 @@ class ImageDetectionDataset(Dataset):
 				image = image_dict['image']
 
 				boxes = [bbox[:4] for bbox in image_dict['bboxes']]
-				labels = image_dict['labels']
+                labels = [bbox[4] for bbox in image_dict['bboxes']]
 
 				target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
 				target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
