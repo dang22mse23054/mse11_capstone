@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../')
-
 from typing import Optional
 from torch.utils.data.dataloader import DataLoader
 import pandas as pd
@@ -57,12 +54,3 @@ class FaceDataLoader(pl.LightningDataModule):
 	def test_dataloader(self):
 		return self.val_dataloader()
 
-
-
-# if __name__ == "__main__":
-#     dm = DataLoader()
-#     dm.setup()
-#     trainloader = dm.train_dataloader()
-#     for img, label in trainloader:
-#         print()
-#         pass 

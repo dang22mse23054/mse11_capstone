@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../')
-
 import torch
 from torch.utils.data.dataset import Dataset
 import pandas as pd
@@ -11,6 +8,8 @@ from tqdm import tqdm
 from matplotlib import pyplot as plt
 
 from utils.constants import Constants
+
+wider_face_root = '/kaggle/input/wider-face-a-face-detection-dataset'
 
 COL_NAME = Constants.DFColumns()
 MODE = Constants.Mode()
@@ -24,12 +23,12 @@ PATHS = {
 		'img_dir': 'raw/WIDER_val/images',
 	},
 	MODE.TRAIN: {
-		'annotation': 'raw/wider_face_split/wider_face_train_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_train/images',
+		'annotation': f'{wider_face_root}/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
+		'img_dir': f'{wider_face_root}/WIDER_train/WIDER_train/images',
 	},
 	MODE.VALIDATE: {
-		'annotation': 'raw/wider_face_split/wider_face_val_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_val/images',
+		'annotation': f'{wider_face_root}/wider_face_annotations/wider_face_split/wider_face_val_bbx_gt.txt',
+		'img_dir': f'{wider_face_root}/WIDER_val/WIDER_val/images',
 	},
 	MODE.TEST:  {
 		'img_dir': 'raw/WIDER_test/images',
