@@ -140,10 +140,10 @@ class ImageDetectionDataset(Dataset):
 			labels = [1 for cols in rows]
 
 			# filter easy boxes
-			selected_boxes = [id for id, cols in enumerate(rows) if max(cols[4:]) < 2]
+			# selected_boxes = [id for id, cols in enumerate(rows) if max(cols[4:]) < 2]
 
-			boxes = [boxes[id] for id in selected_boxes]
-			labels = [labels[id] for id in selected_boxes]
+			# boxes = [boxes[id] for id in selected_boxes]
+			# labels = [labels[id] for id in selected_boxes]
 
 			# convert [x, y, w, h] to [x1, y1, x2, y2]
 			boxes = [(x, y, x+w, y+h) for x, y, w, h in boxes]
