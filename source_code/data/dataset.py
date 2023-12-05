@@ -141,6 +141,13 @@ class ImageDetectionDataset(Dataset):
 
 			# convert [x, y, w, h] to [x1, y1, x2, y2]
 			boxes = [(x, y, x+w, y+h) for x, y, w, h in boxes]
+			
+			# filter small boxes
+			selected_boxes = [id for id, box in enumerate(boxes) if (box[2] - box[0] >= MIN_SIZE and box[3] - box[1] >= MIN_SIZE)
+							and box[2] < image.shape[1] and box[3]  < image.shape[0]]
+
+			boxes = [boxes[id] for id in selected_boxes]
+			labels = [labels[id] for id in selected_boxes]
 
 			# set default label 'Face' (value = 1) to each boxes
 
