@@ -87,7 +87,6 @@ class FaceDetectionModel(LightningModule):
 		# if random.random() < 0.1:
 		if len(batch) == 0: return
 		images, targets = batch
-		print(targets[0]["boxes"], targets[0]["labels"])
 		preds = self.model(images)
 		selected = random.sample(range(len(images)), len(images) // 5)
 		mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
@@ -95,24 +94,8 @@ class FaceDetectionModel(LightningModule):
 	def on_validation_epoch_end(self) -> None:
 		mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
 		self.print(mAPs)
-		# mAPs_per_class = mAPs.pop("val_map_per_class")
-		# mARs_per_class = mAPs.pop("val_mar_100_per_class")
 		self.log_dict(mAPs, sync_dist=True)
 
-		# self.log_dict(
-		# 	{
-		# 		f"val_map_{label}": value
-		# 		for label, value in zip(self.id2label.values(), mAPs_per_class)
-		# 	},
-		# 	sync_dist=True,
-		# )
-		# self.log_dict(
-		# 	{
-		# 		f"val_mar_100_{label}": value
-		# 		for label, value in zip(self.id2label.values(), mARs_per_class)
-		# 	},
-		# 	sync_dist=True,
-		# )
 		mAP.reset()
 
 	def validation_step(self, batch, batch_idx):
