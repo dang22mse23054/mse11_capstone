@@ -84,12 +84,12 @@ class FaceDetectionModel(LightningModule):
 
 	def eval_step(self, batch, batch_idx, prefix: str):
 		import random
-		# if random.random() < 0.1:
-		if len(batch) == 0: return
-		images, targets = batch
-		preds = self.model(images)
-		selected = random.sample(range(len(images)), len(images) // 5)
-		mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
+		if random.random() < 0.1:
+			if len(batch) == 0: return
+			images, targets = batch
+			preds = self.model(images)
+			selected = random.sample(range(len(images)), len(images) // 5)
+			mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
     
 	def on_validation_epoch_end(self) -> None:
 		mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
