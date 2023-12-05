@@ -137,7 +137,7 @@ class ImageDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-			labels = [1 for cols in rows]
+			labels = [1] * len(rows)
 
 			# filter small boxes
 			selected_boxes = [id for id, box in enumerate(boxes) if (box[2] >= MIN_SIZE or box[3] >= MIN_SIZE)
