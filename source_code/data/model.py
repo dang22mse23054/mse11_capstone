@@ -29,9 +29,6 @@ class FaceDetectionModel(LightningModule):
 		self.id2label = {0: 'Background', 1: 'Face'}
 		# metrics
 		self.model = Model(num_classes=2)
-
-	def setup(self):
-		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
 	
 	def forward(self, x):
 		return self.model(x)
@@ -92,6 +89,9 @@ class FaceDetectionModel(LightningModule):
 			selected = random.sample(range(len(images)), len(images) // 5)
 			self.mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
     
+	def on_validation_epoch_start(self):
+		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
+
 	def on_validation_epoch_end(self) -> None:
 		self.mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
 		self.print(self.mAPs)
