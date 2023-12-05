@@ -16,6 +16,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 
 
+mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=True)		
 
 class FaceDetectionModel(LightningModule):
 	def __init__(self,
@@ -28,7 +29,6 @@ class FaceDetectionModel(LightningModule):
 		self.save_hyperparameters()
 		self.id2label = {0: 'Background', 1: 'Face'}
 		# metrics
-		self.map = MeanAveragePrecision(box_format="xyxy", class_metrics=True)		
 		self.model = Model(num_classes=2)
 
 	
@@ -90,7 +90,30 @@ class FaceDetectionModel(LightningModule):
 		print(targets[0]["boxes"], targets[0]["labels"])
 		preds = self.model(images)
 		selected = random.sample(range(len(images)), len(images) // 5)
-		self.map.update([preds[i] for i in selected], [targets[i] for i in selected])
+		mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
+    
+	def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+		mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
+		self.print(mAPs)
+		mAPs_per_class = mAPs.pop("val_map_per_class")
+		mARs_per_class = mAPs.pop("val_mar_100_per_class")
+		self.log_dict(mAPs, sync_dist=True)
+
+		self.log_dict(
+			{
+				f"val_map_{label}": value
+				for label, value in zip(self.id2label.values(), mAPs_per_class)
+			},
+			sync_dist=True,
+		)
+		self.log_dict(
+			{
+				f"val_mar_100_{label}": value
+				for label, value in zip(self.id2label.values(), mARs_per_class)
+			},
+			sync_dist=True,
+		)
+		mAP.reset()
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
