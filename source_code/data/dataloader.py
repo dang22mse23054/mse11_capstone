@@ -29,8 +29,8 @@ class FaceDataLoader(pl.LightningDataModule):
 							RandomCrop(self.img_size, self.img_size, p=1.0),
 							], bbox_params=BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
-			self.train_dataset = ImageDetectionDataset(mode=MODE.DEMO, transforms=transforms)
-			self.val_dataset = ImageDetectionDataset(mode=MODE.VALDEMO)
+			self.train_dataset = ImageDetectionDataset(mode=MODE.TRAIN, transforms=transforms)
+			self.val_dataset = ImageDetectionDataset(mode=MODE.VALIDATE)
 	   
 		# if stage == "test" or stage is None:
 		# 	self.test_dataset = ImageDetectionDataset(mode=MODE.TEST, image_dir=self.val_data)
