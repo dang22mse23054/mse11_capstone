@@ -90,6 +90,13 @@ def get_df(dir):
 
 	return pd.DataFrame(data)
 
+'''
+Number of bounding box
+x1, y1, w, h, blur, expression, illumination, invalid, occlusion, pose
+
+Easy image -> all these are 0s
+blur, expression, illumination, invalid, occlusion, pose
+'''
 class ImageDetectionDataset(Dataset):
 	def __init__(self,
 				 mode : str = MODE.DEMO,
@@ -107,13 +114,13 @@ class ImageDetectionDataset(Dataset):
 		self.image_dir = PATHS[mode]['img_dir']
 		self.transforms = transforms
 
-		print(self.df)
+		# print(self.df)
 
 	def __getitem__(self, idx: int):
 		# get image info (path, detail)
 		img_info = self.df.iloc[idx]
 
-		print(f"------------ GET ITEM -------- {idx} ---- {img_info.path}")
+		# print(f"------------ GET ITEM -------- {idx} ---- {img_info.path}")
 		image = cv2.imread(f'{self.image_dir}/{img_info.path}', cv2.IMREAD_COLOR).astype(np.float32)
 
 		# normalization.
@@ -131,12 +138,11 @@ class ImageDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-			labels = [cols[7] for cols in rows]
+			labels = [1 for cols in rows]
 			# labels = img_info['category_id'].values
 
-			# filter small boxes
-			selected_boxes = [id for id, box in enumerate(boxes) if (box[2] >= MIN_SIZE or box[3] >= MIN_SIZE)
-							  and box[2] + box[0] < image.shape[1] and box[3] + box[1] < image.shape[0]]
+			# filter easy boxes
+			selected_boxes = [id for id, cols in enumerate(rows) if cols[4:10] == (0, 0, 0, 0, 0, 0)]
 
 			boxes = [boxes[id] for id in selected_boxes]
 			labels = [labels[id] for id in selected_boxes]
