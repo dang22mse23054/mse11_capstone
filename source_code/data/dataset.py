@@ -174,7 +174,7 @@ class ImageDetectionDataset(Dataset):
 				boxes = np.array(boxes)
 				area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 				iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
-				target['area'] = area
+				target['area'] = torch.from_numpy(area)
 				target['iscrowd'] = iscrowd
 
 		image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
