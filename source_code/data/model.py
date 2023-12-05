@@ -96,20 +96,12 @@ class FaceDetectionModel(LightningModule):
 	def eval_step(self, batch, batch_idx, prefix: str):
 		print('-----------eval_step------')
 
-		import random
-		if random.random() < 0.1:
-			images, targets = batch
-			preds = self.model(images)
-			
-			selected = random.sample(range(len(images)), len(images) // 5)
-			
-
-			print([targets[i] for i in selected])
-
-
-			print('---------------')
-
-			self.map.update([preds[i] for i in selected], [targets[i] for i in selected])
+		# import random
+		# if random.random() < 0.1:
+		images, targets = batch
+		preds = self.model(images)
+		selected = random.sample(range(len(images)), len(images) // 5)
+		self.map.update([preds[i] for i in selected], [targets[i] for i in selected])
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
