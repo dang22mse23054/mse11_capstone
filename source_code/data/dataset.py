@@ -142,7 +142,9 @@ class ImageDetectionDataset(Dataset):
 			# labels = img_info['category_id'].values
 
 			# filter easy boxes
-			selected_boxes = [id for id, cols in enumerate(rows) if cols[4:10] == (0, 0, 0, 0, 0, 0)]
+			selected_boxes = [id for id, cols in enumerate(rows)]
+			print([cols[4:10] for cols in rows]) 
+			# == [0, 0, 0, 0, 0, 0]]
 
 			boxes = [boxes[id] for id in selected_boxes]
 			labels = [labels[id] for id in selected_boxes]
