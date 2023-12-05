@@ -161,8 +161,8 @@ class ImageDetectionDataset(Dataset):
 				labels = [bbox[4] for bbox in image_dict['bboxes']]
 
 				# filter small boxes
-				selected_boxes = [id for id, box in enumerate(boxes) if (box[2] >= MIN_SIZE or box[3] >= MIN_SIZE)
-								and box[2] + box[0] < image.shape[1] and box[3] + box[1] < image.shape[0]]
+				selected_boxes = [id for id, box in enumerate(boxes) if (box[2] - box[0] >= MIN_SIZE and box[3] - box[1] >= MIN_SIZE)
+								and box[2] < image.shape[1] and box[3]  < image.shape[0]]
 
 				boxes = [boxes[id] for id in selected_boxes]
 				labels = [labels[id] for id in selected_boxes]
