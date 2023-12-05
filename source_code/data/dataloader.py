@@ -13,7 +13,7 @@ class FaceDataLoader(pl.LightningDataModule):
 	def __init__(self,         
 		batch_size: int = 10,
 		workers: int = 5,
-		img_size: int = 512,
+		img_size: int = 256,
 		):
 		super().__init__()
 		self.batch_size = batch_size
