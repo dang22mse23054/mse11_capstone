@@ -30,7 +30,7 @@ class FaceDetectionModel(LightningModule):
 		# metrics
 		self.model = Model(num_classes=2)
 
-	def setup():
+	def setup(self):
 		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
 	
 	def forward(self, x):
