@@ -16,7 +16,6 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 
 
-mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)		
 
 class FaceDetectionModel(LightningModule):
 	def __init__(self,
@@ -31,6 +30,8 @@ class FaceDetectionModel(LightningModule):
 		# metrics
 		self.model = Model(num_classes=2)
 
+	def setup():
+		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
 	
 	def forward(self, x):
 		return self.model(x)
@@ -89,14 +90,14 @@ class FaceDetectionModel(LightningModule):
 			images, targets = batch
 			preds = self.model(images)
 			selected = random.sample(range(len(images)), len(images) // 5)
-			mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
+			self.mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
     
 	def on_validation_epoch_end(self) -> None:
-		mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
-		self.print(mAPs)
-		self.log_dict(mAPs, sync_dist=True)
+		self.mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
+		self.print(self.mAPs)
+		self.log_dict(self.mAPs, sync_dist=True)
 
-		mAP.reset()
+		self.mAP.reset()
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
