@@ -93,7 +93,7 @@ class FaceDetectionModel(LightningModule):
 		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
 
 	def on_validation_epoch_end(self) -> None:
-		self.mAPs = {"val_" + k: v for k, v in mAP.compute().items()}
+		self.mAPs = {"val_" + k: v for k, v in self.mAP.compute().items()}
 		self.print(self.mAPs)
 		self.log_dict(self.mAPs, sync_dist=True)
 
