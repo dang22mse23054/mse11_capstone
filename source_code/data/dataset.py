@@ -165,7 +165,7 @@ class ImageDetectionDataset(Dataset):
 				image = image_dict['image']
 
 				boxes = [bbox[:4] for bbox in image_dict['bboxes']]
-                labels = [bbox[4] for bbox in image_dict['bboxes']]
+				labels = [bbox[4] for bbox in image_dict['bboxes']]
 
 				target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
 				target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
