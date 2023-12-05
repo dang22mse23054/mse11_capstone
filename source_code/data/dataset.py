@@ -19,6 +19,10 @@ PATHS = {
 		'annotation': 'raw/wider_face_split/wider_face_demo_bbx_gt.txt',
 		'img_dir': 'raw/WIDER_train/images',
 	},
+	MODE.VALDEMO: {
+		'annotation': 'raw/wider_face_split/wider_face_valdemo_bbx_gt.txt',
+		'img_dir': 'raw/WIDER_val/images',
+	},
 	MODE.TRAIN: {
 		'annotation': 'raw/wider_face_split/wider_face_train_bbx_gt.txt',
 		'img_dir': 'raw/WIDER_train/images',
@@ -110,7 +114,7 @@ class ImageDetectionDataset(Dataset):
 		# get image info (path, detail)
 		img_info = self.df.iloc[idx]
 
-		print(f"------------ GET ITEM -------- {idx}")
+		print(f"------------ GET ITEM -------- {idx} ---- {img_info.path}")
 		image = cv2.imread(f'{self.image_dir}/{img_info.path}', cv2.IMREAD_COLOR).astype(np.float32)
 
 		# normalization.
@@ -128,7 +132,7 @@ class ImageDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-
+			labels = [cols[7] for cols in rows]
 			# labels = img_info['category_id'].values
 
 			# filter small boxes
@@ -136,13 +140,12 @@ class ImageDetectionDataset(Dataset):
 							  and box[2] + box[0] < image.shape[1] and box[3] + box[1] < image.shape[0]]
 
 			boxes = [boxes[id] for id in selected_boxes]
-			print(selected_boxes)
+			labels = [labels[id] for id in selected_boxes]
 
 			# convert [x, y, w, h] to [x1, y1, x2, y2]
 			boxes = [(x, y, x+w, y+h) for x, y, w, h in boxes]
 
 			# set default label 'Face' (value = 1) to each boxes
-			labels = [1 for id in selected_boxes]
 
 			target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
 			target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
@@ -158,7 +161,7 @@ class ImageDetectionDataset(Dataset):
 				image = image_dict['image']
 
 				boxes = [bbox[:4] for bbox in image_dict['bboxes']]
-				labels = [bbox[4] for bbox in image_dict['bboxes']]
+				labels = image_dict['labels']
 
 				target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
 				target['labels'] = torch.as_tensor(labels, dtype=torch.int64)

@@ -10,6 +10,7 @@ class Constants:
 	class Mode:
 		__slots__ = ()
 		DEMO = 'demo'
+		VALDEMO = 'valdemo'
 		TRAIN = 'train'
 		TEST = 'test'
 		VALIDATE= 'valid'
