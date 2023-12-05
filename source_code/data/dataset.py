@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-from utils.constants import Constants
+from constants import Constants
 
 wider_face_root = '/kaggle/input/wider-face-a-face-detection-dataset'
 
