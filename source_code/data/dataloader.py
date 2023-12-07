@@ -16,8 +16,8 @@ class FaceDataLoader(pl.LightningDataModule):
 	def __init__(self,         
 		batch_size: int = 10,
 		workers: int = 5,
-		img_size: int = 512,
-		):
+		img_size: int = 256,
+	):
 		super().__init__()
 		self.batch_size = batch_size
 		self.workers = workers
@@ -28,12 +28,15 @@ class FaceDataLoader(pl.LightningDataModule):
 	
 	def setup(self, stage: Optional[str] = None) -> None:
 		if stage == "fit" or stage is None:
-			transforms = Compose([
-							RandomCrop(self.img_size, self.img_size, p=1.0),
-							], bbox_params=BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
+			transforms = Compose(
+				[
+					RandomCrop(self.img_size, self.img_size, p=1.0),
+				], 
+				bbox_params=BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
+			)
 
 			self.train_dataset = ImageDetectionDataset(mode=MODE.DEMO, transforms=transforms)
-			self.val_dataset = ImageDetectionDataset(mode=MODE.VALDEMO)
+			self.val_dataset = ImageDetectionDataset(mode=MODE.VALDEMO, transforms=transforms)
 	   
 		# if stage == "test" or stage is None:
 		# 	self.test_dataset = ImageDetectionDataset(mode=MODE.TEST, image_dir=self.val_data)
@@ -57,12 +60,3 @@ class FaceDataLoader(pl.LightningDataModule):
 	def test_dataloader(self):
 		return self.val_dataloader()
 
-
-
-# if __name__ == "__main__":
-#     dm = DataLoader()
-#     dm.setup()
-#     trainloader = dm.train_dataloader()
-#     for img, label in trainloader:
-#         print()
-#         pass 
