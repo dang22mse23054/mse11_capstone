@@ -101,14 +101,14 @@ class FaceDetectionModel(LightningModule):
 
 		# debug: skip calculating loss
 		# losses = torch.tensor(0.)
-		losses.requires_grad = True
+		# losses.requires_grad = True
 
 		return losses
 
 	def eval_step(self, batch, batch_idx, prefix: str):
 		# if random.random() < 0.1:
 		if len(batch) == 0: return
-		
+
 		images, targets = batch
 		preds = self.model(images)
 		selected = random.sample(range(len(images)), len(images) // 5)
@@ -116,4 +116,3 @@ class FaceDetectionModel(LightningModule):
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
-	

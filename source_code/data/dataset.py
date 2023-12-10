@@ -94,6 +94,7 @@ def get_df(dir):
 '''
 Number of bounding box
 x1, y1, w, h, blur, expression, illumination, invalid, occlusion, pose
+
 Easy image -> all these are 0s
 blur, expression, illumination, invalid, occlusion, pose
 '''
@@ -133,9 +134,14 @@ class ImageDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-			labels = [1 for cols in rows]
+			labels = [1] * len(boxes)
+			# dùng cái này bị error
+			# labels = [1 for cols in rows]
+			
 			# labels = [cols[7] for cols in rows]
-			# labels = img_info['category_id'].values
+
+			# convert [x, y, w, h] to [x1, y1, x2, y2]
+			boxes = [(x, y, x+w, y+h) for x, y, w, h in boxes]
 
 			# filter small boxes
 			selected_boxes = [id for id, box in enumerate(boxes) 
@@ -146,9 +152,6 @@ class ImageDetectionDataset(Dataset):
 
 			boxes = [boxes[id] for id in selected_boxes]
 			labels = [labels[id] for id in selected_boxes]
-
-			# convert [x, y, w, h] to [x1, y1, x2, y2]
-			boxes = [(x, y, x+w, y+h) for x, y, w, h in boxes]
 
 			# set default label 'Face' (value = 1) to each boxes
 
@@ -166,7 +169,18 @@ class ImageDetectionDataset(Dataset):
 				image = image_dict['image']
 
 				boxes = [bbox[:4] for bbox in image_dict['bboxes']]
-				labels = image_dict['labels']
+				labels = [bbox[4] for bbox in image_dict['bboxes']]
+
+				# filter small boxes
+				selected_boxes = [id for id, box in enumerate(boxes) 
+					if (box[2] - box[0] >= MIN_SIZE and box[3] - box[1] >= MIN_SIZE)
+					and box[2] < image.shape[1] 
+					and box[3] < image.shape[0]
+				]
+
+				boxes = [boxes[id] for id in selected_boxes]
+				labels = [labels[id] for id in selected_boxes]
+
 
 				target['boxes'] = torch.as_tensor(boxes, dtype=torch.float32)
 				target['labels'] = torch.as_tensor(labels, dtype=torch.int64)
@@ -175,7 +189,7 @@ class ImageDetectionDataset(Dataset):
 				boxes = np.array(boxes)
 				area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 				iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
-				
+
 				target['area'] = torch.from_numpy(area)
 				target['iscrowd'] = iscrowd
 
