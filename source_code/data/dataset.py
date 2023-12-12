@@ -24,15 +24,15 @@ PATHS = {
 		'img_dir': 'raw/WIDER_val/images',
 	},
 	MODE.TRAIN: {
-		'annotation': 'raw/wider_face_split/wider_face_train_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_train/images',
+		'annotation': '/kaggle/input/wider-face-a-face-detection-dataset/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
+		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_train/WIDER_train/images',
 	},
 	MODE.VALIDATE: {
-		'annotation': 'raw/wider_face_split/wider_face_val_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_val/images',
+		'annotation': '/kaggle/input/wider-face-a-face-detection-dataset/wider_face_annotations/wider_face_split/wider_face_val_bbx_gt.txt',
+		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_val/WIDER_val/images',
 	},
 	MODE.TEST:  {
-		'img_dir': 'raw/WIDER_test/images',
+		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_test/WIDER_test/images',
 	}
 }
 
