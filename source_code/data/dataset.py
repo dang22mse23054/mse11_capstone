@@ -10,10 +10,12 @@ import numpy as np
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-from utils.constants import Constants
+from constants import Constants
 
 COL_NAME = Constants.DFColumns()
 MODE = Constants.Mode()
+
+WIDER_FACE_ROOT = '/kaggle/input/wider-face-a-face-detection-dataset'
 PATHS = {
 	MODE.DEMO: {
 		'annotation': 'raw/wider_face_split/wider_face_demo_bbx_gt.txt',
@@ -24,17 +26,18 @@ PATHS = {
 		'img_dir': 'raw/WIDER_val/images',
 	},
 	MODE.TRAIN: {
-		'annotation': '/kaggle/input/wider-face-a-face-detection-dataset/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
-		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_train/WIDER_train/images',
+		'annotation': f'{WIDER_FACE_ROOT}/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
+		'img_dir': f'{WIDER_FACE_ROOT}/WIDER_train/WIDER_train/images',
 	},
 	MODE.VALIDATE: {
-		'annotation': '/kaggle/input/wider-face-a-face-detection-dataset/wider_face_annotations/wider_face_split/wider_face_val_bbx_gt.txt',
-		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_val/WIDER_val/images',
+		'annotation': f'{WIDER_FACE_ROOT}/wider_face_annotations/wider_face_split/wider_face_val_bbx_gt.txt',
+		'img_dir': f'{WIDER_FACE_ROOT}/WIDER_val/WIDER_val/images',
 	},
 	MODE.TEST:  {
-		'img_dir': '/kaggle/input/wider-face-a-face-detection-dataset/WIDER_test/WIDER_test/images',
+		'img_dir': f'{WIDER_FACE_ROOT}/WIDER_test/WIDER_test/images',
 	}
 }
+
 
 def show_img(image):
 	# Đọc hình ảnh từ file

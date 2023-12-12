@@ -7,8 +7,8 @@ import pandas as pd
 from dataset import ImageDetectionDataset
 import pytorch_lightning as pl
 from albumentations import Compose, RandomCrop, BboxParams
-from utils.constants import Constants
-import utils.utils as utils
+from constants import Constants
+import utils as utils
 
 MODE = Constants.Mode()
 
