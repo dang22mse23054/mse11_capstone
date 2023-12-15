@@ -16,8 +16,7 @@ if __name__ == "__main__":
 	# model.model.backbone.load_state_dict(OrderedDict({k.replace('model.backbone.', ''):v for k, v in checkpoint['state_dict'].items() 
 	#                                                   if 'model.backbone.' in k}))
 
-	data = FaceDataLoader(batch_size=48, workers=5)
-
+	data = FaceDataLoader(batch_size=48, workers=4, img_size = 160)
 
 	# Save top3 models wrt precision
 	# on_best_precision = ModelCheckpoint(
@@ -41,27 +40,22 @@ if __name__ == "__main__":
 	# )
 
 	trainer = Trainer(
-		# accelerator="cpu",
 		accelerator="gpu",
+		# accelerator="cpu",
 		# accelerator="mps",
+
 		# checkpoint_callback=True,
 		callbacks = [
-		    LearningRateMonitor(logging_interval='step'),
-		    # ModelCheckpoint(dirpath='', filename='{epoch}-{val_acc:.4f}', save_top_k=5, monitor='val_acc', mode='max'),
+			LearningRateMonitor(logging_interval='step'),
+			ModelCheckpoint(filename='{epoch}-{val_map:.4f}', save_top_k=5, monitor='val_map', mode='max'),
 		], 
-		# check_val_every_n_epoch=1,
-		# fast_dev_run=True,
 		default_root_dir='checkpoint',
-
-		# deterministic=False, 
-		max_epochs=10, 
+		check_val_every_n_epoch=1,
+		fast_dev_run=False,
+		max_epochs=20, 
 		# log_every_n_steps=2,
-
-		# gpus = [2],
-		# amp_backend='apex', 
-		# amp_level='O1', 
-		# # precision=16,
-		# # strategy='ddp',        
+		# precision=16,
+		# strategy='ddp',        
 	)
 
 	trainer.fit(model, data)
