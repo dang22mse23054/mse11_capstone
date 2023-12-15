@@ -41,7 +41,8 @@ if __name__ == "__main__":
 	# )
 
 	trainer = Trainer(
-		accelerator="cpu",
+		# accelerator="cpu",
+		accelerator="gpu",
 		# accelerator="mps",
 		# checkpoint_callback=True,
 		callbacks = [
