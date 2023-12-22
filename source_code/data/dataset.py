@@ -25,6 +25,10 @@ PATHS = {
 		'annotation': 'raw/wider_face_split/wider_face_valdemo_bbx_gt.txt',
 		'img_dir': 'raw/WIDER_val/images',
 	},
+	MODE.TESTDEMO: {
+		'img_list': 'raw/wider_face_split/wider_face_testdemo_filelist.txt',
+		'img_dir': 'raw/WIDER_test/images',
+	},
 	MODE.TRAIN: {
 		'annotation': f'{WIDER_FACE_ROOT}/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
 		'img_dir': f'{WIDER_FACE_ROOT}/WIDER_train/WIDER_train/images',

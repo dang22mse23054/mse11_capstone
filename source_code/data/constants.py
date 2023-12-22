@@ -11,6 +11,7 @@ class Constants:
 		__slots__ = ()
 		DEMO = 'demo'
 		VALDEMO = 'valdemo'
+		TESTDEMO = 'testdemo'
 		TRAIN = 'train'
 		TEST = 'test'
 		VALIDATE= 'valid'
