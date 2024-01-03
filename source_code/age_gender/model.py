@@ -114,11 +114,6 @@ class AgeGenderDetectionModel(LightningModule):
 		if len(batch) == 0: return
 
 		image, (age_gt, gender_gt) = batch
-		print('-------------------------------Image info (VAL)-------------------------------')
-
-		print(image)
-		print(age_gt)
-		print(gender_gt)
 
 		age_logits, gender_logits = self(image)
 		self.gender_acc_list.append(accuracy(gender_logits, gender_gt).item())
