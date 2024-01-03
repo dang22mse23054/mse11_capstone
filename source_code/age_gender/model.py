@@ -88,11 +88,6 @@ class AgeGenderDetectionModel(LightningModule):
 
 		image, (age_gt, gender_gt) = batch
 
-		print('-------------------------------Image info (TRAIN)-------------------------------')
-		print(image)
-		print(age_gt)
-		print(gender_gt)
-
 		age_logits, gender_logits = self(image)
 		
 		# BCE expects one-hot vector
