@@ -9,7 +9,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from common.constants import Constants
 
-UTK_FACE_PATH = '/kaggle/input/wider-face-a-face-detection-dataset'
+UTK_FACE_PATH = '/kaggle/input/utkface-new/UTKFace'
 UTK_FACE_PATH_DEMO = 'raw/UTKFace/'
 AGE = Constants.Age()
 
@@ -34,7 +34,7 @@ def check_image(img_name):
 
 class AgeGenderDataset(Dataset):
 	def __init__(self, 
-			  data_path=UTK_FACE_PATH_DEMO,
+			  data_path=UTK_FACE_PATH,
 			  mode : str = MODE.TRAIN,
 			  transforms=None):
 
