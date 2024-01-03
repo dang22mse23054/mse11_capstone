@@ -9,7 +9,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from common.constants import Constants
 
-UTK_FACE_PATH = '/kaggle/input/utkface-new/UTKFace'
+UTK_FACE_PATH = '/kaggle/input/utkface-new/UTKFace/'
 UTK_FACE_PATH_DEMO = 'raw/UTKFace/'
 AGE = Constants.Age()
 
