@@ -10,7 +10,7 @@ import random
 
 import pytorch_lightning as pl
 from pytorch_lightning.core import LightningModule
-from faster_rcnn import FasterRCNNResNet50FPN as Model
+from models.faster_rcnn import FasterRCNNResNet50FPN
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 
@@ -27,7 +27,7 @@ class FaceDetectionModel(LightningModule):
 		self.id2label = {0: 'Background', 1: 'Face'}
 		# metrics
 		
-		self.model = Model(num_classes=2)
+		self.model = FasterRCNNResNet50FPN(num_classes=2)
 
 	
 	def forward(self, x):

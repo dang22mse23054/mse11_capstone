@@ -8,3 +8,28 @@ Install Pytoch: (https://pytorch.org/)
 
 Dataset:
 - https://paperswithcode.com/dataset/hico-det
+
+
+Summary Pytorch lightning process
+- Dataset
+	Implement torch.utils.data.dataset.Dataset 
+	Must have methods
+		__init__
+		__getitem__(self, idx: int) => return batch (with image, target,... anything you return)
+
+- Dataloader
+	Implement pytorch_lightning.LightningDataModule
+	Must have methods
+		__init__ (with super().__init__())
+		setup(self, stage: Optional[str] = None) 
+		train_dataloader(self) => return torch.utils.data.dataloader.DataLoader
+		val_dataloader(self) => return torch.utils.data.dataloader.DataLoader
+		test_dataloader(self) => return torch.utils.data.dataloader.DataLoader
+
+- Model
+	Implement pytorch_lightning.core.LightningModule
+	Must have methods
+		forward(self, x) => return predict (y')
+		configure_optimizers(self) => [optimizer], [scheduler]
+		training_step(self, batch, batch_idx)
+		validation_step(self, batch, batch_idx)

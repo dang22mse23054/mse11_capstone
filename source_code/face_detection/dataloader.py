@@ -4,11 +4,11 @@ sys.path.append('../')
 from typing import Optional
 from torch.utils.data.dataloader import DataLoader
 import pandas as pd
-from dataset import ImageDetectionDataset
+from dataset import FaceDetectionDataset
 import pytorch_lightning as pl
 from albumentations import Compose, RandomCrop, BboxParams
-from constants import Constants
-import utils as utils
+from common.constants import Constants
+import common.utils as utils
 
 MODE = Constants.Mode()
 
@@ -35,11 +35,11 @@ class FaceDataLoader(pl.LightningDataModule):
 				bbox_params=BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
 			)
 
-			self.train_dataset = ImageDetectionDataset(mode=MODE.TRAIN, transforms=transforms)
-			self.val_dataset = ImageDetectionDataset(mode=MODE.VALIDATE, transforms=transforms)
+			self.train_dataset = FaceDetectionDataset(mode=MODE.TRAIN, transforms=transforms)
+			self.val_dataset = FaceDetectionDataset(mode=MODE.VALIDATE, transforms=transforms)
 	   
 		# if stage == "test" or stage is None:
-		# 	self.test_dataset = ImageDetectionDataset(mode=MODE.TEST, image_dir=self.val_data)
+		# 	self.test_dataset = FaceDetectionDataset(mode=MODE.TEST, image_dir=self.val_data)
 
 	def train_dataloader(self):
 		train_loader = DataLoader(

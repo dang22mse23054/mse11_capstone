@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-from constants import Constants
+from common.constants import Constants
 
 COL_NAME = Constants.DFColumns()
 MODE = Constants.Mode()
@@ -18,16 +18,16 @@ MODE = Constants.Mode()
 WIDER_FACE_ROOT = '/kaggle/input/wider-face-a-face-detection-dataset'
 PATHS = {
 	MODE.DEMO: {
-		'annotation': 'raw/wider_face_split/wider_face_demo_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_train/images',
+		'annotation': 'raw/wider_face/wider_face_split/wider_face_demo_bbx_gt.txt',
+		'img_dir': 'raw/wider_face/WIDER_train/images',
 	},
 	MODE.VALDEMO: {
-		'annotation': 'raw/wider_face_split/wider_face_valdemo_bbx_gt.txt',
-		'img_dir': 'raw/WIDER_val/images',
+		'annotation': 'raw/wider_face/wider_face_split/wider_face_valdemo_bbx_gt.txt',
+		'img_dir': 'raw/wider_face/WIDER_val/images',
 	},
 	MODE.TESTDEMO: {
-		'img_list': 'raw/wider_face_split/wider_face_testdemo_filelist.txt',
-		'img_dir': 'raw/WIDER_test/images',
+		'img_list': 'raw/wider_face/wider_face_split/wider_face_testdemo_filelist.txt',
+		'img_dir': 'raw/wider_face/WIDER_test/images',
 	},
 	MODE.TRAIN: {
 		'annotation': f'{WIDER_FACE_ROOT}/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',
@@ -105,18 +105,11 @@ x1, y1, w, h, blur, expression, illumination, invalid, occlusion, pose
 Easy image -> all these are 0s
 blur, expression, illumination, invalid, occlusion, pose
 '''
-class ImageDetectionDataset(Dataset):
+class FaceDetectionDataset(Dataset):
 	def __init__(self,
 				 mode : str = MODE.DEMO,
 				 transforms: Compose = None):
-		"""
-		Prepare data for image detection.
-
-		Args:
-			dataframe: dataframe with image id and bboxes
-			image_dir: path to images
-			transforms: albumentations
-		"""
+		
 		self.mode = mode
 		self.df = get_df(PATHS[mode]['annotation'])
 		self.image_dir = PATHS[mode]['img_dir']

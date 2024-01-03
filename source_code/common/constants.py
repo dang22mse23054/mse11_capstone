@@ -16,7 +16,6 @@ class Constants:
 		TEST = 'test'
 		VALIDATE= 'valid'
 
-
 	class DFColumns:
 		__slots__ = ()
 		PATH = 'path'
@@ -31,3 +30,19 @@ class Constants:
 		INVALID = 'invalid'
 		OCCLUSION = 'occlusion'
 		POSE = 'pose'
+
+	class Age:
+		__slots__ = ()
+		CHILDREN = 'children'
+		TEENAGERS = 'teenagers'
+		ADULT = 'adult'
+		MIDDLE_AGED = 'middle_aged'
+		ELDERLY = 'elderly'
+
+		Groups = {
+			CHILDREN: {'from': 0, 'to': 12}, 
+			TEENAGERS: {'from': 13, 'to': 17},
+			ADULT: {'from': 18, 'to': 44}, 
+			MIDDLE_AGED: {'from': 45, 'to': 60},
+			ELDERLY: {'from': 61, 'to': 120},
+		}

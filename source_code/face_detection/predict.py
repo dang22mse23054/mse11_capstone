@@ -8,7 +8,7 @@ from PIL import Image
 from model import FaceDetectionModel
 from torchvision import transforms
 from PIL import ImageDraw
-from constants import Constants
+from common.constants import Constants
 from dataset import PATHS
 from albumentations import Compose, RandomCrop, BboxParams
 
