@@ -77,13 +77,13 @@ class AgeGenderDataset(Dataset):
 
 		for idx, name in enumerate(AGE.Groups.keys()):
 			group = AGE.Groups[name]
-			if group['min'] <= age and age <= group['max']:
+			if group['from'] <= age and age <= group['to']:
 				return {'idx': idx, 'name': name, **group}
 
 		else: raise ValueError(f"Age {age} does not fit inside any group.")
 
 	def __getitem__(self, i):
-		img_name, age, gender = self.extract_info(i)
+		img_name, gender, age = self.extract_info(i)
 		file_path = self.data_path + img_name
 		image = cv2.imread(f'{file_path}', cv2.IMREAD_COLOR).astype(np.float32)
 
@@ -100,6 +100,8 @@ class AgeGenderDataset(Dataset):
 		# image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
 		
 		# Solution 1
+		# convert age to group
+		age = self.get_group(age)['idx']
 		age_tensor, gender_tensor = torch.tensor(age), torch.tensor(gender)
 		
 		# Solution 2
@@ -111,7 +113,7 @@ class AgeGenderDataset(Dataset):
 		# Merge tensors.
 		# target = torch.cat([age_tensor, gender_tensor], dim=0)
 
-		target = (age_tensor, gender_tensor)
+		target = (gender_tensor, age_tensor)
 
 		return image, target
 
@@ -124,7 +126,7 @@ class AgeGenderDataset(Dataset):
 		meta_data = img_name.split('_')
 		age, gender = int(meta_data[0]), int(meta_data[1])
 
-		return img_name, age, gender
+		return img_name, gender, age
 
 	def test_item(self, i):
 		return self[i], self.file_list[i]

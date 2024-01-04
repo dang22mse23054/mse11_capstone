@@ -47,5 +47,5 @@ class AgeGenderResNet50(nn.Module):
 		
 		age_logits = self.age_head(features).view(features.size(0), -1)
 		gender_logits = self.gender_head(features).view(features.size(0), -1)
-		return age_logits, gender_logits
+		return gender_logits, age_logits
 
