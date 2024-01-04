@@ -48,10 +48,10 @@ class AgeGenderDetectionModel(LightningModule):
 			gender_classes,
 		)
 		self.loss_functions = {
-			# 'Age': nn.MSELoss(),
-			# 'Gender': nn.BCELoss()
-			'Age': nn.BCEWithLogitsLoss(),
-			'Gender': nn.CrossEntropyLoss()
+			'Age': nn.MSELoss(),
+			'Gender': nn.BCELoss()
+			# 'Age': nn.BCEWithLogitsLoss(),
+			# 'Gender': nn.CrossEntropyLoss()
 		}
 	
 	def forward(self, x):
