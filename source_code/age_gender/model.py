@@ -76,7 +76,7 @@ class AgeGenderDetectionModel(LightningModule):
 		age_acc = np.mean(self.age_acc_list)
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
 		loss = (gender_acc + age_acc) / 2
-		self.log('val_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('val_loss', loss, prog_bar=True, on_epoch=True)
 
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()

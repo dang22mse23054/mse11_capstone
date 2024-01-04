@@ -10,7 +10,9 @@ from matplotlib import pyplot as plt
 from common.constants import Constants
 
 UTK_FACE_PATH = '/kaggle/input/utkface-new/UTKFace/'
-UTK_FACE_PATH_DEMO = 'raw/UTKFace/'
+# FOR DEBUG
+# UTK_FACE_PATH = 'raw/UTKFace/'
+
 AGE = Constants.Age()
 
 TEST_RATIO = 0.1
@@ -94,7 +96,8 @@ class AgeGenderDataset(Dataset):
 			# image = self.transforms(image)
 			image = self.transforms(image=image)['image']
 		
-		image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
+		# đã dùng TensorV2 thì ko cần dòng này
+		# image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
 		
 		# Solution 1
 		age_tensor, gender_tensor = torch.tensor(age), torch.tensor(gender)
