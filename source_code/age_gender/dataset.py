@@ -114,7 +114,7 @@ class AgeGenderDataset(Dataset):
 		# target = torch.cat([age_tensor, gender_tensor], dim=0)
 
 		target = (gender_tensor, age_tensor)
-		# print(f"Gender = {gender} => Logits = {age}")
+		# print(f"REAL Gender = {gender} => Logits = {age}")
 
 		return image, target
 

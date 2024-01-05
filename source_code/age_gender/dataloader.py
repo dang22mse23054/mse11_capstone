@@ -88,6 +88,13 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			# 	ToTensor()
 			# ])
 
+			# test_transforms = albu.Compose([
+			# 	albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
+			# 	albu.CenterCrop(*image_size),
+			# 	albu.Normalize(),
+			# 	ToTensor()
+			# ])
+
 
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=transforms)
 			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=transforms)

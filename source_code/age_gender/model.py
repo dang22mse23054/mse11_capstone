@@ -23,6 +23,7 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 	"""
 	print(f"accuracy pred = {pred}")
 	print(f"accuracy gt = {gt}")
+	print(f"mean = {(pred.max(1)[1] == gt).float().mean()}")
 	return (pred.max(1)[1] == gt).float().mean()
 
 # Ref: 
@@ -75,12 +76,14 @@ class AgeGenderDetectionModel(LightningModule):
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
 		gender_acc = np.mean(self.gender_acc_list)
+		print(self.gender_acc_list)
 		age_acc = np.mean(self.age_acc_list)
+		print(self.age_acc_list)
+
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
 		loss = 1 - ((gender_acc + age_acc) / 2)
 		self.log('val_loss', loss, prog_bar=True, on_epoch=True)
-		self.log('age_acc', age_acc, prog_bar=True, on_epoch=True)
-		self.log('gender_acc', gender_acc, prog_bar=True, on_epoch=True)
+		self.log('age_gender_acc', f'{age_acc}/{gender_acc}', prog_bar=True, on_epoch=True)
 
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
@@ -89,7 +92,7 @@ class AgeGenderDetectionModel(LightningModule):
 	# 	gender_acc = np.mean(self.gender_acc_list)
 	# 	age_acc = np.mean(self.age_acc_list)
 	# 	# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
-	# 	loss = (gender_acc + age_acc) / 2
+	# 	loss = 1 - ((gender_acc + age_acc) / 2)
 	# 	self.log('val_loss', loss, prog_bar=True, on_epoch=True)
 
 	# 	self.gender_acc_list.clear()
