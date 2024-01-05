@@ -76,11 +76,32 @@ class AgeGenderDetectionModel(LightningModule):
 		age_acc = np.mean(self.age_acc_list)
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
 		loss = (gender_acc + age_acc) / 2
+		print(f"Loss = {loss}")
 		self.log('val_loss', loss, prog_bar=True, on_epoch=True)
 
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
+
+	# def on_test_epoch_start(self) -> None:
+	# 	gender_acc = np.mean(self.gender_acc_list)
+	# 	age_acc = np.mean(self.age_acc_list)
+	# 	# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
+	# 	loss = (gender_acc + age_acc) / 2
+	# 	self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+
+	# 	self.gender_acc_list.clear()
+	# 	self.age_acc_list.clear()
 	
+	# def on_test_epoch_end(self) -> None:
+	# 	gender_acc = np.mean(self.gender_acc_list)
+	# 	age_acc = np.mean(self.age_acc_list)
+	# 	# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
+	# 	loss = (gender_acc + age_acc) / 2
+	# 	self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+
+	# 	self.gender_acc_list.clear()
+	# 	self.age_acc_list.clear()
+
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
 		if len(batch) == 0 : return torch.tensor(0.0, requires_grad=True)
@@ -97,6 +118,7 @@ class AgeGenderDetectionModel(LightningModule):
 		
 		gender_gt = gender_gt.long()
 		loss_gender = self.loss_functions['Gender'](gender_logits, gender_gt)  # softmax+ce
+		
 		losses = (loss_gender + loss_age) / 2
 
 		self.log('train_loss', losses, prog_bar=True, on_step=True, on_epoch=True)
@@ -117,3 +139,29 @@ class AgeGenderDetectionModel(LightningModule):
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
+	
+	def test_step(self, batch, batch_idx):
+		image, (gender_gt, age_gt) = batch
+		print('---------test_step---------')
+		print(gender_gt)
+		print(age_gt)
+
+		# real_age = int(torch.argmax(y[0][:Classes]))
+        # read_gender = int(torch.argmax(y[0][Classes:]))
+
+		# # implement your own
+		# out = self(x)
+		# loss = self.loss(out, y)
+
+		# # log 6 example images
+		# # or generated text... or whatever
+		# sample_imgs = x[:6]
+		# grid = torchvision.utils.make_grid(sample_imgs)
+		# self.logger.experiment.add_image('example_images', grid, 0)
+
+		# # calculate acc
+		# labels_hat = torch.argmax(out, dim=1)
+		# test_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
+
+		# # log the outputs!
+		# self.log_dict({'test_loss': loss, 'test_acc': test_acc})

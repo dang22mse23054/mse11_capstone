@@ -8,7 +8,7 @@ if __name__ == "__main__":
 		lr = 1e-4,
 		momentum = 0.9,
 		weight_decay = 1e-4,        
-	)#.load_from_checkpoint('checkpoint/epoch=0-val_map=0.0000.ckpt')
+	)#.load_from_checkpoint('checkpoint/epoch=9-step=3940.ckpt')
 
 	data = AgeGenderDataLoader(batch_size=48, workers=5)
 
@@ -26,5 +26,6 @@ if __name__ == "__main__":
 		max_epochs=10,       
 	)
 
+	# trainer.test(model, data)
 	trainer.fit(model, data)
 		

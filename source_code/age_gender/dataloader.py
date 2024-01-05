@@ -92,8 +92,8 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=transforms)
 			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=transforms)
 	   
-		# if stage == "test" or stage is None:
-		# 	self.test_dataset = AgeGenderDataset(mode=MODE.TEST, image_dir=self.val_data)
+		if stage == "test" or stage is None:
+			self.test_dataset = AgeGenderDataset(mode=MODE.TEST)
 
 	def train_dataloader(self):
 		train_loader = DataLoader(
@@ -110,7 +110,13 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			persistent_workers=True, 
 		)
 		return val_loader
+
 	
 	def test_dataloader(self):
-		return self.val_dataloader()
+		test_loader = DataLoader( 
+			dataset=self.test_dataset, batch_size=self.batch_size, shuffle=False,
+			num_workers=self.workers, #collate_fn=utils.collate_fn,
+			persistent_workers=True, 
+		)
+		return test_loader
 
