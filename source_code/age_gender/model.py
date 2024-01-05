@@ -16,12 +16,14 @@ import torch.optim.lr_scheduler as lr_scheduler
 from models.age_gender_resnet50 import AgeGenderResNet50
 
 def accuracy(pred: torch.Tensor, gt: torch.Tensor):
-    """
-    accuracy metric
-    
-    expects pred shape bs x n_c, gt shape bs x 1
-    """
-    return (pred.max(1)[1] == gt).float().mean()
+	"""
+	accuracy metric
+
+	expects pred shape bs x n_c, gt shape bs x 1
+	"""
+	print(f"accuracy pred = {pred}")
+	print(f"accuracy gt = {gt}")
+	return (pred.max(1)[1] == gt).float().mean()
 
 # Ref: 
 # https://github.com/Sklyvan/Age-Gender-Prediction/blob/main/Age%20%26%20Gender%20Prediction%20Model%20Creation.ipynb
