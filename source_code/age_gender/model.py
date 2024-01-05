@@ -119,14 +119,16 @@ class AgeGenderDetectionModel(LightningModule):
 		# BCE expects one-hot vector
 		age_gt_onehot = torch.zeros(*age_logits.size(), device=age_logits.device)
 		age_gt_onehot = age_gt_onehot.scatter_(1, age_gt.unsqueeze(-1).long(), 1)
-		loss_age = self.loss_functions['Age'](age_logits, age_gt_onehot)  # bce
+		age_loss = self.loss_functions['Age'](age_logits, age_gt_onehot)  # bce
 		
 		gender_gt = gender_gt.long()
-		loss_gender = self.loss_functions['Gender'](gender_logits, gender_gt)  # softmax+ce
+		gender_loss = self.loss_functions['Gender'](gender_logits, gender_gt)  # softmax+ce
 		
-		losses = (loss_gender + loss_age) / 2
+		losses = (gender_loss + age_loss) / 2
 
 		self.log('train_loss', losses, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_age_loss', age_loss, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_gender_loss', gender_loss, prog_bar=True, on_step=True, on_epoch=True)
 
 		return losses
 
