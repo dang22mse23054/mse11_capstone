@@ -79,7 +79,7 @@ class AgeGenderDetectionModel(LightningModule):
 		print(f"age_acc = {age_acc}")
 		print(self.age_acc_list)
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
-		loss = (gender_acc + age_acc) / 2
+		loss = 1 - ((gender_acc + age_acc) / 2)
 		print(f"Loss = {loss}")
 		self.log('val_loss', loss, prog_bar=True, on_epoch=True)
 
