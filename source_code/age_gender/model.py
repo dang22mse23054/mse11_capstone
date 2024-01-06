@@ -50,7 +50,7 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 
 class AgeGenderDetectionModel(LightningModule):
 	def __init__(self,
-				encoder_channels: int = 512,
+				encoder_channels: int = 2048,
 				output_channels: int = 512,
 				age_classes: int = 5,
 				gender_classes: int = 2,
