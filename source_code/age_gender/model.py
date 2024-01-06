@@ -94,15 +94,11 @@ class AgeGenderDetectionModel(LightningModule):
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
 		gender_acc = np.mean(self.gender_acc_list)
-		print('Gender acc list', self.gender_acc_list)
 		age_acc = np.mean(self.age_acc_list)
-		print('Age acc list', self.age_acc_list)
 
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
 		mean_acc = (gender_acc + age_acc) / 2
-		self.log('val_acc', mean_acc, prog_bar=True, on_epoch=True)
-		self.log('val_age_acc', age_acc, prog_bar=True, on_epoch=True)
-		self.log('val_gender_acc', gender_acc, prog_bar=True, on_epoch=True)
+		self.log('val_acc', mean_acc, prog_bar=True, on_step=True, on_epoch=True)
 
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
@@ -146,9 +142,9 @@ class AgeGenderDetectionModel(LightningModule):
 		
 		losses = (gender_loss + age_loss) / 2
 
-		self.log('train_loss', losses, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('train_age_loss', age_loss, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('train_gender_loss', gender_loss, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_acc', 1 - losses, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_age_acc', 1 - age_loss, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_gender_acc', 1 - gender_loss, prog_bar=True, on_step=True, on_epoch=True)
 
 		return losses
 
@@ -161,7 +157,6 @@ class AgeGenderDetectionModel(LightningModule):
 
 		gender_logits, age_logits = self(image)
 
-
 		age_acc = accuracy(age_logits, age_gt).item()
 		self.log('val_age_acc', age_acc, prog_bar=True, on_step=True)
 		self.age_acc_list.append(age_acc)
@@ -170,7 +165,6 @@ class AgeGenderDetectionModel(LightningModule):
 		self.log('val_gender_acc', gender_acc, prog_bar=True, on_step=True)
 		self.gender_acc_list.append(gender_acc)
 
-		
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
