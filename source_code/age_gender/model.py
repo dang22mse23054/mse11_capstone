@@ -105,7 +105,8 @@ class AgeGenderDetectionModel(LightningModule):
 		
 		# BCE expects one-hot vector
 		# 'Gender': nn.BCEWithLogitsLoss()
-		gender_gt_onehot = torch.zeros(*gender_logits.size())
+		# Warning: bắt buộc phải có device, nếu ko sẽ bị lỗi do tensor.zeros() ko có device (mặc định là cpu)
+		gender_gt_onehot = torch.zeros(*gender_logits.size(), device=gender_logits.device)
 		gender_gt_onehot = gender_gt_onehot.scatter_(1, gender_gt.unsqueeze(-1).long(), 1)
 		gender_loss = loss_functions['Gender'](gender_logits, gender_gt_onehot)  # bce
 		
