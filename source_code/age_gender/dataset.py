@@ -95,10 +95,11 @@ class AgeGenderDataset(Dataset):
 	def __getitem__(self, i):
 		img_name, gender, age = self.extract_info(i)
 		file_path = self.data_path + img_name
-		image = cv2.imread(f'{file_path}', cv2.IMREAD_COLOR).astype(np.float32)
+		image = Image.open(file_path).convert('RGB')
 
 		# normalization.
-		image /= 255.0
+		image = np.array(image, dtype=np.float32) / 255.0
+		
 		target = {}
 
 		# transformation

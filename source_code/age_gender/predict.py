@@ -19,13 +19,16 @@ from albumentations.pytorch import ToTensorV2
 
 MODE = Constants.Mode()
 AGE = Constants.Age()
+AGES = list(Constants.Age().Groups.keys())
+NUM_OF_AGE_GROUPS = len(AGES)
 
-NUM_OF_AGE_GROUPS = len(AGE.Groups)
+
+TEST_IMG_PATH = 'raw/test/' #UTK_FACE_PATH
 
 TEST_RATIO = 0.1
 
 def init_model():
-	checkpoint = torch.load("checkpoint/epoch=6-val_loss=0.1157.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/epoch=6-val_acc=0.8180-val_age_acc=0.7697-val_gender_acc=0.8662.ckpt", map_location=torch.device('cpu'))
 	model = AgeGenderDetectionModel(
 		lr=1e-4,
 		momentum=0.9,
@@ -42,15 +45,23 @@ def predict_all(file_list, model):
 	transforms = albu.Compose([
 		# albu.ToTensor(),
 		albu.Normalize(mean=(0.5,), std=(0.5,)),
-		albu.Resize(200, 200),
-		albu.Rotate(limit=10),
+		albu.Resize(224, 224),
+		# albu.Rotate(limit=10),
 		ToTensorV2()
 	])
+
+	# image_size = (224, 224)
+	# transforms = albu.Compose([
+	# 	albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
+	# 	albu.CenterCrop(*image_size),
+	# 	albu.Normalize(),
+	# 	ToTensorV2()
+	# ])
 	with torch.no_grad():
 		for idx, img_name in enumerate(file_list):
 
 			# Read the list of image files
-			file_path = UTK_FACE_PATH + img_name
+			file_path = TEST_IMG_PATH + img_name
 			# input_image = cv2.imread(f'{file_path}', cv2.IMREAD_COLOR).astype(np.float32)
 			input_image = Image.open(file_path).convert('RGB')
 
@@ -62,7 +73,7 @@ def predict_all(file_list, model):
 			# ])
 			# input_tensor = preprocess(input_image)
 
-			input_tensor = transforms(image=np.array(input_image))['image']
+			input_tensor = transforms(image=np.array(input_image)/255)['image']
 			input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
 			
 			prediction = model(input_batch)
@@ -80,7 +91,7 @@ def predict_all(file_list, model):
 			print(f"Gender = {pred_gender} => Age = {pred_age}")
 
 			plt.subplot(len(file_list), len(file_list), idx+1)
-			plt.title(f'{list(AGE.Groups.keys())[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
+			plt.title(f'{AGES[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
 			plt.imshow(input_image, cmap='gray')
 			plt.axis('off')
 		plt.show()
@@ -89,15 +100,15 @@ def predict_all(file_list, model):
 	return predictions
 
 if __name__ == "__main__":
-	file_list = os.listdir(UTK_FACE_PATH)
+	file_list = os.listdir(TEST_IMG_PATH)
 	model = init_model()
 	
 	# splitting dataset
 	testPart = int(len(file_list) * TEST_RATIO)
 	# file_list = file_list[len(file_list) - testPart:]
 
-	file_list = random.choices(file_list, k=2)
-	
+	file_list = random.sample(file_list, k=3)
+	print(file_list)
 	# Make predictions for all files in the list
 	all_predictions = predict_all(file_list, model)
 

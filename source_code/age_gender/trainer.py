@@ -10,7 +10,7 @@ if __name__ == "__main__":
 		weight_decay = 1e-4,        
 	)#.load_from_checkpoint('checkpoint/epoch=9-step=3940.ckpt')
 
-	data = AgeGenderDataLoader(batch_size=64, workers=5)
+	data = AgeGenderDataLoader(batch_size=48, workers=4)
 
 	trainer = Trainer(
 		accelerator="cpu",
