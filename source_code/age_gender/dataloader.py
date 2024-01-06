@@ -56,7 +56,7 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			transforms = albu.Compose([
 				# albu.ToTensor(),
 				albu.Normalize(mean=(0.5,), std=(0.5,)),
-				albu.Resize(200, 200),
+				albu.Resize(224, 224),
 				albu.Rotate(limit=10),
 				ToTensorV2()
 			])
@@ -97,7 +97,7 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 
 
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=transforms)
-			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=transforms)
+			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE)#, transforms=transforms)
 	   
 		if stage == "test" or stage is None:
 			self.test_dataset = AgeGenderDataset(mode=MODE.TEST)

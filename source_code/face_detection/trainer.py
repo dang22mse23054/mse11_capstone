@@ -47,7 +47,7 @@ if __name__ == "__main__":
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),
 		    # ModelCheckpoint(dirpath='', filename='{epoch}-{val_acc:.4f}', save_top_k=5, monitor='val_acc', mode='max'),
-			ModelCheckpoint(filename='{epoch}-{val_map:.4f}', save_top_k=5, monitor='val_map', mode='max'),
+			ModelCheckpoint(filename='{epoch}-{val_map:.4f}-{val_age_acc:.4f}-{val_gender_acc:.4f}', save_top_k=5, monitor='val_map', mode='max'),
 		], 
 		# check_val_every_n_epoch=1,
 		# fast_dev_run=True,
