@@ -100,9 +100,9 @@ class AgeGenderDetectionModel(LightningModule):
 
 		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
 		mean_acc = (gender_acc + age_acc) / 2
-		self.log('val_acc', mean_acc, on_epoch=True)
-		self.log('val_age_acc', age_acc, on_epoch=True)
-		self.log('val_gender_acc', gender_acc, on_epoch=True)
+		self.log('val_acc', mean_acc, prog_bar=True, on_epoch=True)
+		self.log('val_age_acc', age_acc, prog_bar=True, on_epoch=True)
+		self.log('val_gender_acc', gender_acc, prog_bar=True, on_epoch=True)
 
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
@@ -160,8 +160,16 @@ class AgeGenderDetectionModel(LightningModule):
 		image, (gender_gt, age_gt) = batch
 
 		gender_logits, age_logits = self(image)
-		self.gender_acc_list.append(accuracy(gender_logits, gender_gt).item())
-		self.age_acc_list.append(accuracy(age_logits, age_gt).item())
+
+
+		age_acc = accuracy(age_logits, age_gt).item()
+		self.log('val_age_acc', age_acc, prog_bar=True, on_step=True)
+		self.age_acc_list.append(age_acc)
+
+		gender_acc = accuracy(gender_logits, gender_gt).item()
+		self.log('val_gender_acc', gender_acc, prog_bar=True, on_step=True)
+		self.gender_acc_list.append(gender_acc)
+
 		
 
 	def validation_step(self, batch, batch_idx):
