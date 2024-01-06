@@ -21,6 +21,12 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 
 	expects pred shape bs x n_c, gt shape bs x 1
 	"""
+
+	print(f"pred = {pred}")
+	print(f"pred.max(1)[1] = {pred.max(1)[1]}")
+	print(f"gt = {gt}")
+
+
 	print(f"mean = {(pred.max(1)[1] == gt).float().mean()}")
 	return (pred.max(1)[1] == gt).float().mean()
 
