@@ -8,7 +8,7 @@ import torchvision.models as models
 '''
 class AgeGenderResNet50(nn.Module):
 	def __init__(self,
-				encoder_channels: int = 2048,
+				encoder_channels: int = 512,
 				output_channels: int = 512,
 				age_classes: int = 5,
 				gender_classes: int = 2,
@@ -19,8 +19,6 @@ class AgeGenderResNet50(nn.Module):
 		# tạo thành 1 encoder
 		self.encoder = nn.Sequential(*list(models.resnet50(pretrained=True).children())[:-1])
 
-		# sqeeze-excite là 1 kiến trúc để tăng cường đặc trưng của 1 layer (tăng cường đặc trưng của encoder)
-		# https://arxiv.org/pdf/1709.01507.pdf
 		self.downsample = nn.Conv2d(encoder_channels, output_channels, 1)
 		self.relu = nn.ReLU()
 		
