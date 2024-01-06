@@ -1,15 +1,20 @@
 import torch.nn as nn
 import torchvision.models as models
+from common.constants import Constants
 
 '''
 	num_classes (int): number of output classes of the model (>>> including the Background <<<).
 		If box_predictor is specified, num_classes should be None.
 		Tức là nếu chỉ nhận biết đâu là Face thì sẽ setting bằng 2 classes (Face, Background)
 '''
+
+AGE = Constants.Age()
+NUM_OF_AGE_GROUPS = len(AGE.Groups)
+
 class AgeGenderResNet50(nn.Module):
 	def __init__(self,
 				output_channels: int = 512,
-				age_classes: int = 5,
+				age_classes: int = NUM_OF_AGE_GROUPS,
 				gender_classes: int = 2,
 	):
 		super().__init__()
@@ -21,7 +26,7 @@ class AgeGenderResNet50(nn.Module):
 		self.encoder = nn.Sequential(*list(model.children())[:-1])
 
 		self.linear = nn.Linear(model.fc.in_features, output_channels)
-		
+
 		self.age_head = nn.Linear(output_channels, age_classes, 1)
 		self.gender_head = nn.Linear(output_channels, gender_classes, 1)
 

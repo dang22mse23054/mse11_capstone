@@ -98,7 +98,7 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=train_transforms)
 			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
 	   
-		if stage == "test" or stage is None:
+		if stage == "test":
 			self.test_dataset = AgeGenderDataset(mode=MODE.TEST, transforms=test_transforms)
 
 	def train_dataloader(self):

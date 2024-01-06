@@ -121,10 +121,11 @@ class AgeGenderDataset(Dataset):
 		# # set 
 		# age_tensor[self.get_group(age)['idx']] = 1
 		# gender_tensor[gender] = 1
+		
+		target = (gender_tensor, age_tensor)
 		# Merge tensors.
 		# target = torch.cat([age_tensor, gender_tensor], dim=0)
 
-		target = (gender_tensor, age_tensor)
 		# print(f"REAL Gender = {gender} => Logits = {age}")
 
 		return image, target

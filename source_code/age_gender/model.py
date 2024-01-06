@@ -14,6 +14,12 @@ from models.age_gender_resnet50 import AgeGenderResNet50
 import matplotlib.pyplot as plt
 from common.constants import Constants
 
+loss_functions = {
+	# Solution_3
+	'Age': nn.CrossEntropyLoss(),
+	'Gender': nn.BCEWithLogitsLoss()
+}
+
 def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 	"""
 	accuracy metric
@@ -58,6 +64,14 @@ class AgeGenderDetectionModel(LightningModule):
 				**kwargs
 	):
 		super().__init__()
+
+		# bắt buộc phải truyền param vào __init__ và khai báo self.param_name = param_name 
+		# thì khi dùng save_hyperparameters() mới có thể lưu lại được các param này
+		# và để sử dụng được các param này thì phải dùng self.hparams.param_name
+		self.lr = lr 
+		self.momentum = momentum
+		self.weight_decay = weight_decay 
+
 		self.save_hyperparameters()
 		
 		self.model = AgeGenderResNet50(
@@ -65,23 +79,63 @@ class AgeGenderDetectionModel(LightningModule):
 			age_classes,
 			gender_classes,
 		)
-		self.loss_functions = {
-			# Solution_3
-			'Age': nn.CrossEntropyLoss(),
-			# 'Age': nn.MSELoss(),
-			'Gender': nn.BCEWithLogitsLoss()
-		}
 	
 	def forward(self, x):
 		return self.model(x)
 
 	def configure_optimizers(self):
-		optimizer = optim.AdamW(self.parameters(), amsgrad=True, lr=0.001, weight_decay=1e-6)
+		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
 		# We will reduce the learning rate by 0.1 after 20 epochs
 		scheduler = lr_scheduler.LambdaLR(optimizer, lambda epoch: 0.1 ** (epoch // 20))
 		# scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True)
 
 		return [optimizer], [scheduler]
+	
+	def training_step(self, batch, batch_idx):
+		# if len(batch) == 0 : return torch.tensor(0.)
+		if len(batch) == 0 : return torch.tensor(0.0, requires_grad=True)
+
+		# Label thực tế
+		image, (gender_gt, age_gt) = batch
+
+		# Label dự đoán
+		gender_logits, age_logits = self(image)
+		# print(f"Gender = {gender_gt} => Logits = {gender_logits}")
+		# print(f"Age = {age_gt} => Logits = {age_logits}")
+		
+		# BCE expects one-hot vector
+		# 'Gender': nn.BCEWithLogitsLoss()
+		gender_gt_onehot = torch.zeros(*gender_logits.size())
+		gender_gt_onehot = gender_gt_onehot.scatter_(1, gender_gt.unsqueeze(-1).long(), 1)
+		gender_loss = loss_functions['Gender'](gender_logits, gender_gt_onehot)  # bce
+		
+		# 'Age': nn.CrossEntropyLoss(),
+		age_gt = age_gt.long()
+		age_loss = loss_functions['Age'](age_logits, age_gt)  # ce
+		
+		losses = gender_loss + age_loss
+
+		self.log('train_loss', losses, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_age_loss', age_loss, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('train_gender_loss', gender_loss, prog_bar=True, on_step=True, on_epoch=True)
+
+		return losses
+
+	def validation_step(self, batch, batch_idx):
+		# if random.random() < 0.1:
+		if len(batch) == 0: return
+
+		image, (gender_gt, age_gt) = batch
+
+		gender_logits, age_logits = self(image)
+
+		age_acc = accuracy(age_logits, age_gt).item()
+		self.log('val_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.age_acc_list.append(age_acc)
+
+		gender_acc = accuracy(gender_logits, gender_gt).item()
+		self.log('val_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.gender_acc_list.append(gender_acc)
 	
 	def on_validation_epoch_start(self):
 		self.gender_acc_list = []
@@ -98,69 +152,6 @@ class AgeGenderDetectionModel(LightningModule):
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
 
-	def on_test_epoch_start(self) -> None:
-		self.gender_acc_list = []
-		self.age_acc_list = []
-	
-	def on_test_epoch_end(self) -> None:
-		gender_acc = np.mean(self.gender_acc_list)
-		age_acc = np.mean(self.age_acc_list)
-
-		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
-		mean_acc = (gender_acc + age_acc) / 2
-		self.log('test_acc', mean_acc, prog_bar=True, on_epoch=True)
-
-		self.gender_acc_list.clear()
-		self.age_acc_list.clear()
-
-	def training_step(self, batch, batch_idx):
-		# if len(batch) == 0 : return torch.tensor(0.)
-		if len(batch) == 0 : return torch.tensor(0.0, requires_grad=True)
-
-		image, (gender_gt, age_gt) = batch
-		gender_logits, age_logits = self(image)
-		# print(f"Gender = {gender_gt} => Logits = {gender_logits}")
-		# print(f"Age = {age_gt} => Logits = {age_logits}")
-		
-		# BCE expects one-hot vector
-		# 'Gender': nn.BCEWithLogitsLoss()
-		gender_gt_onehot = torch.zeros(*gender_logits.size(), device=gender_logits.device)
-		gender_gt_onehot = gender_gt_onehot.scatter_(1, gender_gt.unsqueeze(-1).long(), 1)
-		gender_loss = self.loss_functions['Gender'](gender_logits, gender_gt_onehot)  # bce
-		
-		# 'Age': nn.CrossEntropyLoss(),
-		age_gt = age_gt.long()
-		age_loss = self.loss_functions['Age'](age_logits, age_gt)  # ce
-		
-		losses = (gender_loss + age_loss) / 2
-
-		self.log('train_acc', 1 - losses, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('train_age_acc', 1 - age_loss, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('train_gender_acc', 1 - gender_loss, prog_bar=True, on_step=True, on_epoch=True)
-
-		return losses
-
-
-	def eval_step(self, batch, batch_idx, prefix: str):
-		# if random.random() < 0.1:
-		if len(batch) == 0: return
-
-		image, (gender_gt, age_gt) = batch
-
-		gender_logits, age_logits = self(image)
-
-		age_acc = accuracy(age_logits, age_gt).item()
-		self.log('val_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
-		self.age_acc_list.append(age_acc)
-
-		gender_acc = accuracy(gender_logits, gender_gt).item()
-		self.log('val_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
-		self.gender_acc_list.append(gender_acc)
-
-
-	def validation_step(self, batch, batch_idx):
-		return self.eval_step(batch, batch_idx, "val")
-	
 	def test_step(self, batch, batch_idx):
 		image, (gender_gt, age_gt) = batch
 
@@ -187,4 +178,19 @@ class AgeGenderDetectionModel(LightningModule):
 		age_acc = accuracy(age_logits, age_gt).item()
 		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
 		self.age_acc_list.append(age_acc)
+
+	def on_test_epoch_start(self) -> None:
+		self.gender_acc_list = []
+		self.age_acc_list = []
+	
+	def on_test_epoch_end(self) -> None:
+		gender_acc = np.mean(self.gender_acc_list)
+		age_acc = np.mean(self.age_acc_list)
+
+		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
+		mean_acc = (gender_acc + age_acc) / 2
+		self.log('test_acc', mean_acc, prog_bar=True, on_epoch=True)
+
+		self.gender_acc_list.clear()
+		self.age_acc_list.clear()
 
