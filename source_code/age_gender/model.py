@@ -131,11 +131,11 @@ class AgeGenderDetectionModel(LightningModule):
 		gender_logits, age_logits = self(image)
 
 		age_acc = accuracy(age_logits, age_gt).item()
-		self.log('val_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('val_age_acc', age_acc, prog_bar=True, on_epoch=True)
 		self.age_acc_list.append(age_acc)
 
 		gender_acc = accuracy(gender_logits, gender_gt).item()
-		self.log('val_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('val_gender_acc', gender_acc, prog_bar=True, on_epoch=True)
 		self.gender_acc_list.append(gender_acc)
 	
 	def on_validation_epoch_start(self):
