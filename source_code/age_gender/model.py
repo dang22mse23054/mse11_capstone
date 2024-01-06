@@ -14,8 +14,6 @@ from models.age_gender_resnet50 import AgeGenderResNet50
 import matplotlib.pyplot as plt
 from common.constants import Constants
 
-AGE = Constants.Age()
-
 def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 	"""
 	accuracy metric
@@ -49,7 +47,6 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 # https://github.com/Sklyvan/Age-Gender-Prediction/blob/main/Age%20%26%20Gender%20Prediction%20Model%20Creation.ipynb
 # https://github.com/thepowerfuldeez/age_gender_classifier/blob/master/training.ipynb
 
-
 class AgeGenderDetectionModel(LightningModule):
 	def __init__(self,
 				output_channels: int = 512,
@@ -70,7 +67,8 @@ class AgeGenderDetectionModel(LightningModule):
 		)
 		self.loss_functions = {
 			# Solution_3
-			'Age': nn.MSELoss(),
+			'Age': nn.CrossEntropyLoss(),
+			# 'Age': nn.MSELoss(),
 			'Gender': nn.BCEWithLogitsLoss()
 		}
 	
@@ -173,22 +171,22 @@ class AgeGenderDetectionModel(LightningModule):
 
 		# implement your own
 		prediction = self(image)
-
 		print(prediction)
+		# print(f'(Test-REAL) gender={AGES[age_gt]} age={"Male" if gender_gt == 0 else "Female"}')
+		# pred_gender = int(torch.argmax(prediction[0]))
+		# pred_age = int(torch.argmax(prediction[1]))
+		# print(f'(Test-PREDICT) gender={AGES[pred_age]} age={"Male" if pred_gender == 0 else "Female"}')
 
-		pred_gender = int(torch.argmax(prediction[0]))
-		pred_age = int(torch.argmax(prediction[1]))
+		# plt.title(f'{AGES[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
+		# plt.imshow(image, cmap='gray')
+		# plt.axis('off')
+		# plt.show()
 
-		age_acc = accuracy(pred_age, age_gt).item()
-		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
-		self.age_acc_list.append(age_acc)
-
-		gender_acc = accuracy(pred_gender, gender_gt).item()
+		gender_acc = accuracy(prediction[0], gender_gt).item()
 		self.log('test_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
 		self.gender_acc_list.append(gender_acc)
 
+		age_acc = accuracy(prediction[1], age_gt).item()
+		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.age_acc_list.append(age_acc)
 
-		plt.title(f'{list(AGE.Groups.keys())[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
-		plt.imshow(image, cmap='gray')
-		plt.axis('off')
-		plt.show()
