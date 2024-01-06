@@ -170,8 +170,8 @@ class AgeGenderDetectionModel(LightningModule):
         # read_gender = int(torch.argmax(y[0][Classes:]))
 
 		# implement your own
-		prediction = self(image)
-		print(prediction)
+		gender_logits, age_logits = self(image)
+		# print(prediction)
 		# print(f'(Test-REAL) gender={AGES[age_gt]} age={"Male" if gender_gt == 0 else "Female"}')
 		# pred_gender = int(torch.argmax(prediction[0]))
 		# pred_age = int(torch.argmax(prediction[1]))
@@ -182,11 +182,11 @@ class AgeGenderDetectionModel(LightningModule):
 		# plt.axis('off')
 		# plt.show()
 
-		gender_acc = accuracy(prediction[0], gender_gt).item()
+		gender_acc = accuracy(gender_logits, gender_gt).item()
 		self.log('test_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
 		self.gender_acc_list.append(gender_acc)
 
-		age_acc = accuracy(prediction[1], age_gt).item()
+		age_acc = accuracy(age_logits, age_gt).item()
 		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
 		self.age_acc_list.append(age_acc)
 

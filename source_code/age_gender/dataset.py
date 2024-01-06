@@ -20,7 +20,7 @@ TEST_RATIO = 0.1
 TRAIN_RATIO = 0.8
 VALIDATION_RATIO = 0.1
 
-MIN_AGE, MAX_AGE = 1, 90
+MIN_AGE, MAX_AGE = 1, 120
 MIN_GENDER, MAX_GENDER = 0, 1
 NUM_OF_AGE_GROUPS = len(AGE.Groups)
 
@@ -64,9 +64,9 @@ class AgeGenderDataset(Dataset):
 		if (trainPart + validationPart + testPart) == len(file_list): print(f"(Mode {self.mode}) Correct Partition")
 
 		# set file list depending on mode
-		if self.mode == MODE.VALIDATE:
+		if self.mode == MODE.TESTDEMO:
 			self.file_list = file_list[trainPart:trainPart+validationPart]
-		elif self.mode == MODE.TEST:
+		elif self.mode == MODE.VALIDATE:
 			self.file_list = file_list[trainPart+validationPart:]
 			# self.file_list = random.sample(file_list, k=3)
 
