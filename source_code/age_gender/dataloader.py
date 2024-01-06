@@ -6,7 +6,7 @@ from torch.utils.data.dataloader import DataLoader
 from dataset import AgeGenderDataset
 from albumentations import Compose, Normalize, Resize, Rotate
 from common.constants import Constants
-import pandas as pd
+import numpy as np
 import common.utils as utils
 import pytorch_lightning as pl
 from matplotlib import pyplot as plt
@@ -53,40 +53,40 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 	def setup(self, stage: Optional[str] = None) -> None:
 		if stage == "fit" or stage is None:
 			
-			transforms = albu.Compose([
-				# albu.ToTensor(),
-				albu.Normalize(mean=(0.5,), std=(0.5,)),
-				albu.Resize(224, 224),
-				albu.Rotate(limit=10),
+			# transforms = albu.Compose([
+			# 	# albu.ToTensor(),
+			# 	albu.Normalize(mean=(0.5,), std=(0.5,)),
+			# 	albu.Resize(224, 224),
+			# 	albu.Rotate(limit=10),
+			# 	ToTensorV2()
+			# ])
+
+			# # height, width
+			image_size = (224, 224)
+
+			augmentations = [
+				albu.RandomResizedCrop(*image_size, scale=(0.6, 1)),
+				albu.HorizontalFlip(),
+				albu.RandomBrightnessContrast(),
+				albu.OneOf([
+					albu.CLAHE(),
+					albu.Blur(5),
+					albu.RGBShift()  
+				], p=1),
+			]
+
+			train_transforms = albu.Compose([
+				*augmentations,
+				albu.Normalize(),
 				ToTensorV2()
 			])
 
-			# # height, width
-			# image_size = (224, 224)
-
-			# augmentations = [
-			# 	albu.RandomResizedCrop(*image_size, scale=(0.6, 1)),
-			# 	albu.HorizontalFlip(),
-			# 	albu.RandomBrightnessContrast(),
-			# 	albu.OneOf([
-			# 		albu.CLAHE(),
-			# 		albu.Blur(5),
-			# 		albu.RGBShift()  
-			# 	], p=1),
-			# ]
-
-			# train_transforms = albu.Compose([
-			# 	*augmentations,
-			# 	albu.Normalize(),
-			# 	ToTensor()
-			# ])
-
-			# valid_transforms = albu.Compose([
-			# 	albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
-			# 	albu.CenterCrop(*image_size),
-			# 	albu.Normalize(),
-			# 	ToTensor()
-			# ])
+			valid_transforms = albu.Compose([
+				albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
+				albu.CenterCrop(*image_size),
+				albu.Normalize(),
+				ToTensorV2()
+			])
 
 			# test_transforms = albu.Compose([
 			# 	albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
@@ -96,8 +96,8 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			# ])
 
 
-			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=transforms)
-			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE)#, transforms=transforms)
+			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=train_transforms)
+			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
 	   
 		if stage == "test" or stage is None:
 			self.test_dataset = AgeGenderDataset(mode=MODE.TEST)
