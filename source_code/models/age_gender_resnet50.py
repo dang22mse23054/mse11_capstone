@@ -21,7 +21,7 @@ class AgeGenderResNet50(nn.Module):
 
 		# sqeeze-excite là 1 kiến trúc để tăng cường đặc trưng của 1 layer (tăng cường đặc trưng của encoder)
 		# https://arxiv.org/pdf/1709.01507.pdf
-		self.downsample = nn.Conv2d(encoder_channels, output_channels)
+		self.downsample = nn.Conv2d(encoder_channels, output_channels, 1)
 		self.relu = nn.ReLU()
 		
 		self.age_head = nn.Conv2d(output_channels, age_classes, 1)
@@ -38,6 +38,6 @@ class AgeGenderResNet50(nn.Module):
 		
 		age_logits = self.age_head(features)
 		gender_logits = self.gender_head(features)
-		
+
 		return gender_logits, age_logits
 
