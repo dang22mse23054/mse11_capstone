@@ -69,7 +69,7 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 				albu.HorizontalFlip(),
 				albu.RandomBrightnessContrast(),
 				albu.OneOf([
-					albu.CLAHE(),
+					# albu.CLAHE(),
 					albu.Blur(5),
 					albu.RGBShift()  
 				], p=1),
