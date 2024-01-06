@@ -19,12 +19,12 @@ if __name__ == "__main__":
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),
 		    # ModelCheckpoint(dirpath='', filename='{epoch}-{val_acc:.4f}', save_top_k=5, monitor='val_acc', mode='max'),
-			ModelCheckpoint(filename='{epoch}-{val_loss:.4f}', save_top_k=5, monitor='val_loss', mode='min'),
+			ModelCheckpoint(filename='{epoch}-{val_acc:.4f}', save_top_k=5, monitor='val_acc', mode='max'),
 		], 
 		# check_val_every_n_epoch=1,
 		# fast_dev_run=True,
 		default_root_dir='checkpoint',
-		max_epochs=25,       
+		max_epochs=1,       
 	)
 
 	# trainer.test(model, data)
