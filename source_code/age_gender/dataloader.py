@@ -51,6 +51,27 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 		self.test_dataset = None
 	
 	def setup(self, stage: Optional[str] = None) -> None:
+
+		train_transforms = albu.Compose([
+			*augmentations,
+			albu.Normalize(),
+			ToTensorV2()
+		])
+
+		valid_transforms = albu.Compose([
+			albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
+			albu.CenterCrop(*image_size),
+			albu.Normalize(),
+			ToTensorV2()
+		])
+
+		test_transforms = albu.Compose([
+			albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
+			albu.CenterCrop(*image_size),
+			albu.Normalize(),
+			ToTensorV2()
+		])
+		
 		if stage == "fit" or stage is None:
 			
 			# transforms = albu.Compose([
@@ -74,27 +95,6 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 					albu.RGBShift()  
 				], p=1),
 			]
-
-			train_transforms = albu.Compose([
-				*augmentations,
-				albu.Normalize(),
-				ToTensorV2()
-			])
-
-			valid_transforms = albu.Compose([
-				albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
-				albu.CenterCrop(*image_size),
-				albu.Normalize(),
-				ToTensorV2()
-			])
-
-			test_transforms = albu.Compose([
-				albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
-				albu.CenterCrop(*image_size),
-				albu.Normalize(),
-				ToTensorV2()
-			])
-
 
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=train_transforms)
 			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
