@@ -76,19 +76,17 @@ class AgeGenderDetectionModel(LightningModule):
 		return self.model(x)
 
 	def configure_optimizers(self):
-		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+		optimizer = optim.AdamW(self.parameters(), amsgrad=True, lr=0.001, weight_decay=1e-6)
 		# We will reduce the learning rate by 0.1 after 20 epochs
 		scheduler = lr_scheduler.LambdaLR(optimizer, lambda epoch: 0.1 ** (epoch // 20))
 		# scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True)
 
 		return [optimizer], [scheduler]
 	
-	# TODO: Q&A
 	def on_validation_epoch_start(self):
 		self.gender_acc_list = []
 		self.age_acc_list = []
 	
-	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
 		gender_acc = np.mean(self.gender_acc_list)
 		age_acc = np.mean(self.age_acc_list)
