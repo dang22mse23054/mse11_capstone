@@ -11,7 +11,6 @@ import torch.utils.data.distributed
 import random
 import pytorch_lightning as pl
 from pytorch_lightning.core import LightningModule
-from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 from models.age_gender_resnet50 import AgeGenderResNet50
 
@@ -50,7 +49,6 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 
 class AgeGenderDetectionModel(LightningModule):
 	def __init__(self,
-				encoder_channels: int = 2048,
 				output_channels: int = 512,
 				age_classes: int = 5,
 				gender_classes: int = 2,
@@ -63,7 +61,6 @@ class AgeGenderDetectionModel(LightningModule):
 		self.save_hyperparameters()
 		
 		self.model = AgeGenderResNet50(
-			encoder_channels,
 			output_channels,
 			age_classes,
 			gender_classes,
