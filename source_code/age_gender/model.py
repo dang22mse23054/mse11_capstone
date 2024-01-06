@@ -20,14 +20,28 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 	accuracy metric
 
 	expects pred shape bs x n_c, gt shape bs x 1
+
+	Ví dụ:
+		input là pred: có kích thước bs x n_c
+		pred = tensor([[0.1, 0.9],
+					   [0.8, 0.2],
+					   [0.3, 0.7]])
+		thì pred.max(1) sẽ là .object có format 
+		(
+			values=tensor([0.7000, 0.8000, 0.5000]),
+			indices=tensor([1, 0, 0])
+		)
+		
+		=> pred.max(1)[1] sẽ là tensor([1, 0, 0])
+		
+		mà gt = tensor([1, 0, 1])
+		(tức là kết quả thực tế lấy từ dataset, kích thước là input là bs x 1) 
+		
+		sau khi so sánh ==  sẽ ra True/False rồi tiếp theo dùng .float() để chuyển về kiểu float dạng 1. OR 0.
+		rồi tính mean() để ra kết quả accuracy
+		=> accuracy = 2/3 = 0.6667
 	"""
 
-	print(f"pred = {pred}")
-	print(f"pred.max(1)[1] = {pred.max(1)[1]}")
-	print(f"gt = {gt}")
-
-
-	print(f"mean = {(pred.max(1)[1] == gt).float().mean()}")
 	return (pred.max(1)[1] == gt).float().mean()
 
 # Ref: 
