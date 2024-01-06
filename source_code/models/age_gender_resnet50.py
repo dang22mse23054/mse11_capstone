@@ -17,35 +17,27 @@ class AgeGenderResNet50(nn.Module):
 		
 		# Dùng model resnet50 đã train trước đó, nhg loại bỏ 2 layer cuối cùng (avgpool và fc)
 		# tạo thành 1 encoder
-		self.encoder = nn.Sequential(*list(models.resnet50(pretrained=True).children())[:-2])
+		self.encoder = nn.Sequential(*list(models.resnet50(pretrained=True).children())[:-1])
 
 		# sqeeze-excite là 1 kiến trúc để tăng cường đặc trưng của 1 layer (tăng cường đặc trưng của encoder)
 		# https://arxiv.org/pdf/1709.01507.pdf
-		# 
-		self.squeeze = nn.AdaptiveAvgPool2d(1)
-		self.downsample = nn.Conv2d(encoder_channels, output_channels, 1)
-		self.bn1 = nn.BatchNorm2d(output_channels)
-		self.nonlin1 = nn.ReLU()
-		
-		self.excite = nn.Conv2d(output_channels, output_channels, 1)
-		self.bn2 = nn.BatchNorm2d(output_channels)
-		self.nonlin2 = nn.ReLU()
+		self.downsample = nn.Conv2d(encoder_channels, output_channels)
+		self.relu = nn.ReLU()
 		
 		self.age_head = nn.Conv2d(output_channels, age_classes, 1)
 		self.gender_head = nn.Conv2d(output_channels, gender_classes, 1)
 
 	
 	def forward(self, x):
+		# Feature extraction using ResNet50
 		features = self.encoder(x)
-		features = self.squeeze(features)
+		features = features.view(features.size(0), -1)
+
 		features = self.downsample(features)
-		features = self.nonlin1(self.bn1(features))
+		features = self.relu(features)
 		
-		weights_logits = self.excite(features)
-		features = features * weights_logits.sigmoid()
-		features = self.nonlin2(self.bn2(features))
+		age_logits = self.age_head(features)
+		gender_logits = self.gender_head(features)
 		
-		age_logits = self.age_head(features).view(features.size(0), -1)
-		gender_logits = self.gender_head(features).view(features.size(0), -1)
 		return gender_logits, age_logits
 

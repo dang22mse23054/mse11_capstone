@@ -69,10 +69,9 @@ class AgeGenderDetectionModel(LightningModule):
 			gender_classes,
 		)
 		self.loss_functions = {
-			# 'Age': nn.MSELoss(),
-			# 'Gender': nn.BCEWithLogitsLoss()
-			'Age': nn.BCEWithLogitsLoss(),
-			'Gender': nn.CrossEntropyLoss()
+			# Solution_3
+			'Age': nn.CrossEntropyLoss(),
+			'Gender': nn.BCEWithLogitsLoss()
 		}
 	
 	def forward(self, x):
@@ -133,12 +132,14 @@ class AgeGenderDetectionModel(LightningModule):
 		# print(f"Age = {age_gt} => Logits = {age_logits}")
 		
 		# BCE expects one-hot vector
-		age_gt_onehot = torch.zeros(*age_logits.size(), device=age_logits.device)
-		age_gt_onehot = age_gt_onehot.scatter_(1, age_gt.unsqueeze(-1).long(), 1)
-		age_loss = self.loss_functions['Age'](age_logits, age_gt_onehot)  # bce
+		# 'Gender': nn.BCEWithLogitsLoss()
+		gender_gt_onehot = torch.zeros(*gender_logits.size(), device=gender_logits.device)
+		gender_gt_onehot = gender_gt_onehot.scatter_(1, gender_gt.unsqueeze(-1).long(), 1)
+		gender_loss = self.loss_functions['Gender'](gender_logits, gender_gt_onehot)  # bce
 		
-		gender_gt = gender_gt.long()
-		gender_loss = self.loss_functions['Gender'](gender_logits, gender_gt)  # softmax+ce
+		# 'Age': nn.CrossEntropyLoss(),
+		age_gt = age_gt.long()
+		age_loss = self.loss_functions['Age'](age_logits, age_gt)  # ce
 		
 		losses = (gender_loss + age_loss) / 2
 
