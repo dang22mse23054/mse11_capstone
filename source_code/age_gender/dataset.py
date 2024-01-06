@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, random
 sys.path.append('../')
 
 import torch
@@ -45,6 +45,7 @@ class AgeGenderDataset(Dataset):
 		self.transforms = transforms
 		
 		file_list = os.listdir(self.data_path)
+		random.Random(4).shuffle(file_list)
 		for img_name in file_list:
 			if not check_image(img_name):
 				file_list.remove(img_name)

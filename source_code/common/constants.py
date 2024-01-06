@@ -33,11 +33,11 @@ class Constants:
 
 	class Age:
 		__slots__ = ()
-		CHILDREN = 'children'
-		TEENAGERS = 'teenagers'
-		ADULT = 'adult'
-		MIDDLE_AGED = 'middle_aged'
-		ELDERLY = 'elderly'
+		CHILDREN = 'children (0~12)'
+		TEENAGERS = 'teenagers (13~17)'
+		ADULT = 'adult (18~44)'
+		MIDDLE_AGED = 'middle_aged (45~60)'
+		ELDERLY = 'elderly (61~120)'
 
 		Groups = {
 			CHILDREN: {'from': 0, 'to': 12}, 
