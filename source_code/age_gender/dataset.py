@@ -67,8 +67,13 @@ class AgeGenderDataset(Dataset):
 			self.file_list = file_list[trainPart:trainPart+validationPart]
 		elif self.mode == MODE.TEST:
 			self.file_list = file_list[trainPart+validationPart:]
+			# self.file_list = random.sample(file_list, k=3)
+
 		else:
 			self.file_list = file_list[0:trainPart]
+
+		df = pd.DataFrame(self.file_list, columns=['List'])
+		print(df)
 
 	def get_group(self, age):
 		"""
