@@ -51,7 +51,20 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 		self.test_dataset = None
 	
 	def setup(self, stage: Optional[str] = None) -> None:
+		# height, width
+		image_size = (224, 224)
 
+		augmentations = [
+			albu.RandomResizedCrop(*image_size, scale=(0.6, 1)),
+			albu.HorizontalFlip(),
+			albu.RandomBrightnessContrast(),
+			albu.OneOf([
+				# albu.CLAHE(),
+				albu.Blur(5),
+				albu.RGBShift()  
+			], p=1),
+		]
+		
 		train_transforms = albu.Compose([
 			*augmentations,
 			albu.Normalize(),
@@ -81,20 +94,6 @@ class AgeGenderDataLoader(pl.LightningDataModule):
 			# 	albu.Rotate(limit=10),
 			# 	ToTensorV2()
 			# ])
-
-			# # height, width
-			image_size = (224, 224)
-
-			augmentations = [
-				albu.RandomResizedCrop(*image_size, scale=(0.6, 1)),
-				albu.HorizontalFlip(),
-				albu.RandomBrightnessContrast(),
-				albu.OneOf([
-					# albu.CLAHE(),
-					albu.Blur(5),
-					albu.RGBShift()  
-				], p=1),
-			]
 
 			self.train_dataset = AgeGenderDataset(mode=MODE.TRAIN, transforms=train_transforms)
 			self.val_dataset = AgeGenderDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
