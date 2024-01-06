@@ -2,17 +2,19 @@ import os, random
 import torch
 import torch.nn as nn
 import numpy as np
-import torch.nn.functional as F
 import torch.nn.parallel
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.utils.data
 import torch.utils.data.distributed
 import random
-import pytorch_lightning as pl
 from pytorch_lightning.core import LightningModule
 import torch.optim.lr_scheduler as lr_scheduler
 from models.age_gender_resnet50 import AgeGenderResNet50
+import matplotlib.pyplot as plt
+from common.constants import Constants
+
+AGE = Constants.Age()
 
 def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 	"""
@@ -46,6 +48,7 @@ def accuracy(pred: torch.Tensor, gt: torch.Tensor):
 # Ref: 
 # https://github.com/Sklyvan/Age-Gender-Prediction/blob/main/Age%20%26%20Gender%20Prediction%20Model%20Creation.ipynb
 # https://github.com/thepowerfuldeez/age_gender_classifier/blob/master/training.ipynb
+
 
 class AgeGenderDetectionModel(LightningModule):
 	def __init__(self,
@@ -99,25 +102,20 @@ class AgeGenderDetectionModel(LightningModule):
 		self.gender_acc_list.clear()
 		self.age_acc_list.clear()
 
-	# def on_test_epoch_start(self) -> None:
-	# 	gender_acc = np.mean(self.gender_acc_list)
-	# 	age_acc = np.mean(self.age_acc_list)
-	# 	# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
-	# 	loss = 1 - ((gender_acc + age_acc) / 2)
-	# 	self.log('val_loss', loss, prog_bar=True, on_epoch=True)
-
-	# 	self.gender_acc_list.clear()
-	# 	self.age_acc_list.clear()
+	def on_test_epoch_start(self) -> None:
+		self.gender_acc_list = []
+		self.age_acc_list = []
 	
-	# def on_test_epoch_end(self) -> None:
-	# 	gender_acc = np.mean(self.gender_acc_list)
-	# 	age_acc = np.mean(self.age_acc_list)
-	# 	# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
-	# 	loss = (gender_acc + age_acc) / 2
-	# 	self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+	def on_test_epoch_end(self) -> None:
+		gender_acc = np.mean(self.gender_acc_list)
+		age_acc = np.mean(self.age_acc_list)
 
-	# 	self.gender_acc_list.clear()
-	# 	self.age_acc_list.clear()
+		# print(f"val epoch {epoch}, gender acc {gender_acc:.2%}, age acc {age_acc:.2%}")
+		mean_acc = (gender_acc + age_acc) / 2
+		self.log('test_acc', mean_acc, prog_bar=True, on_epoch=True)
+
+		self.gender_acc_list.clear()
+		self.age_acc_list.clear()
 
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
@@ -169,26 +167,28 @@ class AgeGenderDetectionModel(LightningModule):
 	
 	def test_step(self, batch, batch_idx):
 		image, (gender_gt, age_gt) = batch
-		print('---------test_step---------')
-		print(gender_gt)
-		print(age_gt)
 
 		# real_age = int(torch.argmax(y[0][:Classes]))
         # read_gender = int(torch.argmax(y[0][Classes:]))
 
-		# # implement your own
-		# out = self(x)
-		# loss = self.loss(out, y)
+		# implement your own
+		prediction = self(image)
 
-		# # log 6 example images
-		# # or generated text... or whatever
-		# sample_imgs = x[:6]
-		# grid = torchvision.utils.make_grid(sample_imgs)
-		# self.logger.experiment.add_image('example_images', grid, 0)
+		print(prediction)
 
-		# # calculate acc
-		# labels_hat = torch.argmax(out, dim=1)
-		# test_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
+		pred_gender = int(torch.argmax(prediction[0]))
+		pred_age = int(torch.argmax(prediction[1]))
 
-		# # log the outputs!
-		# self.log_dict({'test_loss': loss, 'test_acc': test_acc})
+		age_acc = accuracy(pred_age, age_gt).item()
+		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.age_acc_list.append(age_acc)
+
+		gender_acc = accuracy(pred_gender, gender_gt).item()
+		self.log('test_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.gender_acc_list.append(gender_acc)
+
+
+		plt.title(f'{list(AGE.Groups.keys())[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
+		plt.imshow(image, cmap='gray')
+		plt.axis('off')
+		plt.show()

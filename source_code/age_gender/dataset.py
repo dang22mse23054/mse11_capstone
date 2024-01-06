@@ -56,6 +56,9 @@ class AgeGenderDataset(Dataset):
 		validationPart = int(len(file_list) * VALIDATION_RATIO)
 		total = trainPart + validationPart + testPart
 		trainPart += (len(file_list) - total)
+
+		print(f'(Mode {self.mode}) Total: {len(file_list)}, Train: {trainPart}, Validation: {validationPart}, Test: {testPart}')
+
 		# check if the partition is correct
 		if (trainPart + validationPart + testPart) == len(file_list): print(f"(Mode {self.mode}) Correct Partition")
 
