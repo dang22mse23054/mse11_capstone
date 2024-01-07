@@ -173,11 +173,11 @@ class AgeGenderDetectionModel(LightningModule):
 		# plt.show()
 
 		gender_acc = accuracy(gender_logits, gender_gt).item()
-		self.log('test_gender_acc', gender_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('test_gender_acc', gender_acc, prog_bar=True, on_epoch=True)
 		self.gender_acc_list.append(gender_acc)
 
 		age_acc = accuracy(age_logits, age_gt).item()
-		self.log('test_age_acc', age_acc, prog_bar=True, on_step=True, on_epoch=True)
+		self.log('test_age_acc', age_acc, prog_bar=True, on_epoch=True)
 		self.age_acc_list.append(age_acc)
 
 	def on_test_epoch_start(self) -> None:
