@@ -46,26 +46,33 @@ def predict_all(file_list, model):
 			input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
 			
 			output = model(input_batch)
+
 			predictions.append(output)
 	
 	return predictions
 
-def get_features(images, model):
+def convert_img_to_features(images, model):
+	if len(images) == 0:
+		return None
+	
 	model = model.model
 	features = []
 	with torch.no_grad():
 		images, _= model.transform(images, None)
 		features = model.backbone(images.tensors)
-	return features
+	
+	print('-------convert_img_to_features-------')
+	print(features.keys())
+	return features['0']
 
-def show_bbox(image, prediction):
+def show_bbox(image, prediction, min_score=0.7):
 	image_with_bbox = image.copy()
 	draw = ImageDraw.Draw(image_with_bbox)
 	prediction = prediction[0]
 	scores = prediction['scores'].tolist()
-	print(prediction)
+
 	for index, bbox in enumerate(prediction['boxes']):
-		if scores[index] > 0.3:
+		if scores[index] > min_score:
 			draw.rectangle(bbox.tolist(), outline="red", width=4)
 	image_with_bbox.show()
 
@@ -78,7 +85,7 @@ def extract_faces(image, prediction):
 	image = image.copy()
 	prediction = prediction[0]
 	scores = prediction['scores'].tolist()
-	print(prediction)
+
 	for index, bbox in enumerate(prediction['boxes']):
 		if scores[index] > 0.3:
 			face = image.crop(bbox.tolist())
@@ -107,11 +114,11 @@ if __name__ == "__main__":
 		file_path = f'{PATHS[MODE.TESTDEMO]["img_dir"]}/{file_path}'
 		input_image = Image.open(file_path).convert('RGB')
 		# show_bbox(input_image, prediction)
-		face_images = extract_faces(input_image, prediction)
+		# face_images = extract_faces(input_image, prediction)
 		# get the face features
-		features = get_features(face_images, model)
 		
 		print('---------- FACE features ----------')
+		features = convert_img_to_features([transforms.ToTensor()(input_image)], model)
 		print(features)
 	
 	

@@ -14,7 +14,6 @@ from models.faster_rcnn import FasterRCNNResNet50FPN
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 
-
 class FaceDetectionModel(LightningModule):
 	def __init__(self,
 				lr: float = 1e-3,
@@ -29,9 +28,14 @@ class FaceDetectionModel(LightningModule):
 		
 		self.model = FasterRCNNResNet50FPN(num_classes=2)
 
-	
-	def forward(self, x):
-		return self.model(x)
+	def forward(self, x): 
+		# Call the parent class forward method
+		output = self.model(x)
+		# Add feature map to the output
+		if (len(output) > 0):
+			output[0]['feature_map'] = self.model.feature_map_callback.feature_map
+			
+		return output
 
 	def configure_optimizers(self):
 		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)

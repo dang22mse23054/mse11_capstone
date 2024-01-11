@@ -18,16 +18,16 @@ MODE = Constants.Mode()
 WIDER_FACE_ROOT = '/kaggle/input/wider-face-a-face-detection-dataset'
 PATHS = {
 	MODE.DEMO: {
-		'annotation': 'raw/wider_face/wider_face_split/wider_face_demo_bbx_gt.txt',
-		'img_dir': 'raw/wider_face/WIDER_train/images',
+		'annotation': 'raw/wider_face_split/wider_face_demo_bbx_gt.txt',
+		'img_dir': 'raw/WIDER_train/images',
 	},
 	MODE.VALDEMO: {
-		'annotation': 'raw/wider_face/wider_face_split/wider_face_valdemo_bbx_gt.txt',
-		'img_dir': 'raw/wider_face/WIDER_val/images',
+		'annotation': 'raw/wider_face_split/wider_face_valdemo_bbx_gt.txt',
+		'img_dir': 'raw/WIDER_val/images',
 	},
 	MODE.TESTDEMO: {
-		'img_list': 'raw/wider_face/wider_face_split/wider_face_testdemo_filelist.txt',
-		'img_dir': 'raw/wider_face/WIDER_test/images',
+		'img_list': 'raw/wider_face_split/wider_face_testdemo_filelist.txt',
+		'img_dir': 'raw/WIDER_test/images',
 	},
 	MODE.TRAIN: {
 		'annotation': f'{WIDER_FACE_ROOT}/wider_face_annotations/wider_face_split/wider_face_train_bbx_gt.txt',

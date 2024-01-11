@@ -141,8 +141,5 @@ class AgeGenderDataset(Dataset):
 
 		return img_name, gender, age
 
-	def test_item(self, i):
-		return self[i], self.file_list[i]
-
 	def __len__(self):
 		return len(self.file_list)
