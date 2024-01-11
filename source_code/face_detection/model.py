@@ -13,6 +13,8 @@ from pytorch_lightning.core import LightningModule
 from models.faster_rcnn import FasterRCNNResNet50FPN
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
+from common.constants import Constants
+GROUPS = Constants.GROUPS
 
 class FaceDetectionModel(LightningModule):
 	def __init__(self,
@@ -22,11 +24,13 @@ class FaceDetectionModel(LightningModule):
 				**kwargs
 	):
 		super().__init__()
+		self.lr = lr 
+		self.momentum = momentum
+		self.weight_decay = weight_decay 
+
 		self.save_hyperparameters()
-		self.id2label = {0: 'Background', 1: 'Face'}
-		# metrics
-		
-		self.model = FasterRCNNResNet50FPN(num_classes=2)
+
+		self.model = FasterRCNNResNet50FPN(num_classes=len(GROUPS))
 
 	def forward(self, x): 
 		# Call the parent class forward method
@@ -50,9 +54,7 @@ class FaceDetectionModel(LightningModule):
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
 		self.mAPs = {"val_" + k: v for k, v in self.mAP.compute().items()}
-		self.print(self.mAPs)
 		self.log_dict(self.mAPs, sync_dist=True)
-
 		self.mAP.reset()
 	
 	def training_step(self, batch, batch_idx):

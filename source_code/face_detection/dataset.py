@@ -14,6 +14,7 @@ from common.constants import Constants
 
 COL_NAME = Constants.DFColumns()
 MODE = Constants.Mode()
+FACE_GROUPS = Constants.FACE_GROUPS
 
 WIDER_FACE_ROOT = '/kaggle/input/wider-face-a-face-detection-dataset'
 PATHS = {
@@ -134,7 +135,7 @@ class FaceDetectionDataset(Dataset):
 			# convert each item of cols to int
 			rows = [[int(value) for value in cols] for cols in rows]
 			boxes = [cols[0:4]for cols in rows]
-			labels = [1] * len(boxes)
+			labels = [FACE_GROUPS.index('Face')] * len(boxes)
 			# dùng cái này bị error
 			# labels = [1 for cols in rows]
 			

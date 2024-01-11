@@ -1,10 +1,7 @@
 class Constants:
 	__slots__ = ()
 
-	# ======== CONFIG ======== #
-	MUST_HAVE_ADMIN = True
-	IS_USING_SLACK_ID = True
-
+	FACE_GROUPS =['Background', 'Face']
 	# ======== Classes ======= #
 
 	class Mode:
