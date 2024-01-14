@@ -33,12 +33,14 @@ class FaceDataLoader(pl.LightningDataModule):
 	
 	def setup(self, stage: Optional[str] = None) -> None:
 		if stage == "fit" or stage is None:
-			# transforms = albu.Compose(
-			# 	[
-			# 		albu.RandomCrop(*self.img_size, p=1.0),
-			# 	], 
-			# 	bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
-			# )
+			transforms = albu.Compose(
+				[
+					# albu.RandomCrop(*self.img_size, p=1.0),
+					albu.RandomCrop(*self.crop_size, p=1.0),
+					albu.Resize(*self.img_size),
+				], 
+				bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
+			)
 
 			augmentations = [
 				albu.RandomCrop(*self.crop_size, p=1.0),
@@ -54,8 +56,8 @@ class FaceDataLoader(pl.LightningDataModule):
 			
 			train_transforms = albu.Compose([
 				*augmentations,
-				# albu.Normalize(),
-				# ToTensorV2()
+				albu.Normalize(),
+				ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
 			valid_transforms = albu.Compose([
@@ -72,7 +74,7 @@ class FaceDataLoader(pl.LightningDataModule):
 			# 	ToTensorV2()
 			# ], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
-			self.train_dataset = FaceDetectionDataset(mode=MODE.TRAIN, transforms=train_transforms)
+			self.train_dataset = FaceDetectionDataset(mode=MODE.TRAIN, transforms=transforms)
 			self.val_dataset = FaceDetectionDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
 	   
 		# if stage == "test" or stage is None:
