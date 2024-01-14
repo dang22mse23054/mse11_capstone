@@ -53,9 +53,9 @@ class FaceDetectionModel(LightningModule):
 	
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
-		self.mAPs = {"val_" + k: v for k, v in self.mAPs.compute().items()}
-		print(self.mAPs)
-		self.log_dict(self.mAPs, sync_dist=True)
+		mAP = {"val_" + k: v for k, v in self.mAPs.compute().items()}
+		print(mAP)
+		self.log_dict(mAP, sync_dist=True)
 		self.mAPs.reset()
 	
 	def training_step(self, batch, batch_idx):
