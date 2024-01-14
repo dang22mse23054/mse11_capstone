@@ -54,28 +54,22 @@ class FaceDataLoader(pl.LightningDataModule):
 				], p=1),
 			]
 			
-			train_transforms = albu.Compose([
+			transforms = albu.Compose([
 				*augmentations,
 				albu.Normalize(),
 				ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
-			valid_transforms = albu.Compose([
-				albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
-				albu.CenterCrop(*self.img_size),
-				albu.Normalize(),
-				ToTensorV2()
-			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
-
-			# test_transforms = albu.Compose([
+			# valid_transforms = albu.Compose([
 			# 	albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
 			# 	albu.CenterCrop(*self.img_size),
 			# 	albu.Normalize(),
 			# 	ToTensorV2()
 			# ], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
+
 			self.train_dataset = FaceDetectionDataset(mode=MODE.TRAIN, transforms=transforms)
-			self.val_dataset = FaceDetectionDataset(mode=MODE.VALIDATE, transforms=valid_transforms)
+			self.val_dataset = FaceDetectionDataset(mode=MODE.VALIDATE, transforms=transforms)
 	   
 		# if stage == "test" or stage is None:
 		# 	self.test_dataset = FaceDetectionDataset(mode=MODE.TEST, image_dir=self.val_data)
