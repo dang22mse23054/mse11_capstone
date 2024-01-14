@@ -41,19 +41,19 @@ class FaceDataLoader(pl.LightningDataModule):
 				], 
 				bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
 			)
-			
+
 			transforms = albu.Compose([
 				albu.RandomCrop(*self.crop_size, p=1.0),
 				albu.Resize(*self.img_size),
 				albu.HorizontalFlip(),
 				albu.RandomBrightnessContrast(),
-				albu.OneOf([
-					# albu.CLAHE(),
-					albu.Blur(5),
-					albu.RGBShift()  
-				], p=1),
-				albu.Normalize(),
-				ToTensorV2()
+				# albu.OneOf([
+				# 	# albu.CLAHE(),
+				# 	albu.Blur(5),
+				# 	albu.RGBShift()  
+				# ], p=1),
+				# albu.Normalize(),
+				# ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
 			# valid_transforms = albu.Compose([
