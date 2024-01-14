@@ -26,7 +26,7 @@ class FaceDataLoader(pl.LightningDataModule):
 		self.workers = workers
 		# height, width
 		self.img_size = (img_size, img_size)
-		self.crop_size = (img_size, img_size)
+		self.crop_size = (crop_size, crop_size)
 		self.train_dataset = None
 		self.val_dataset = None
 		self.test_dataset = None
@@ -41,8 +41,8 @@ class FaceDataLoader(pl.LightningDataModule):
 				], 
 				bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
 			)
-
-			augmentations = [
+			
+			transforms = albu.Compose([
 				albu.RandomCrop(*self.crop_size, p=1.0),
 				albu.Resize(*self.img_size),
 				albu.HorizontalFlip(),
@@ -52,10 +52,6 @@ class FaceDataLoader(pl.LightningDataModule):
 					albu.Blur(5),
 					albu.RGBShift()  
 				], p=1),
-			]
-			
-			transforms = albu.Compose([
-				*augmentations,
 				albu.Normalize(),
 				ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
