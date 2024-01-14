@@ -43,7 +43,7 @@ class FaceDataLoader(pl.LightningDataModule):
 			augmentations = [
 				albu.RandomCrop(*self.crop_size, p=1.0),
 				albu.Resize(*self.img_size),
-				albu.HorizontalFlip(),
+				# albu.HorizontalFlip(),
 				albu.RandomBrightnessContrast(),
 				albu.OneOf([
 					# albu.CLAHE(),
