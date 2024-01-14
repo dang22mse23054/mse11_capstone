@@ -45,11 +45,11 @@ class FaceDataLoader(pl.LightningDataModule):
 				albu.Resize(*self.img_size),
 				# albu.HorizontalFlip(),
 				albu.RandomBrightnessContrast(),
-				albu.OneOf([
-					# albu.CLAHE(),
-					albu.Blur(5),
-					albu.RGBShift()  
-				], p=1),
+				# albu.OneOf([
+				# 	# albu.CLAHE(),
+				# 	albu.Blur(5),
+				# 	albu.RGBShift()  
+				# ], p=1),
 			]
 			
 			train_transforms = albu.Compose([
