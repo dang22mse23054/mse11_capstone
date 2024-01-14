@@ -39,10 +39,10 @@ def init_model():
 def predict_all(file_list, model):
 	predictions = []
 
-	image_size = (224, 224)
+	img_size = (224, 224)
 	transforms = albu.Compose([
-		albu.Resize(*(np.array(image_size) * 1.25).astype(int)),
-		albu.CenterCrop(*image_size),
+		albu.Resize(*(np.array(img_size) * 1.25).astype(int)),
+		albu.CenterCrop(*img_size),
 		albu.Normalize(),
 		ToTensorV2()
 	])

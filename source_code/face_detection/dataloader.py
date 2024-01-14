@@ -31,15 +31,15 @@ class FaceDataLoader(pl.LightningDataModule):
 	
 	def setup(self, stage: Optional[str] = None) -> None:
 		if stage == "fit" or stage is None:
-			transforms = albu.Compose(
-				[
-					albu.RandomCrop(*self.img_size, p=1.0),
-				], 
-				bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
-			)
+			# transforms = albu.Compose(
+			# 	[
+			# 		albu.RandomCrop(*self.img_size, p=1.0),
+			# 	], 
+			# 	bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None)
+			# )
 
 			augmentations = [
-				albu.RandomResizedCrop(*self.image_size, scale=(0.6, 1)),
+				albu.RandomResizedCrop(*self.img_size, scale=(0.6, 1)),
 				albu.HorizontalFlip(),
 				albu.RandomBrightnessContrast(),
 				albu.OneOf([
@@ -56,15 +56,15 @@ class FaceDataLoader(pl.LightningDataModule):
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
 			valid_transforms = albu.Compose([
-				albu.Resize(*(np.array(self.image_size) * 1.25).astype(int)),
-				albu.CenterCrop(*self.image_size),
+				albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
+				albu.CenterCrop(*self.img_size),
 				albu.Normalize(),
 				ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
 			# test_transforms = albu.Compose([
-			# 	albu.Resize(*(np.array(self.image_size) * 1.25).astype(int)),
-			# 	albu.CenterCrop(*self.image_size),
+			# 	albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
+			# 	albu.CenterCrop(*self.img_size),
 			# 	albu.Normalize(),
 			# 	ToTensorV2()
 			# ], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
