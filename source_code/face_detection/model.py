@@ -117,6 +117,7 @@ class FaceDetectionModel(LightningModule):
 		# if random.random() < 0.1:
 		if len(batch) == 0:
 			print('eval_step no batch item ')
+			self.mAP.update([], [])
 			return
 
 		print('eval_step --- UPDATE ---')
