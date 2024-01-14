@@ -14,7 +14,7 @@ from models.faster_rcnn import FasterRCNNResNet50FPN
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch.optim.lr_scheduler as lr_scheduler
 from common.constants import Constants
-GROUPS = Constants.GROUPS
+FACE_GROUPS = Constants.FACE_GROUPS
 
 class FaceDetectionModel(LightningModule):
 	def __init__(self,
@@ -30,7 +30,7 @@ class FaceDetectionModel(LightningModule):
 
 		self.save_hyperparameters()
 
-		self.model = FasterRCNNResNet50FPN(num_classes=len(GROUPS))
+		self.model = FasterRCNNResNet50FPN(num_classes=len(FACE_GROUPS))
 
 	def forward(self, x): 
 		# Call the parent class forward method
