@@ -49,32 +49,14 @@ class FaceDetectionModel(LightningModule):
 	
 	# TODO: Q&A
 	def on_validation_epoch_start(self):
-		self.mAP = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
+		self.mAPs = MeanAveragePrecision(box_format="xyxy", class_metrics=False)
 	
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
-		self.mAP = {"val_" + k: v for k, v in self.mAP.compute().items()}
-		self.print(self.mAP)
-		mAP_per_class = self.mAP.pop("val_map_per_class")
-		mARs_per_class = self.mAP.pop("val_mar_100_per_class")
-		self.log_dict(self.mAP, sync_dist=True)
-
-		self.log_dict(
-			{
-				f"val_map_{label}": value
-				for label, value in zip(self.id2label.values(), mAP_per_class)
-			},
-			sync_dist=True,
-		)
-		self.log_dict(
-			{
-				f"val_mar_100_{label}": value
-				for label, value in zip(self.id2label.values(), mARs_per_class)
-			},
-			sync_dist=True,
-		)
-
-		self.mAP.reset()
+		self.mAPs = {"val_" + k: v for k, v in self.mAPs.compute().items()}
+		print(self.mAPs)
+		self.log_dict(self.mAPs, sync_dist=True)
+		self.mAPs.reset()
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
@@ -137,7 +119,7 @@ class FaceDetectionModel(LightningModule):
 		# if random.random() < 0.1:
 		if len(batch) == 0:
 			# print('eval_step no batch item ')
-			# self.mAP.update([], [])
+			# self.mAPs.update([], [])
 			return
 
 		# print('eval_step --- UPDATE ---')
@@ -145,7 +127,7 @@ class FaceDetectionModel(LightningModule):
 		preds = self.model(images)
 		selected = random.sample(range(len(images)), len(images) // 5)
 		# print(f'eval_step --- len(selected) = {len(selected)} ---')
-		self.mAP.update([preds[i] for i in selected], [targets[i] for i in selected])
+		self.mAPs.update([preds[i] for i in selected], [targets[i] for i in selected])
 
 	def validation_step(self, batch, batch_idx):
 		return self.eval_step(batch, batch_idx, "val")
