@@ -53,16 +53,16 @@ class FaceDetectionModel(LightningModule):
 	
 	# TODO: Q&A
 	def on_validation_epoch_end(self) -> None:
-		self.mAPs = {"val_" + k: v for k, v in self.mAPs.compute().items()}
-		self.print(self.mAPs)
-		mAPs_per_class = self.mAPs.pop("val_map_per_class")
-		mARs_per_class = self.mAPs.pop("val_mar_100_per_class")
-		self.log_dict(self.mAPs, sync_dist=True)
+		self.mAP = {"val_" + k: v for k, v in self.mAP.compute().items()}
+		self.print(self.mAP)
+		mAP_per_class = self.mAP.pop("val_map_per_class")
+		mARs_per_class = self.mAP.pop("val_mar_100_per_class")
+		self.log_dict(self.mAP, sync_dist=True)
 
 		self.log_dict(
 			{
 				f"val_map_{label}": value
-				for label, value in zip(self.id2label.values(), mAPs_per_class)
+				for label, value in zip(self.id2label.values(), mAP_per_class)
 			},
 			sync_dist=True,
 		)
@@ -74,7 +74,7 @@ class FaceDetectionModel(LightningModule):
 			sync_dist=True,
 		)
 
-		self.mAPs.reset()
+		self.mAP.reset()
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
