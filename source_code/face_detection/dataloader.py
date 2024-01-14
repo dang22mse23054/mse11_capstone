@@ -52,7 +52,7 @@ class FaceDataLoader(pl.LightningDataModule):
 				# 	albu.Blur(5),
 				# 	albu.RGBShift()  
 				# ], p=1),
-				# albu.Normalize(),
+				albu.Normalize(),
 				# ToTensorV2()
 			], bbox_params=albu.BboxParams(format='pascal_voc', min_visibility=0.85, label_fields=None))
 
