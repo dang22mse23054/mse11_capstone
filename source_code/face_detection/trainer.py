@@ -9,36 +9,9 @@ if __name__ == "__main__":
 		lr = 1e-4,
 		momentum = 0.9,
 		weight_decay = 1e-4,        
-	)#.load_from_checkpoint('checkpoint/epoch=0-val_map=0.0000.ckpt')
-	# import torch
-	# from collections import OrderedDict
-	# checkpoint = torch.load('checkpoint/zalo-faster-rcnn/lightning_logs/version_26/checkpoints/epoch=30-val_map=0.3509.ckpt', map_location='cpu')
-	# model.model.backbone.load_state_dict(OrderedDict({k.replace('model.backbone.', ''):v for k, v in checkpoint['state_dict'].items() 
-	#                                                   if 'model.backbone.' in k}))
+	)
 
-	data = FaceDataLoader(batch_size=48, workers=5)
-
-
-	# Save top3 models wrt precision
-	# on_best_precision = ModelCheckpoint(
-	# 	filepath=filepath + "{epoch}-{precision}",
-	# 	monitor="precision",
-	# 	save_top_k=3,
-	# 	mode="max",
-	# )
-	# # Save top3 models wrt recall
-	# on_best_recall = ModelCheckpoint(
-	# 	filepath=filepath + "{epoch}-{recall}",
-	# 	monitor="recall",
-	# 	save_top_k=3,
-	# 	mode="max",
-	# )
-	# # Save the model every 5 epochs
-	# every_five_epochs = ModelCheckpoint(
-	# 	period=5,
-	# 	save_top_k=-1,
-	# 	save_last=True,
-	# )
+	data = FaceDataLoader(batch_size=48, workers=4, img_size = 160)
 
 	trainer = Trainer(
 		accelerator="cpu",
