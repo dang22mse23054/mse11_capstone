@@ -35,8 +35,9 @@ class EmotionDataLoader(LightningDataModule):
 	def setup(self, stage: Optional[str] = None) -> None:
 
 		augmentations = [
-			albu.RandomResizedCrop(*self.img_size, scale=(0.6, 1)),
+			albu.Resize(*self.img_size),
 			albu.HorizontalFlip(),
+			albu.Rotate(),
 			albu.RandomBrightnessContrast(),
 			albu.OneOf([
 				# albu.CLAHE(),
@@ -52,15 +53,13 @@ class EmotionDataLoader(LightningDataModule):
 		])
 
 		valid_transforms = albu.Compose([
-			albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
-			albu.CenterCrop(*self.img_size),
+			albu.Resize(*(np.array(self.img_size)).astype(int)),
 			albu.Normalize(),
 			ToTensorV2()
 		])
 
 		test_transforms = albu.Compose([
-			albu.Resize(*(np.array(self.img_size) * 1.25).astype(int)),
-			albu.CenterCrop(*self.img_size),
+			albu.Resize(*(np.array(self.img_size)).astype(int)),
 			albu.Normalize(),
 			ToTensorV2()
 		])

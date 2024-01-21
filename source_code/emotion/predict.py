@@ -17,17 +17,14 @@ import albumentations as albu
 from albumentations.pytorch import ToTensorV2
 
 MODE = Constants.Mode()
-AGE = Constants.Age()
-AGES = list(Constants.Age().Groups.keys())
-NUM_OF_AGE_GROUPS = len(AGES)
+EMOTION = Constants.Emotion()
 
-
-TEST_IMG_PATH = 'raw/test/' #UTK_FACE_PATH
+TEST_IMG_PATH = 'raw/daka/' #UTK_FACE_PATH
 
 TEST_RATIO = 0.1
 
 def init_model():
-	checkpoint = torch.load("checkpoint/epoch=24-val_acc=0.8411-val_age_acc=0.8013-val_gender_acc=0.8857.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/epoch=7-val_loss=1.8096.ckpt", map_location=torch.device('cpu'))
 	model = EmotionDetectionModel()
 	model.load_state_dict(checkpoint['state_dict'])
 	
@@ -67,17 +64,16 @@ def predict_all(file_list, model):
 
 			print(prediction)
 
-			pred_gender = int(torch.argmax(prediction[0]))
-			pred_age = int(torch.argmax(prediction[1]))
+			pred_emotion = int(torch.argmax(prediction[0]))
 
-			target = (img_name, pred_gender, pred_age)
+			target = (img_name, pred_emotion)
 
 			predictions.append(target)
 
 			# input_image.show()
-			print(f"Gender = {pred_gender} => Age = {pred_age}")
+			print(f"Emotion = {pred_emotion}")
 
-			axes[idx].set_title(f'{AGES[pred_age]} {"Male" if pred_gender == 0 else "Female"}')
+			axes[idx].set_title(f'{EMOTION.Groups[pred_emotion]}')
 			axes[idx].imshow(input_image, cmap='gray')
 			axes[idx].axis('off')
 		
@@ -95,7 +91,7 @@ if __name__ == "__main__":
 	testPart = int(len(file_list) * TEST_RATIO)
 	# file_list = file_list[len(file_list) - testPart:]
 
-	file_list = random.sample(file_list, k=2)
+	file_list = random.sample(file_list, k=6)
 	# print(file_list)
 
 	# Make predictions for all files in the list

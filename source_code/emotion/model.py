@@ -42,12 +42,15 @@ class EmotionDetectionModel(LightningModule):
 		return self.model(x)
 
 	def configure_optimizers(self):
-		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
-		# We will reduce the learning rate by 0.1 after 20 epochs
-		scheduler = lr_scheduler.LambdaLR(optimizer, lambda epoch: 0.1 ** (epoch // 20))
-		# scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True)
-
-		return [optimizer], [scheduler]
+		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, min_lr=0.0001)
+		return {
+			'optimizer': optimizer,
+			'lr_scheduler': {
+				'scheduler': scheduler,
+				'monitor': 'val_loss',  # Điều chỉnh monitor theo mục bạn muốn
+			}
+		}
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
