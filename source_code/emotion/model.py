@@ -79,17 +79,7 @@ class EmotionDetectionModel(LightningModule):
 		# Tính toán loss
 		loss = self.loss_function(predicted_emotion_id, emotion_id)
 
-		# Dùng softmax để chuyển logits thành xác suất (đối với mục tiêu là inference)
-		predicted_probs = nn.functional.softmax(predicted_emotion_id, dim=1)
-
-		# Đưa ra các giả định
-		# Đây chỉ là một ví dụ, bạn có thể thay đổi tùy thuộc vào nhu cầu của bạn
-		predicted_labels = torch.argmax(predicted_probs, dim=1)
-		accuracy = torch.sum(predicted_labels == emotion_id).item() / len(emotion_id)
-
-		# Log kết quả
 		self.log('val_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('val_accuracy', accuracy, prog_bar=True, on_step=True, on_epoch=True)
 
 	def test_step(self, batch, batch_idx):
 		image, emotion_id = batch
@@ -100,13 +90,4 @@ class EmotionDetectionModel(LightningModule):
 		# Tính toán loss
 		loss = self.loss_function(predicted_emotion_id, emotion_id)
 
-		# Dùng softmax để chuyển logits thành xác suất (đối với mục tiêu là inference)
-		predicted_probs = nn.functional.softmax(predicted_emotion_id, dim=1)
-
-		# Đưa ra các giả định
-		predicted_labels = torch.argmax(predicted_probs, dim=1)
-		accuracy = torch.sum(predicted_labels == emotion_id).item() / len(emotion_id)
-
-		# Log kết quả
 		self.log('test_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
-		self.log('test_accuracy', accuracy, prog_bar=True, on_step=True, on_epoch=True)
