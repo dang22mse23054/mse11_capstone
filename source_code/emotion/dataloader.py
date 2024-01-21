@@ -47,19 +47,19 @@ class EmotionDataLoader(LightningDataModule):
 		]
 		
 		train_transforms = albu.Compose([
-			*augmentations,
+			# *augmentations,
 			albu.Normalize(),
 			ToTensorV2()
 		])
 
 		valid_transforms = albu.Compose([
-			albu.Resize(*(np.array(self.img_size)).astype(int)),
+			# albu.Resize(*(np.array(self.img_size)).astype(int)),
 			albu.Normalize(),
 			ToTensorV2()
 		])
 
 		test_transforms = albu.Compose([
-			albu.Resize(*(np.array(self.img_size)).astype(int)),
+			# albu.Resize(*(np.array(self.img_size)).astype(int)),
 			albu.Normalize(),
 			ToTensorV2()
 		])
