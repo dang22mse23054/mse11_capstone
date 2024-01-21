@@ -92,7 +92,6 @@ class EmotionDataset(Dataset):
 	def __getitem__(self, idx):
 		file_path = self.file_list[idx]
 		emotion_name = file_path.split('/')[-2]
-		print(emotion_name)
 		emotion_id = EMOTION_GROUPS.index(emotion_name)
 
 		image = Image.open(file_path).convert('RGB')
