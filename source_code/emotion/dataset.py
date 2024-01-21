@@ -66,8 +66,6 @@ class EmotionDataset(Dataset):
 		
 	def __getitem__(self, idx):
 		file_path = self.file_list[idx]
-		print(file_path)
-		print(file_path.split('/'))
 		emotion_name = file_path.split('/')[-2]
 		emotion_id = EMOTION_GROUPS.index(emotion_name)
 
