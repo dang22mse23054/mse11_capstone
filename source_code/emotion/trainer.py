@@ -13,8 +13,8 @@ if __name__ == "__main__":
 	data = EmotionDataLoader(batch_size=64, workers=4)
 
 	trainer = Trainer(
-		accelerator="cpu",
-		# accelerator="gpu",
+		# accelerator="cpu",
+		accelerator="gpu",
 		# checkpoint_callback=True,
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),

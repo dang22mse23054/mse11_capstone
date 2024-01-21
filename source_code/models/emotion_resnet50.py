@@ -36,11 +36,11 @@ class EmotionResNet50(nn.Module):
 		self.batch_norm2 = nn.BatchNorm1d(output_channels)
 		self.relu = nn.ReLU()
 
-		self.fc2 = nn.Linear(output_channels, output_channels)
-		self.batch_norm3 = nn.BatchNorm1d(output_channels)
+		# self.fc2 = nn.Linear(output_channels, output_channels)
+		# self.batch_norm3 = nn.BatchNorm1d(output_channels)
 
-		self.fc3 = nn.Linear(output_channels, output_channels)
-		self.batch_norm4 = nn.BatchNorm1d(output_channels)
+		# self.fc3 = nn.Linear(output_channels, output_channels)
+		# self.batch_norm4 = nn.BatchNorm1d(output_channels)
 
 		self.output = nn.Linear(output_channels, emotion_classes)
 
@@ -59,15 +59,15 @@ class EmotionResNet50(nn.Module):
 		x = self.fc1(x)
 		x = self.batch_norm2(x)
 		
-		x = self.relu(x)
-		x = self.dropout(x)
-		x = self.fc2(x)
-		x = self.batch_norm3(x)
+		# x = self.relu(x)
+		# x = self.dropout(x)
+		# x = self.fc2(x)
+		# x = self.batch_norm3(x)
 		
-		x = self.relu(x)
-		x = self.dropout(x)
-		x = self.fc3(x)
-		x = self.batch_norm4(x)
+		# x = self.relu(x)
+		# x = self.dropout(x)
+		# x = self.fc3(x)
+		# x = self.batch_norm4(x)
 		
 		x = self.relu(x)
 		x = self.output(x)
