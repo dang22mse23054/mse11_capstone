@@ -7,12 +7,14 @@ import cv2
 import numpy as np
 import pandas as pd
 from PIL import Image
-from matplotlib import pyplot as plt
 from common.constants import Constants
+import matplotlib.pyplot as plt
+import albumentations as albu
+
 
 EMOTION_PATH = '/kaggle/input/fer2013'
 # FOR DEBUG
-# EMOTION_PATH = 'raw'
+EMOTION_PATH = 'raw'
 
 MODE = Constants.Mode()
 
@@ -26,6 +28,27 @@ EMOTION_GROUPS = EMOTION.Groups
 
 VALIDATION_RATIO = 0.2
 
+def check_images(file_list):
+	cols = 4
+	rows = int(len(file_list) / cols) + 1
+	fig, axes = plt.subplots(rows, cols, figsize=(10, 7))
+	# Flatten axes để dễ quản lý
+	axes = axes.flatten()
+
+	with torch.no_grad():
+		for idx, file_path in enumerate(file_list):
+
+			# Read the list of image files
+			input_image = Image.open(file_path).convert('RGB')
+			emotion_name = file_path.split('/')[-2]
+			emotion_id = EMOTION_GROUPS.index(emotion_name)
+			axes[idx].set_title(f'{emotion_name} ({emotion_id})')
+			axes[idx].imshow(input_image, cmap='gray')
+			axes[idx].axis('off')
+		
+	plt.tight_layout()
+	plt.show()
+
 class EmotionDataset(Dataset):
 	def __init__(self, 
 			  mode : str = MODE.TRAIN,
@@ -38,6 +61,8 @@ class EmotionDataset(Dataset):
 		# splitting dataset
 		self.file_list = self.init_dataset()
 		random.Random(4).shuffle(self.file_list)
+
+		check_images(self.file_list[:8])
 
 	def init_dataset(self):
 		train_set = []
