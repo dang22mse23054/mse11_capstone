@@ -10,9 +10,9 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from common.constants import Constants
 
-EMOTION_PATH = 'kaggle/input/fer2013'
+EMOTION_PATH = '/kaggle/input/fer2013'
 # FOR DEBUG
-# EMOTION_PATH = 'raw/'
+# EMOTION_PATH = 'raw'
 
 MODE = Constants.Mode()
 

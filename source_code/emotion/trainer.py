@@ -13,13 +13,13 @@ if __name__ == "__main__":
 	data = EmotionDataLoader(batch_size=64, workers=4)
 
 	trainer = Trainer(
-		# accelerator="cpu",
-		accelerator="gpu",
+		accelerator="cpu",
+		# accelerator="gpu",
 		# checkpoint_callback=True,
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),
 		    # ModelCheckpoint(dirpath='', filename='{epoch}-{val_acc:.4f}', save_top_k=5, monitor='val_acc', mode='max'),
-            ModelCheckpoint(filename='{epoch}-{val_acc:.4f}-{val_age_acc:.4f}-{val_gender_acc:.4f}', save_top_k=2, monitor='val_acc', mode='max'),
+            ModelCheckpoint(filename='{epoch}-{val_acc:.4f}', save_top_k=2, monitor='val_acc', mode='max'),
 		], 
 		# check_val_every_n_epoch=1,
 		fast_dev_run=False,
