@@ -8,7 +8,7 @@ NUM_OF_EMOTIONS = len(EMOTION.Groups)
 class EmotionResNet50(nn.Module):
 	def __init__(self,
 				emotion_classes: int = NUM_OF_EMOTIONS,
-				output_channels: int = 32,
+				output_channels: int = 24,
 	):
 		super().__init__()
 		
@@ -28,19 +28,19 @@ class EmotionResNet50(nn.Module):
 		# ở đây là thêm 1 layer mới, 
 		# nn.BatchNorm1d(2048) để chuẩn hóa lại dữ liệu đầu ra của layer trước đó 
 		self.batch_norm1 = nn.BatchNorm1d(2048)
-		# nn.Linear(2048, 32) để giảm số chiều của dữ liệu đầu ra của layer trước đó từ 2048 xuống 32
-		# vì ta chỉ cần 32 features để phân loại emotion
+		# nn.Linear(2048, 32) để giảm số chiều của dữ liệu đầu ra của layer trước đó từ 2048 xuống 24
+		# vì ta chỉ cần 24 features để phân loại emotion
 		self.fc1 = nn.Linear(2048, output_channels)
 
 		# tiếp tục BatchNorm1d 
 		self.batch_norm2 = nn.BatchNorm1d(output_channels)
 		self.relu = nn.ReLU()
 
-		# self.fc2 = nn.Linear(output_channels, output_channels)
-		# self.batch_norm3 = nn.BatchNorm1d(output_channels)
+		self.fc2 = nn.Linear(output_channels, output_channels)
+		self.batch_norm3 = nn.BatchNorm1d(output_channels)
 
-		# self.fc3 = nn.Linear(output_channels, output_channels)
-		# self.batch_norm4 = nn.BatchNorm1d(output_channels)
+		self.fc3 = nn.Linear(output_channels, output_channels)
+		self.batch_norm4 = nn.BatchNorm1d(output_channels)
 
 		self.output = nn.Linear(output_channels, emotion_classes)
 
@@ -59,15 +59,15 @@ class EmotionResNet50(nn.Module):
 		x = self.fc1(x)
 		x = self.batch_norm2(x)
 		
-		# x = self.relu(x)
-		# x = self.dropout(x)
-		# x = self.fc2(x)
-		# x = self.batch_norm3(x)
+		x = self.relu(x)
+		x = self.dropout(x)
+		x = self.fc2(x)
+		x = self.batch_norm3(x)
 		
-		# x = self.relu(x)
-		# x = self.dropout(x)
-		# x = self.fc3(x)
-		# x = self.batch_norm4(x)
+		x = self.relu(x)
+		x = self.dropout(x)
+		x = self.fc3(x)
+		x = self.batch_norm4(x)
 		
 		x = self.relu(x)
 		x = self.output(x)
