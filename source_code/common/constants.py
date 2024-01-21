@@ -43,3 +43,23 @@ class Constants:
 			MIDDLE_AGED: {'from': 45, 'to': 60},
 			ELDERLY: {'from': 61, 'to': 120},
 		}
+
+	class Emotion:
+		__slots__ = ()
+		ANGRY = 'angry'
+		DISGUST = 'disgust'
+		FEAR = 'fear'
+		SAD = 'sad'
+		NEUTRAL = 'neutral'
+		HAPPY = 'happy'
+		SURPRISE = 'surprise'
+
+		Groups = [
+			ANGRY,
+			DISGUST,
+			FEAR,
+			SAD,
+			NEUTRAL,
+			HAPPY,
+			SURPRISE,
+		]
