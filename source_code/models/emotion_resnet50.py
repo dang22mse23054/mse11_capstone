@@ -22,25 +22,16 @@ class EmotionResNet50(nn.Module):
 		self.base_model.fc = nn.Identity()
 
 		# bắt đầu từ đây, nối tiếp nhiều layer mới
-		self.dropout = nn.Dropout(0.5)
 		self.flatten = nn.Flatten()
 
-		# ở đây là thêm 1 layer mới, 
-		# nn.BatchNorm1d(2048) để chuẩn hóa lại dữ liệu đầu ra của layer trước đó 
-		self.batch_norm1 = nn.BatchNorm1d(2048)
 		# nn.Linear(2048, 32) để giảm số chiều của dữ liệu đầu ra của layer trước đó từ 2048 xuống 24
 		# vì ta chỉ cần 24 features để phân loại emotion
 		self.fc1 = nn.Linear(2048, output_channels)
-
-		# tiếp tục BatchNorm1d 
-		self.batch_norm2 = nn.BatchNorm1d(output_channels)
-		self.relu = nn.ReLU()
+		self.relu1 = nn.ReLU()
+		self.dropout = nn.Dropout(0.6)
 
 		self.fc2 = nn.Linear(output_channels, output_channels)
-		self.batch_norm3 = nn.BatchNorm1d(output_channels)
-
-		self.fc3 = nn.Linear(output_channels, output_channels)
-		self.batch_norm4 = nn.BatchNorm1d(output_channels)
+		self.relu2 = nn.ReLU()
 
 		self.output = nn.Linear(output_channels, emotion_classes)
 
@@ -50,26 +41,15 @@ class EmotionResNet50(nn.Module):
 	def forward(self, x):
 		# Feature extraction using ResNet50
 		x = self.base_model(x)
-		x = self.dropout(x)
-
-		# Flatten the features for using in Linear layers
 		x = self.flatten(x)
-		x = self.batch_norm1(x)
-
+		
 		x = self.fc1(x)
-		x = self.batch_norm2(x)
-		
-		x = self.relu(x)
+		x = self.relu1(x)
 		x = self.dropout(x)
+
 		x = self.fc2(x)
-		x = self.batch_norm3(x)
-		
-		x = self.relu(x)
-		x = self.dropout(x)
-		x = self.fc3(x)
-		x = self.batch_norm4(x)
-		
-		x = self.relu(x)
+		x = self.relu2(x)
+
 		x = self.output(x)
 
 		# khi dùng CrossEntropyLoss() thì ko cần dùng softmax ở trong model nữa

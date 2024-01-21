@@ -42,7 +42,7 @@ class EmotionDetectionModel(LightningModule):
 		return self.model(x)
 
 	def configure_optimizers(self):
-		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+		optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
 		# We will reduce the learning rate by 0.1 after 20 epochs
 		scheduler = lr_scheduler.LambdaLR(optimizer, lambda epoch: 0.1 ** (epoch // 20))
 		# scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=6, verbose=True)

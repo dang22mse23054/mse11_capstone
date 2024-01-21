@@ -23,7 +23,7 @@ if __name__ == "__main__":
 		# check_val_every_n_epoch=1,
 		fast_dev_run=False,
 		default_root_dir='checkpoint',
-		max_epochs=25,       
+		max_epochs=20,       
 	)
 
 	trainer.fit(model, data)
