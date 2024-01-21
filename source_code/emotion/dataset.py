@@ -39,27 +39,6 @@ class EmotionDataset(Dataset):
 		self.file_list = self.init_dataset()
 		random.Random(4).shuffle(self.file_list)
 
-
-	def __getitem__(self, idx):
-		file_path = self.file_list[idx]
-		emotion_name = file_path.split('/')[-2]
-		emotion_id = EMOTION_GROUPS.index(emotion_name)
-
-		image = Image.open(file_path).convert('RGB')
-
-		# normalization.
-		image = np.array(image, dtype=np.float32) / 255.0
-		
-		# transformation
-		if self.transforms: 
-			# image = self.transforms(image)
-			image = self.transforms(image=image)['image']
-		
-		# đã dùng TensorV2 thì ko cần dòng này
-		# image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
-
-		return image, emotion_id
-	
 	def init_dataset(self):
 		train_set = []
 		val_set = []
@@ -82,9 +61,30 @@ class EmotionDataset(Dataset):
 					train_part = total - validation_part
 					train_set.extend([os.path.join(dirpath, filename) for filename in filenames[:train_part]])
 					val_set.extend([os.path.join(dirpath, filename) for filename in filenames[train_part:]])
-					val_set.extend(filenames[train_part:])
 
 			return train_set if self.mode == MODE.TRAIN else val_set
 		
+	def __getitem__(self, idx):
+		file_path = self.file_list[idx]
+		print(file_path)
+		print(file_path.split('/'))
+		emotion_name = file_path.split('/')[-2]
+		emotion_id = EMOTION_GROUPS.index(emotion_name)
+
+		image = Image.open(file_path).convert('RGB')
+
+		# normalization.
+		image = np.array(image, dtype=np.float32) / 255.0
+		
+		# transformation
+		if self.transforms: 
+			# image = self.transforms(image)
+			image = self.transforms(image=image)['image']
+		
+		# đã dùng TensorV2 thì ko cần dòng này
+		# image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
+
+		return image, emotion_id
+	
 	def __len__(self):
 		return len(self.file_list)

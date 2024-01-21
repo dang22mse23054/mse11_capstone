@@ -1,4 +1,4 @@
-from dataloader import EmotionDataset
+from dataloader import EmotionDataLoader
 from model import EmotionDetectionModel
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
@@ -10,11 +10,11 @@ if __name__ == "__main__":
 		weight_decay = 1e-4,        
 	)
 
-	data = EmotionDetectionModel(batch_size=64, workers=4)
+	data = EmotionDataLoader(batch_size=64, workers=4)
 
 	trainer = Trainer(
-		accelerator="cpu",
-		# accelerator="mps",
+		# accelerator="cpu",
+		accelerator="gpu",
 		# checkpoint_callback=True,
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),
