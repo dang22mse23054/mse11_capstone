@@ -49,6 +49,7 @@ def check_images(file_list):
 	plt.tight_layout()
 	plt.show()
 
+# Dataset FER2013
 class EmotionDataset(Dataset):
 	def __init__(self, 
 			  mode : str = MODE.TRAIN,

@@ -63,3 +63,13 @@ class Constants:
 			HAPPY,
 			SURPRISE,
 		]
+
+		Augmentor = {
+			ANGRY: 3000,
+			DISGUST: 6500,
+			FEAR: 3000,
+			SAD: 2000,
+			NEUTRAL: 2000,
+			HAPPY: 0,
+			SURPRISE: 3500,
+		}
