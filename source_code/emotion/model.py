@@ -17,6 +17,35 @@ from common.constants import Constants
 # Ref: 
 # https://www.kaggle.com/code/tunguyentan/face-emotion-recognition-using-resnet50/notebook
 
+def accuracy(pred: torch.Tensor, gt: torch.Tensor):
+	"""
+	accuracy metric
+
+	expects pred shape bs x n_c, gt shape bs x 1
+
+	Ví dụ:
+		input là pred: có kích thước bs x n_c
+		pred = tensor([[0.1, 0.9],
+					   [0.8, 0.2],
+					   [0.3, 0.7]])
+		thì pred.max(1) sẽ là .object có format 
+		(
+			values=tensor([0.7000, 0.8000, 0.5000]),
+			indices=tensor([1, 0, 0])
+		)
+		
+		=> pred.max(1)[1] sẽ là tensor([1, 0, 0])
+		
+		mà gt = tensor([1, 0, 1])
+		(tức là kết quả thực tế lấy từ dataset, kích thước là input là bs x 1) 
+		
+		sau khi so sánh ==  sẽ ra True/False rồi tiếp theo dùng .float() để chuyển về kiểu float dạng 1. OR 0.
+		rồi tính mean() để ra kết quả accuracy
+		=> accuracy = 2/3 = 0.6667
+	"""
+
+	return (pred.max(1)[1] == gt).float().mean()
+
 class EmotionDetectionModel(LightningModule):
 	def __init__(self,
 				lr: float = 1e-3,
@@ -69,6 +98,9 @@ class EmotionDetectionModel(LightningModule):
 
 		return loss
 
+	def on_validation_epoch_start(self):
+		self.acc_list = []
+
 	def validation_step(self, batch, batch_idx):
 		# if random.random() < 0.1:
 		if len(batch) == 0 : return 
@@ -77,20 +109,48 @@ class EmotionDetectionModel(LightningModule):
 		image, emotion_id = batch
 
 		# Label dự đoán
-		predicted_emotion_id = self(image)
+		predicted_emotion_logits = self(image)
+
+		# # Lấy nhãn dự đoán bằng cách chọn class có xác suất cao nhất
+		# _, preds = torch.max(predicted_emotion_logits, 1)
 		
-		# Tính toán loss
-		loss = self.loss_function(predicted_emotion_id, emotion_id)
+		# Tính accuracy
+		val_acc = accuracy(predicted_emotion_logits, emotion_id).item()
+		self.acc_list.append(val_acc)
+		
+		# # Tính toán loss
+		loss = self.loss_function(predicted_emotion_logits, emotion_id)
 
 		self.log('val_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
+
+	def on_validation_epoch_end(self) -> None:
+		final_val_acc = np.mean(self.acc_list)
+
+		self.log('val_acc', final_val_acc, prog_bar=True, on_epoch=True)
+
+		self.acc_list.clear()
+
+	def on_test_epoch_start(self):
+		self.acc_list = []
 
 	def test_step(self, batch, batch_idx):
 		image, emotion_id = batch
 
 		# implement your own
-		predicted_emotion_id = self(image)
+		predicted_emotion_logits = self(image)
+
+		# Tính accuracy
+		val_acc = accuracy(predicted_emotion_logits, emotion_id).item()
+		self.acc_list.append(val_acc)
 
 		# Tính toán loss
-		loss = self.loss_function(predicted_emotion_id, emotion_id)
+		loss = self.loss_function(predicted_emotion_logits, emotion_id)
 
 		self.log('test_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
+
+	def on_test_epoch_end(self) -> None:
+		final_val_acc = np.mean(self.acc_list)
+
+		self.log('val_acc', final_val_acc, prog_bar=True, on_epoch=True)
+
+		self.acc_list.clear()
