@@ -98,6 +98,7 @@ class EmotionResNet50v2(nn.Module):
 		self.dropout = nn.Dropout(0.6)
 		self.fc2 = nn.Linear(output_channels, output_channels)
 		self.relu = nn.ReLU()
+		self.output = nn.Linear(output_channels, emotion_classes)
 
 		# khi dùng CrossEntropyLoss() thì ko cần dùng softmax ở trong model nữa
 		# self.softmax = nn.Softmax(dim=1)
