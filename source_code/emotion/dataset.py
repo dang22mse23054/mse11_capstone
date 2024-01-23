@@ -28,7 +28,7 @@ EMOTION_GROUPS = EMOTION.Groups
 
 VALIDATION_RATIO = 0.2
 
-def check_images(file_list):
+def check_images(file_list, title = 'Graph'):
 	cols = 4
 	rows = int(len(file_list) / cols) + 1
 	fig, axes = plt.subplots(rows, cols, figsize=(10, 7))
@@ -47,6 +47,7 @@ def check_images(file_list):
 			axes[idx].axis('off')
 		
 	plt.tight_layout()
+	plt.title(title, fontdict={'size': 16, 'color': 'red'}) 
 	plt.show()
 
 # Dataset FER2013
@@ -63,7 +64,7 @@ class EmotionDataset(Dataset):
 		self.file_list = self.init_dataset()
 		random.Random(4).shuffle(self.file_list)
 
-		check_images(self.file_list[:8])
+		check_images(self.file_list[:8], f'{self.mode} set ({len(self.file_list)} items)')
 
 	def init_dataset(self):
 		train_set = []
