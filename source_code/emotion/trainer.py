@@ -5,7 +5,15 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Ea
 
 if __name__ == "__main__":
 	max_epochs = 100
-	model = EmotionDetectionModel(
+	
+	modelv1 = EmotionDetectionModel(
+		lr = 1e-3,
+		momentum = 0.9,
+		weight_decay = 1e-4,
+		max_epochs = max_epochs    
+	)
+	
+	modelv2 = EmotionDetectionModel(
 		lr = 1e-3,
 		momentum = 0.9,
 		weight_decay = 1e-4,
@@ -19,9 +27,14 @@ if __name__ == "__main__":
 		accelerator="gpu",
 		# checkpoint_callback=True,
 		callbacks = [
-            ModelCheckpoint(filename='{epoch}-{val_loss:.4f}', save_top_k=2, monitor='val_loss', mode='min'),
-			EarlyStopping(monitor='val_loss', patience=11, min_delta=0.00005, verbose=True),
 		    LearningRateMonitor(logging_interval='step'),
+            ModelCheckpoint(filename='{epoch}-{val_loss:.4f}', save_top_k=2, monitor='val_loss', mode='min'),
+			
+			# version 1
+			# EarlyStopping(monitor='val_loss', patience=11, min_delta=0.00005, verbose=True),
+			
+			# version 2
+			EarlyStopping(monitor='val_loss', patience=5, verbose=True),
 		], 
 		# check_val_every_n_epoch=1,
 		fast_dev_run=False,
@@ -29,4 +42,5 @@ if __name__ == "__main__":
 		max_epochs=max_epochs,       
 	)
 
-	trainer.fit(model, data)
+	# trainer.fit(modelv1, data)
+	trainer.fit(modelv2, data)

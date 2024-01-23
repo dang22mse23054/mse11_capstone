@@ -10,7 +10,7 @@ import torch.utils.data.distributed
 import random
 from pytorch_lightning.core import LightningModule
 import torch.optim.lr_scheduler as lr_scheduler
-from models.emotion_resnet50 import EmotionResNet50
+from models.emotion_resnet50 import EmotionResNet50v1, EmotionResNet50v2
 import matplotlib.pyplot as plt
 from common.constants import Constants
 
@@ -66,15 +66,30 @@ class EmotionDetectionModel(LightningModule):
 
 		self.save_hyperparameters()
 		
-		self.model = EmotionResNet50()
+		# self.model = EmotionResNet50v1()
+		self.model = EmotionResNet50v2()
+		
 		self.loss_function = nn.CrossEntropyLoss()
 	
 	def forward(self, x):
 		return self.model(x)
 
+	# version 1
+	# def configure_optimizers(self):
+	# 	optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay / self.hparams.max_epochs)
+	# 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=1e-7)
+	# 	return {
+	# 		'optimizer': optimizer,
+	# 		'lr_scheduler': {
+	# 			'scheduler': scheduler,
+	# 			'monitor': 'val_loss',  # Điều chỉnh monitor theo mục bạn muốn
+	# 		}
+	# 	}
+	
+	# version 2
 	def configure_optimizers(self):
-		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay / self.hparams.max_epochs)
-		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=1e-7)
+		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, min_lr=1e-4)
 		return {
 			'optimizer': optimizer,
 			'lr_scheduler': {
