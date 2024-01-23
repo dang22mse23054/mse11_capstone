@@ -93,7 +93,10 @@ class EmotionDataset(Dataset):
 	def __getitem__(self, idx):
 		file_path = self.file_list[idx]
 		emotion_name = file_path.split('/')[-2]
+		
 		emotion_id = EMOTION_GROUPS.index(emotion_name)
+		# phải chuyển thành tensor để có thể tính loss function
+		emotion_id_tensor = torch.tensor(emotion_id)
 
 		image = Image.open(file_path).convert('RGB')
 
@@ -108,7 +111,7 @@ class EmotionDataset(Dataset):
 		# đã dùng TensorV2 thì ko cần dòng này
 		# image = torch.as_tensor(image, dtype=torch.float32).permute(2, 0, 1)
 
-		return image, emotion_id
+		return image, emotion_id_tensor
 	
 	def __len__(self):
 		return len(self.file_list)
