@@ -51,6 +51,7 @@ class EmotionDetectionModel(LightningModule):
 				lr: float = 1e-3,
 				momentum: float = 0.9,
 				weight_decay: float = 1e-4,
+				max_epochs: int = 20,
 				**kwargs
 	):
 		super().__init__()
@@ -61,6 +62,7 @@ class EmotionDetectionModel(LightningModule):
 		self.lr = lr 
 		self.momentum = momentum
 		self.weight_decay = weight_decay 
+		self.max_epochs = max_epochs 
 
 		self.save_hyperparameters()
 		
@@ -71,8 +73,8 @@ class EmotionDetectionModel(LightningModule):
 		return self.model(x)
 
 	def configure_optimizers(self):
-		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
-		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, min_lr=0.0001)
+		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay / self.hparams.max_epochs)
+		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=1e-7)
 		return {
 			'optimizer': optimizer,
 			'lr_scheduler': {
