@@ -34,13 +34,17 @@ if __name__ == "__main__":
 		# checkpoint_callback=True,
 		callbacks = [
 		    LearningRateMonitor(logging_interval='step'),
-            ModelCheckpoint(filename='{epoch}-{val_loss:.4f}', save_top_k=2, monitor='val_loss', mode='min'),
+            # ModelCheckpoint(filename='{epoch}-{val_loss:.4f}', save_top_k=2, monitor='val_loss', mode='min'),
 			
 			# version 1
 			# EarlyStopping(monitor='val_loss', patience=11, min_delta=0.00005, verbose=True),
 			
 			# version 2
 			EarlyStopping(monitor='val_loss', patience=5, verbose=True),
+
+			# version 3
+            ModelCheckpoint(filename='{epoch}-{val_acc:.4f}', save_top_k=2, monitor='val_acc', mode='max'),
+			EarlyStopping(monitor='val_acc', patience=7, min_delta=0.0001, verbose=True),
 		], 
 		# check_val_every_n_epoch=1,
 		fast_dev_run=False,
