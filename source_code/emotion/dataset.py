@@ -64,7 +64,7 @@ class EmotionDataset(Dataset):
 		self.file_list = self.init_dataset()
 		random.Random(4).shuffle(self.file_list)
 
-		check_images(self.file_list[:8], f'{self.mode} set ({len(self.file_list)} items)')
+		# check_images(self.file_list[:8], f'{self.mode} set ({len(self.file_list)} items)')
 
 	def init_dataset(self):
 		train_set = []

@@ -117,3 +117,40 @@ class EmotionResNet50v2(nn.Module):
 		# khi dùng CrossEntropyLoss() thì ko cần dùng softmax ở trong model nữa
 		# x = self.softmax(x)
 		return x
+
+class EmotionResNet50v3(nn.Module):
+	
+	def __init__(self,
+				emotion_classes: int = NUM_OF_EMOTIONS,
+				output_channels: int = 32,
+	):
+		super().__init__()
+
+		# Tải ResNet-50 với trọng số được huấn luyện
+		self.base_model = models.resnet50(pretrained=True)
+		last_input_features = self.base_model.fc.in_features
+		# Loại bỏ 2 lớp agvpool và fully connected (fc)
+		self.base_model = nn.Sequential(*list(self.base_model.children())[:-2])
+		# Thêm lớp Global Average Pooling (GAP)
+		self.global_avg_pooling = nn.AdaptiveAvgPool2d((1, 1))
+
+		# bắt đầu từ đây, nối tiếp nhiều layer mới
+		self.dropout = nn.Dropout(0.2)
+		self.flatten = nn.Flatten()
+		self.fc = nn.Linear(last_input_features, output_channels)
+		self.output = nn.Linear(output_channels, emotion_classes)
+		# self.softmax = nn.Softmax(dim=1)
+
+	def forward(self, x):
+		x = self.base_model(x)
+		x = self.global_avg_pooling(x)
+		
+		x = self.dropout(x)
+
+		# x = x.view(x.size(0), -1)  # Flatten the tensor
+		x = self.flatten(x)
+
+		x = self.fc(x)
+		x = self.output(x)
+
+		return x

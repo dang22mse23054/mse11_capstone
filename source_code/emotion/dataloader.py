@@ -21,7 +21,7 @@ class EmotionDataLoader(LightningDataModule):
 	def __init__(self,         
 		batch_size: int = 64,
 		workers: int = 4,
-		img_size: int = 48,
+		img_size: int = 224,
 	):
 		super().__init__()
 		self.batch_size = batch_size
@@ -34,32 +34,22 @@ class EmotionDataLoader(LightningDataModule):
 	
 	def setup(self, stage: Optional[str] = None) -> None:
 
-		augmentations = [
-			albu.Resize(*self.img_size),
-			albu.HorizontalFlip(),
-			albu.Rotate(),
-			albu.RandomBrightnessContrast(),
-			albu.OneOf([
-				# albu.CLAHE(),
-				albu.Blur(5),
-				albu.RGBShift()  
-			], p=1),
-		]
-		
 		train_transforms = albu.Compose([
-			# *augmentations,
+			albu.Resize(*self.img_size),
 			albu.Normalize(),
 			ToTensorV2()
 		])
 
 		valid_transforms = albu.Compose([
 			# albu.Resize(*(np.array(self.img_size)).astype(int)),
+			albu.Resize(*self.img_size),
 			albu.Normalize(),
 			ToTensorV2()
 		])
 
 		test_transforms = albu.Compose([
 			# albu.Resize(*(np.array(self.img_size)).astype(int)),
+			albu.Resize(*self.img_size),
 			albu.Normalize(),
 			ToTensorV2()
 		])

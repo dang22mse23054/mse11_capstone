@@ -6,17 +6,23 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Ea
 if __name__ == "__main__":
 	max_epochs = 100
 	
-	modelv1 = EmotionDetectionModel(
-		lr = 1e-3,
-		momentum = 0.9,
-		weight_decay = 1e-4,
-		max_epochs = max_epochs    
-	)
+	# modelv1 = EmotionDetectionModel(
+	# 	lr = 1e-3,
+	# 	momentum = 0.9,
+	# 	weight_decay = 1e-4,
+	# 	max_epochs = max_epochs    
+	# )
 	
-	modelv2 = EmotionDetectionModel(
-		lr = 1e-3,
-		momentum = 0.9,
-		weight_decay = 1e-4,
+	# modelv2 = EmotionDetectionModel(
+	# 	lr = 1e-3,
+	# 	momentum = 0.9,
+	# 	weight_decay = 1e-4,
+	# 	max_epochs = max_epochs    
+	# )
+
+	modelv3 = EmotionDetectionModel(
+		lr = 5e-4,
+		weight_decay = 1e-6,
 		max_epochs = max_epochs    
 	)
 
@@ -43,4 +49,5 @@ if __name__ == "__main__":
 	)
 
 	# trainer.fit(modelv1, data)
-	trainer.fit(modelv2, data)
+	# trainer.fit(modelv2, data)
+	trainer.fit(modelv3, data)
