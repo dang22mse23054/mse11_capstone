@@ -108,7 +108,7 @@ class EmotionDetectionModel(LightningModule):
 			'optimizer': optimizer,
 			'lr_scheduler': {
 				'scheduler': scheduler,
-				'monitor': 'val_loss',  # Điều chỉnh monitor theo mục bạn muốn
+				'monitor': 'val_acc',  # Điều chỉnh monitor theo mục bạn muốn
 			}
 		}
 	

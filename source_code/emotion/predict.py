@@ -24,7 +24,7 @@ TEST_IMG_PATH = 'raw/daka/' #UTK_FACE_PATH
 TEST_RATIO = 0.1
 
 def init_model():
-	checkpoint = torch.load("checkpoint/epoch=7-val_loss=1.8096.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/epoch=5-val_acc=0.4701.ckpt", map_location=torch.device('cpu'))
 	model = EmotionDetectionModel()
 	model.load_state_dict(checkpoint['state_dict'])
 	
@@ -37,8 +37,7 @@ def predict_all(file_list, model):
 
 	img_size = (48, 48)
 	transforms = albu.Compose([
-		albu.Resize(*(np.array(img_size) * 1.25).astype(int)),
-		albu.CenterCrop(*img_size),
+		albu.Resize(*img_size),
 		albu.Normalize(),
 		ToTensorV2()
 	])
