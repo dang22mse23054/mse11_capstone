@@ -1,0 +1,9 @@
+type Query {
+	node(id: ID!): Node
+}
+
+# === OR ===
+# type Query {
+# 	# Must add this line to create non-empty query
+# 	_: Boolean
+# }

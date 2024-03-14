@@ -1,0 +1,13 @@
+.textInput { 
+	font-size: 12;
+	background-color: none;
+}
+/* export const themes = {
+	textInput: {
+		...DefaultTheme,
+		colors: {
+			...DefaultTheme.colors,
+			primary: theme.vermillion,
+		},
+	},
+}; */

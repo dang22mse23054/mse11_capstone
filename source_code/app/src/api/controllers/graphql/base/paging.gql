@@ -1,0 +1,48 @@
+interface Node {
+	id: ID!
+}
+
+# This is the Connection pattern apply to pagination
+# {
+#   <tableName> (limit: 100, nextCursor: xyz123) {
+#     totalCount
+#     edges {
+#       node {
+#         __typename
+#         <column_1>
+#         <column_2>
+# 		...
+#       }
+#       cursor
+#     }
+#     pageInfo {
+#       startCursor
+#       hasNextPage
+#     }
+#   }
+# }
+
+type Edge {
+	node: Node
+	cursor: String
+}
+
+type PageInfo {
+	total: Int
+	limit: Int
+	remaining: Int
+	remainingBefore: Int
+	remainingAfter: Int
+	hasNext: Boolean
+	next: String
+	hasPrevious: Boolean
+	previous: String
+	
+	# using for reload page after CRUD
+	lastCursor: String
+}
+
+type PagingObj {
+	edges: [Edge]
+	pageInfo: PageInfo
+}

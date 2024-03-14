@@ -1,0 +1,49 @@
+{
+	"compilerOptions": {
+		"jsx": "preserve",
+		"strict": true,
+		"allowJs": true,
+		"sourceMap": true,
+		"target": "esnext",
+		"module": "esnext",
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+		"noImplicitAny": false,
+		"lib": [
+			"es2017",
+			"es6",
+			"dom"
+		],
+		"allowSyntheticDefaultImports": true,
+		"typeRoots": [
+			"node_modules/@types"
+		],
+		"moduleResolution": "node",
+		"baseUrl": ".",
+		"paths": {
+			"rootDir/*": ["./*"],
+			"constDir": ["constants"],
+			"constDir/*": ["constants/*"],
+			"compDir/*": ["components/*"],
+			"interfaceDir": ["interfaces"],
+			"interfaceDir/*": ["interfaces/*"],
+			"inputModelDir": ["inputModel"],
+			"inputModelDir/*": ["inputModel/*"],
+			"servDir": ["services"],
+			"servDir/*": ["services/*"],
+			"stylesDir/*": ["public/styles/*"]
+		},
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"incremental": true
+	},
+	"include": [
+		"./**/*"
+	],
+	"exclude": [
+		"babel.config.js",
+		"node_modules"
+	]
+}

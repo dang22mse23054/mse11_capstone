@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"module": "commonjs",
+		"paths": {
+			"~/*": ["./*"],
+			"rootDir/*": ["src/*"],
+			"routeDir/*": ["src/api/routes/*"],
+			"compDir/*": ["src/client-module/components/*"],
+			"interfaceDir/*": ["src/client-module/components/*"],
+			"inputModelDir/*": ["src/client-module/components/*"],
+			"apiDir/*": ["src/api/*"],
+			"authDir/*": ["src/auth-module/*"],
+			"commonDir/*": ["src/common/*"],
+			"modelDir": ["src/api/db/models"],
+			"modelDir/*": ["src/api/db/models/*"],
+			"dbDir": ["src/database"],
+			"dbDir/*": ["src/database/*"],
+			"graphqlDir/*": ["src/api/controllers/graphql/*"]
+		},
+	}
+}
