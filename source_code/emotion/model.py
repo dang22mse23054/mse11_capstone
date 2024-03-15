@@ -123,19 +123,18 @@ class EmotionDetectionModel(LightningModule):
 		# Chia tham số thành 2 nhóm:
 		# 1. Tham số của lớp fully connected mới
 		# 2. Tham số của Inception-v3 pretrained
-		fc_params = self.fc.parameters()
-		other_params = [p for p in params if p not in fc_params]
+		# fc_params = self.base_model.fc.parameters()
+		# other_params = [p for p in params if p not in fc_params]
 		
 		# Sử dụng tỉ lệ học tập khác nhau cho 2 nhóm tham số
 		lr1 = 1e-3 # Tỉ lệ học tập cho lớp fully connected mới
 		lr2 = 1e-4 # Tỉ lệ học tập cho Inception-v3 pretrained
 		
 		# Tạo 2 optimizer, một cho mỗi nhóm tham số
-		optimizer1 = torch.optim.Adam(fc_params, lr=lr1)
-		optimizer2 = torch.optim.Adam(other_params, lr=lr2)
+		optimizer2 = torch.optim.Adam(params, lr=lr1)
 		
 		# Trả về list các optimizer
-		return [optimizer1, optimizer2]
+		return [optimizer2]
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
