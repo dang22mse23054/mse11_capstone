@@ -11,6 +11,7 @@ import random
 from pytorch_lightning.core import LightningModule
 import torch.optim.lr_scheduler as lr_scheduler
 from models.emotion_resnet50 import EmotionResNet50v1, EmotionResNet50v2, EmotionResNet50v3
+from models.emotion_inception_v3_1 import EmotionInceptionV3_1
 import matplotlib.pyplot as plt
 from common.constants import Constants
 
@@ -68,7 +69,9 @@ class EmotionDetectionModel(LightningModule):
 		
 		# self.model = EmotionResNet50v1()
 		# self.model = EmotionResNet50v2()
-		self.model = EmotionResNet50v3()
+		# self.model = EmotionResNet50v3()
+
+		self.model = EmotionInceptionV3_1()
 		
 		self.loss_function = nn.CrossEntropyLoss()
 	
@@ -100,17 +103,39 @@ class EmotionDetectionModel(LightningModule):
 	# 	}
 	
 	# version 3
+	# def configure_optimizers(self):
+	# 	# return optim.Adam(self.parameters(), lr=self.hparams.lr)
+	# 	optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+	# 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, min_lr=0.00001)
+	# 	return {
+	# 		'optimizer': optimizer,
+	# 		'lr_scheduler': {
+	# 			'scheduler': scheduler,
+	# 			'monitor': 'val_acc',  # Điều chỉnh monitor theo mục bạn muốn
+	# 		}
+	# 	}
+	
+	# version 4
 	def configure_optimizers(self):
-		# return optim.Adam(self.parameters(), lr=self.hparams.lr)
-		optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
-		scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, min_lr=0.00001)
-		return {
-			'optimizer': optimizer,
-			'lr_scheduler': {
-				'scheduler': scheduler,
-				'monitor': 'val_acc',  # Điều chỉnh monitor theo mục bạn muốn
-			}
-		}
+		# Lấy tất cả các tham số của mô hình
+		params = self.parameters()
+		
+		# Chia tham số thành 2 nhóm:
+		# 1. Tham số của lớp fully connected mới
+		# 2. Tham số của Inception-v3 pretrained
+		fc_params = self.fc.parameters()
+		other_params = [p for p in params if p not in fc_params]
+		
+		# Sử dụng tỉ lệ học tập khác nhau cho 2 nhóm tham số
+		lr1 = 1e-3 # Tỉ lệ học tập cho lớp fully connected mới
+		lr2 = 1e-4 # Tỉ lệ học tập cho Inception-v3 pretrained
+		
+		# Tạo 2 optimizer, một cho mỗi nhóm tham số
+		optimizer1 = torch.optim.Adam(fc_params, lr=lr1)
+		optimizer2 = torch.optim.Adam(other_params, lr=lr2)
+		
+		# Trả về list các optimizer
+		return [optimizer1, optimizer2]
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
@@ -124,6 +149,11 @@ class EmotionDetectionModel(LightningModule):
 		
 		# Using nn.CrossEntropyLoss(),
 		loss = self.loss_function (predicted_emotion_id, emotion_id)  # ce
+
+		# # for inception_v3
+		#  # Tính accuracy
+		# preds = torch.argmax(predicted_emotion_id, dim=1)
+		# acc = torch.sum(preds == emotion_id) / len(emotion_id)
 		
 		self.log('train_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
 
