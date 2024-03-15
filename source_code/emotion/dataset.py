@@ -102,7 +102,7 @@ class EmotionDataset(Dataset):
 		image = Image.open(file_path).convert('RGB')
 
 		# normalization.
-		image = np.array(image, dtype=np.float32) / 255.0
+		image = np.array(image, dtype=np.float32) #/ 255.0
 		
 		# transformation
 		if self.transforms: 
