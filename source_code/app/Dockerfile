@@ -43,10 +43,6 @@ RUN npm install -g ts-node
 RUN npm install yarn -g
 RUN npm install pm2@latest -g
 
-# Install credentials
-RUN mkdir /root/.aws
-COPY ./credentials /root/.aws/credentials
-
 # Clone source
 RUN mkdir $APP_ROOT
 
