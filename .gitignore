@@ -2,3 +2,7 @@ raw
 lightning_logs
 __pycache__
 checkpoint
+logs/
+node_modules
+.next
+.env
