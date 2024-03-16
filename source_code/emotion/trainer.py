@@ -26,13 +26,15 @@ if __name__ == "__main__":
 	# 	max_epochs = max_epochs    
 	# )
 
+	# data = EmotionDataLoader(batch_size=64, workers=4)
+
 	modelv4 = EmotionDetectionModel(
 		lr = 1e-3,
 		weight_decay = 1e-4,
 		max_epochs = max_epochs    
 	)
 
-	data = EmotionDataLoader(batch_size=64, workers=4)
+	datav4 = EmotionDataLoader(batch_size=64, workers=4, img_size = 299)
 
 	trainer = Trainer(
 		# accelerator="cpu",
@@ -65,4 +67,4 @@ if __name__ == "__main__":
 	# trainer.fit(modelv1, data)
 	# trainer.fit(modelv2, data)
 	# trainer.fit(modelv3, data)
-	trainer.fit(modelv4, data)
+	trainer.fit(modelv4, datav4)

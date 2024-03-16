@@ -23,7 +23,7 @@ EMOTION = Constants.Emotion()
 TEST_RATIO = 0.1
 
 def init_model():
-	checkpoint = torch.load("checkpoint/epoch=13-val_acc=0.7565.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/inception-epoch=9-val_acc=0.7520.ckpt", map_location=torch.device('cpu'))
 	model = EmotionDetectionModel()
 	model.load_state_dict(checkpoint['state_dict'])
 	
@@ -34,7 +34,12 @@ def init_model():
 def predict_all(file_list, model):
 	predictions = []
 
-	img_size = (48, 48)
+	# for resnet
+	# img_size = (48, 48)
+
+	# for inception
+	img_size = (299, 299)
+	
 	transforms = albu.Compose([
 		# albu.Resize(*img_size),
 		albu.Resize(*(np.array(img_size) * 1.25).astype(int)),
@@ -59,7 +64,8 @@ def predict_all(file_list, model):
 			input_image = Image.open(file_path).convert('RGB')
 
 			# Preprocess the image using torchvision.transforms
-			input_tensor = transforms(image=np.array(input_image)/255)['image']
+			# input_tensor = transforms(image=np.array(input_image)/255)['image']
+			input_tensor = transforms(image=np.array(input_image))['image']
 			input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
 			
 			prediction = model(input_batch)
