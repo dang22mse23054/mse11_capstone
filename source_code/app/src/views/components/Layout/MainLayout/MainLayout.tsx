@@ -140,7 +140,7 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 									openSideBar && (
 										<Grid item style={{ position: 'relative' }}>
 											{/* <Box fontSize={24} fontWeight='fontWeightBold'>TaskTracker</Box> */}
-											<img style={{ width: '12rem' }} src="/static/img/logo/adstracker.png" />
+											<img style={{ width: '12rem' }} src="/static/img/logo/adms.png" />
 											{/* {
 												process.env.NEXT_PUBLIC_NODE_ENV != 'production' && (
 													<Box component={'span'} position='absolute' marginX={1} style={{ backgroundColor: 'blue' }}
@@ -219,7 +219,7 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 						</ActiveLink>
 						
 					</List>
-					<CopyrightComponent />
+					<CopyrightComponent openSideBar={openSideBar} />
 				</SideBar>
 				
 				<Grid item className={classes.content}>
@@ -231,9 +231,10 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 };
 
 const CopyrightComponent: FC<IProps> = (props: IProps) => (
-	<Box color='white' component={'p'} position='fixed' marginX={'10px'} marginY={'5px'}
+	<Box color='white' component={'p'} position='fixed' marginX={props.openSideBar ? '10px' : 0} marginY={'5px'}
 		left={0} bottom={0} fontSize={8} fontWeight='fontWeightLight'>
-		©{new Date().getFullYear()} MSE11-HCM All Rights Reserved. ({process.env.UI_VERSION})
+		{`©${new Date().getFullYear()} MSE11`}
+		{ props.openSideBar && `-HCM All Rights Reserved. (${process.env.UI_VERSION})` }
 	</Box>
 );
 

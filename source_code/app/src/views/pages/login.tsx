@@ -85,7 +85,7 @@ class Login extends React.Component {
 					<div className="card card-signin">
 						<div className="card-body">
 							<h5 className="card-title text-center">
-								<img style={{ width: '80%', marginBlock: '30px' }} src="/static/img/cyberagent.png" />
+								<img style={{ width: '100%' }} src="/static/img/logo/adms.png" />
 							</h5>
 							<form className="form-signin" style={{ textAlign: 'center' }} method='post' onSubmit={this.handleSubmit}>
 								<Grid container spacing={2} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -96,7 +96,7 @@ class Login extends React.Component {
 											onChange={this.handleChange} value={this.state.userId} />
 									</Grid>
 									<Grid item style={{ marginTop: 50, marginBottom: 20 }}>
-										<ColorButton fullWidth btnColor="green" btnContrast={700} variant="contained"
+										<ColorButton fullWidth btnColor="indigo" btnContrast={900} variant="contained"
 											onClick={this.handleSubmit}>Sign In</ColorButton>
 									</Grid>
 									
@@ -122,9 +122,7 @@ class Login extends React.Component {
                 }
                 
                 .card-signin .card-title {
-                    margin-bottom: 2rem;
-                    font-weight: 300;
-                    font-size: 2rem;
+					margin-bottom: 5rem;
                 }
                 
                 .card-signin .card-body {
