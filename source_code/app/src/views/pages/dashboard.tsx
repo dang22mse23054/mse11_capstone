@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import initWrapper from 'compDir/Wrapper';
-import TaskList from 'compDir/pages/Task/List';
-const TaskListWrapper = initWrapper(TaskList);
+import VideoList from 'compDir/pages/Video/List';
+const VideoListWrapper = initWrapper(VideoList);
 
 interface IState {
 }
@@ -9,7 +9,7 @@ interface IState {
 interface IProps {
 }
 
-class TaskPage extends Component<IProps, IState> {
+class VideoPage extends Component<IProps, IState> {
 	// Set default properties's values
 	public static defaultProps: IProps = {
 	}
@@ -19,8 +19,8 @@ class TaskPage extends Component<IProps, IState> {
 	}
 
 	public render(): React.ReactNode {
-		return <TaskListWrapper {...this.props} />;
+		return <VideoListWrapper {...this.props} />;
 	}
 }
 
-export default TaskPage;
+export default VideoPage;

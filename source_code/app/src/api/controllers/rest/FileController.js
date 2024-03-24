@@ -5,7 +5,7 @@ const BaseResponse = require('apiDir/dto/BaseResponse');
 const formidable = require('formidable');
 const fs = require('fs');
 const moment = require('moment-timezone');
-const { RoutePaths, Common, ErrorCodes, TaskStatus } = require('commonDir/constants');
+const { RoutePaths, Common, ErrorCodes, VideoStatus } = require('commonDir/constants');
 const { _7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, JPEG, PNG, CSV, PPT, PPTX } = Common.FileTypes;
 const ACCETED_TYPES = [_7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, PPT, PPTX, JPEG, PNG, CSV];
 
@@ -86,14 +86,6 @@ module.exports = class FileController {
 						folderName = `${process.env.S3_TASK_FOLDER}/${taskId}`;
 						break;
 
-					case Common.FileTargets.TaskProcess:
-						const taskProc = await taskService.getProcesses(taskId, taskProcId);
-						if (!(taskProc && taskProc.updatedAt.getTime() == updatedAt)) {
-							throw (ErrorCodes.OBSOLETE_DATA);
-						}
-
-						folderName = `${process.env.S3_TASK_FOLDER}/${taskId}/${process.env.S3_TASK_PROC_FOLDER}/${taskProcId}`;
-						break;
 				}
 
 				let newName = `${now}_${Math.random().toString(36).substring(3)}.${extension}`;
@@ -204,10 +196,8 @@ module.exports = class FileController {
 		const parts = objKey.split('/');
 		/*
 			Temporary: 	[S3_TMP_FOLDER]/filename
-			Report: 	[S3_REPORT_FOLDER]/<csv_id>/filePath
 			Schedule: 	[S3_SCHEDULE_FOLDER]/<s_id>/filename
 			Task: 		[S3_TASK_FOLDER]/<t_id>/filename
-			Task_Proc: 	[S3_TASK_FOLDER]/<t_id>/[S3_TASK_PROC_FOLDER]/<proc_id>/filename
 		*/
 		const folderName = parts[0];
 		let fileName = null;
@@ -237,24 +227,9 @@ module.exports = class FileController {
 						//Update donwload counter
 						await taskService.updateDownCount({
 							taskId: task.id,
-							downCount: task.status == TaskStatus.CLOSED ? task.downCount + 1 : undefined
+							downCount: task.status == VideoStatus.STOPPED ? task.downCount + 1 : undefined
 						});
 					}
-				}
-
-				break;
-
-			case process.env.S3_REPORT_FOLDER:
-				const csvReportId = parts[1];
-				const filePath = `${parts[0]}/${parts[2]}`;
-
-				// Download Task file 
-				// get csv info 
-				const csvReport = await csvService.getCsvReportInfo(csvReportId, filePath);
-
-				if (csvReport) {
-					fileName = JSON.parse(csvReport.params)?.fileName;
-					objKey = filePath;
 				}
 
 				break;

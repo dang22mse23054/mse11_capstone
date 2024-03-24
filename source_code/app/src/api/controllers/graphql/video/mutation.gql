@@ -1,0 +1,10 @@
+extend type Mutation {
+	# WARNING: Please keep this line
+	# this code is used to prevent error when the 'extend type' is empty
+	_ : Boolean
+
+
+	# Your code here
+	insertOrUpdateVideo(video: VideoInput!): ResponseObj
+
+}

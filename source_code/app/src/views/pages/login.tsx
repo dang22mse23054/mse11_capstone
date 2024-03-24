@@ -89,9 +89,9 @@ class Login extends React.Component {
 							</h5>
 							<form className="form-signin" style={{ textAlign: 'center' }} method='post' onSubmit={this.handleSubmit}>
 								<Grid container spacing={2} style={{ display: 'flex', flexDirection: 'column' }}>
-									<Grid item>
-										<TextField autoComplete='off' fullWidth id="userId" placeholder="UserID"
-											inputProps={{ style: { textAlign: 'center' } }}
+									<Grid item className='txt-input'>
+										<TextField autoComplete='off' fullWidth id="userId" placeholder="UserID" variant="filled"
+											inputProps={{ style: { textAlign: 'center', borderBottom: "2px solid #6f7384", color: 'white' } }}
 											error={this.state.errMsg ? true : false} helperText={this.state.errMsg}
 											onChange={this.handleChange} value={this.state.userId} />
 									</Grid>
@@ -119,10 +119,11 @@ class Login extends React.Component {
                     border: 0;
                     border-radius: 1rem;
                     box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.1);
+					background: #070d2b;
                 }
                 
                 .card-signin .card-title {
-					margin-bottom: 5rem;
+					margin-bottom: 2rem;
                 }
                 
                 .card-signin .card-body {

@@ -96,7 +96,7 @@ class Authorization {
 	 * get Graphql Tool User (GTU) for debug Graphiql 
 	 * @returns 
 	 */
-	getGTU = async () => await userService.getUserByUid('dt0294');
+	getGTU = async () => await userService.getUserByUid('admin');
 
 	handleStrategyResponse(req, res, next, byPassOnError = false) {
 		return async (err, user, info) => {

@@ -6,8 +6,8 @@ exports.seed = function (knex, Promise) {
 			return knex('users').insert([
 				{ 
 					id: 1,
-					uid: 'dt0294',
-					fullname: 'Ha Hai Dang',
+					uid: 'admin',
+					fullname: 'Administrator',
 				}
 			]);
 		});

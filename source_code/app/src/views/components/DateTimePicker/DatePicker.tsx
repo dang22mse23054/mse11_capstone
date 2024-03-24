@@ -117,7 +117,7 @@ const CustomDatePicker: FC<IProps> = (props: IProps) => {
 				props.onChange(selectedDate);
 			}
 		}
-	}, [selectedDate, props.holidays]);
+	}, [selectedDate]);
 
 	const handleDateChange = (date) => {
 		if (!date) {

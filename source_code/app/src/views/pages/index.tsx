@@ -1,2 +1,2 @@
-import HomePage from './task';
+import HomePage from './dashboard';
 export default HomePage;

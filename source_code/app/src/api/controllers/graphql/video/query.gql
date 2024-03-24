@@ -1,0 +1,11 @@
+extend type Query {
+	# WARNING: Please keep this line
+	# this code is used to prevent error when the 'extend type' is empty
+	_ : Boolean
+
+
+	# Your code here
+	searchVideos(options: SearchVideoInput, cursor: CursorInput, limit: Int): PagingObj
+	getVideo(id: Int!): Video
+	
+}

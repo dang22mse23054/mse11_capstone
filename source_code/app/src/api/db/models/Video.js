@@ -1,6 +1,6 @@
-const { ScrollingModel: Model } = require('./_base');
+const { BaseModel: Model, cursorForPaging, cursorForScrolling } = require('./_base');
 
-module.exports = class Video extends Model {
+class Video extends Model {
 
 	// Required
 	static get tableName() {
@@ -29,4 +29,32 @@ module.exports = class Video extends Model {
 		};
 	}
 
+	// This object defines the relations to other models.
+	static get relationMappings() {
+		// Importing models here is one way to avoid require loops.
+		const Category = require('./Category');
+		const VideoCategory = require('./VideoCategory');
+		return {
+			categories: {
+				relation: Model.ManyToManyRelation,
+				modelClass: Category,
+				join: {
+					from: `${Video.tableName}.id`,
+					through: {
+						from: `${VideoCategory.tableName}.videoId`,
+						to: `${VideoCategory.tableName}.categoryId`
+					}
+				},
+				to: `${Category.tableName}.id`
+			},
+		};
+	}
+
 };
+
+const PVideo = cursorForPaging(Video);
+const SVideo = cursorForScrolling(Video);
+
+module.exports = Video;
+module.exports.PVideo = PVideo;
+module.exports.SVideo = SVideo;

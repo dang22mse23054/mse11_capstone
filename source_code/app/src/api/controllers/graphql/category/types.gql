@@ -1,0 +1,8 @@
+type Category implements Node {
+	id: ID!
+	name: String!
+}
+
+input SearchCategoryInput {
+	keyword: String
+}

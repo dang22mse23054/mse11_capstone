@@ -4,17 +4,41 @@ import {
 	ICursorInput,
 	IGraphqlPageInfo,
 	ICAUserOption,
+	IVideo,
+	ICategory,
 } from 'interfaceDir';
-import { Moment } from 'moment';
-import { DropDownOption } from 'compDir/DropDownSelect';
-import { ChannelMemberStatusValues } from 'rootDir/constants';
 
 export interface IActionObj {
-  type: string;
-  obj?: any;
+	type: string;
+	obj?: any;
 }
 
 export interface IAuthActionObj extends IActionObj {
-  authData?: any;
-  isFirstLoading?: boolean;
+	authData?: any;
+	isFirstLoading?: boolean;
 }
+
+// ------ Video ------ //
+export interface IVideoActionObj extends IActionObj, IVideo {
+	isLoading?: boolean;
+}
+
+export interface IVideoSettingAO extends IActionObj, IVideo {
+	isLoading?: boolean;
+	error?: IVideoError;
+}
+
+export interface IVideoSearchAO extends IActionObj, IPagingObj {
+	searchInput?: IVideoSearchOpt;
+	videoList?: Array<IVideo>;
+	pageInfo: IGraphqlPageInfo;
+	reloadCursorMap: Map<number, string>;
+	isFirstLoading?: boolean;
+	isLoading?: boolean;
+	errMsg?: string;
+}
+
+// ------ Cateogry ------ //
+export interface ICategoryAO extends IActionObj {
+	initCategoryList?: Array<ICategory>;
+  }

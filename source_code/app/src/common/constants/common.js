@@ -74,11 +74,6 @@ module.exports = {
 		YYYYMMDD: 'YYYY-MM-DD',
 	},
 
-	ExportModes: {
-		DeadlineDate: 1,
-		FinishedDate: 2,
-	},
-
 	FileTargets: {
 		Temporary: 'tmp',
 		Schedule: 'schedule',

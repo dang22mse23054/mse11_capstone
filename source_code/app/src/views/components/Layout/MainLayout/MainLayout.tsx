@@ -7,8 +7,8 @@ import MDIcon from '@mdi/react';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import {
-	mdiChevronLeft, mdiShape, mdiMenu, mdiCheckboxMarkedCircleOutline, mdiCalendarRange,
-	mdiYoutubeSubscription, mdiDownloadCircleOutline, mdiStopCircleOutline, mdiAutorenew, mdiDelete, mdiChartBar, mdiHelpBox, mdiForum
+	mdiChevronLeft, mdiShape, mdiMenu, mdiCalendarRange,
+	mdiYoutubeSubscription, mdiDownloadCircleOutline, mdiStopCircleOutline, mdiAutorenew, mdiDelete, mdiChartBar, mdiHelpBox, mdiForum, mdiMoviePlay
 } from '@mdi/js';
 import { initSidebar } from 'compDir/SideBar';
 import ActiveLink from 'compDir/ActiveLink';
@@ -178,17 +178,17 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 						</ListItem>
 						<Divider style={{ marginBottom: 8 }} />
 						<ActiveLink href="/" activeClassName="active">
-							<Tooltip title='Dashboard' placement="right" disableHoverListener={openSideBar} arrow>
+							<Tooltip title='Video Settings' placement="right" disableHoverListener={openSideBar} arrow>
 								<ListItem className={classes.leftNavItem} button>
 									<Grid container alignItems='center' justify={openSideBar ? 'flex-start' : 'center'} wrap='nowrap' spacing={1}>
 										<Grid item style={{ display: 'flex' }}>
-											<MDIcon color={theme.palette.background.default} size={'24px'} path={mdiCheckboxMarkedCircleOutline} />
+											<MDIcon color={theme.palette.background.default} size={'24px'} path={mdiMoviePlay} />
 										</Grid>
 										{
 											openSideBar && (
 												<Grid item>
 													<Typography component='div' variant="body1">
-														<Box fontWeight='fontWeightRegular'>Dashboard</Box>
+														<Box fontWeight='fontWeightRegular'>Video Settings</Box>
 													</Typography>
 												</Grid>
 											)
@@ -197,7 +197,7 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 								</ListItem>
 							</Tooltip>
 						</ActiveLink>
-						<ActiveLink href="/statistic" activeClassName="active">
+						{/* <ActiveLink href="/statistic" activeClassName="active">
 							<Tooltip title='Statistic' placement="right" disableHoverListener={openSideBar} arrow>
 								<ListItem className={classes.leftNavItem} button>
 									<Grid container alignItems='center' justify={openSideBar ? 'flex-start' : 'center'} wrap='nowrap' spacing={1}>
@@ -216,7 +216,7 @@ const MainLayout: FunctionComponent<IProps> = (props) => {
 									</Grid>
 								</ListItem>
 							</Tooltip>
-						</ActiveLink>
+						</ActiveLink> */}
 						
 					</List>
 					<CopyrightComponent openSideBar={openSideBar} />

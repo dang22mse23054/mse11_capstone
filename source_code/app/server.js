@@ -120,10 +120,13 @@ nextApp.prepare().then(() => {
 			if (!req.body.operationName) {
 				return res.status(400).json({ status: 400, message: 'Required operationName' });
 			}
+
 			return authMiddleware.verifyApiAuth(req, res, next);
 		} else {
 			req.user = await authMiddleware.getGTU();
+
 		}
+
 		next();
 
 	}, GraphQL.instance);

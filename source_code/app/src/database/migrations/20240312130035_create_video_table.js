@@ -5,6 +5,7 @@ exports.up = function (knex, Promise) {
 			table.increments('id').primary();
 			table.string('title', 200).notNullable();
 			table.string('path', 500).notNullable();
+			table.boolean('isEnabled').notNullable().defaultTo(true);
 
 			table.timestamp('deletedAt').nullable();
 			// table.timestamps(); // this option cannot set default value to createdAt & updatedAt columns
