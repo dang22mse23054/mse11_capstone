@@ -1,11 +1,12 @@
-import { VideoInput, VideoStatusInput } from 'inputModelDir';
+import { VideoInput } from 'inputModelDir';
 import { /* ICsvReport,  */ IGraphqlPagingObj, IVideo } from 'interfaceDir';
 import ApiRequest from './api-request';
 
 const getQuery = (type) => `{
 	id
 	title
-	path
+	refFileName
+	refFilePath
 
 	status
 	isEnabled
@@ -101,54 +102,29 @@ const Service = {
 		});
 	},
 
-	updateStatus: async (taskId, status, updatedAt, searchOptions) => {
+	/**
+	 * 
+	 * @param {VideoInput} video 
+	 * @returns 
+	 */
+	insertOrUpdateVideo: async (video) => {
 		const remoteUrl = `https://${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/graphql`;
-		const gqlMethod = 'changeVideoStatus';
+		const gqlMethod = 'insertOrUpdateVideo';
 		const queryString = `
-			mutation ${gqlMethod} ($task: VideoStatusInput!, $searchOptions: SearchVideoInput) {
-				${gqlMethod}(task: $task, searchOptions: $searchOptions) {
+			mutation ${gqlMethod} ($video: VideoInput!) {
+				${gqlMethod}(video: $video) {
 					id
 					hasErr
 					message
 				}
 			}
 		`;
+
 		return await ApiRequest.sendPOST(remoteUrl, {
+			//add operationName and banned API cause stress server
 			operationName: gqlMethod,
 			query: queryString,
-			variables: {
-				task: new VideoStatusInput(taskId, status, updatedAt),
-				searchOptions
-			}
-
-		}, (response) => {
-			const obj = response.data.data[gqlMethod];
-			return obj;
-
-		}, (error) => {
-			console.error(`Error when calling ${gqlMethod}: `, error);
-			return null;
-		});
-	},
-
-	updateSetting: async (task) => {
-		const remoteUrl = `https://${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/graphql`;
-		const gqlMethod = 'updateVideo';
-		const queryString = `
-			mutation ${gqlMethod} ($task: VideoInput!) {
-				${gqlMethod}(task: $task) {
-					id
-					hasErr
-					message
-				}
-			}
-		`;
-		return await ApiRequest.sendPOST(remoteUrl, {
-			operationName: gqlMethod,
-			query: queryString,
-			variables: {
-				task: new VideoInput(task),
-			}
+			variables: { video }
 
 		}, (response) => {
 			const obj = response.data.data[gqlMethod];
@@ -156,9 +132,47 @@ const Service = {
 
 		}, (error) => {
 			console.error(error);
-			return null;
+			throw error.response?.data?.errors[0];
 		});
 	},
+
+	updateVideoStatus: async (video, isDel = false) => {
+		const remoteUrl = `https://${process.env.NEXT_PUBLIC_SERVER_DOMAIN}/graphql`;
+		const gqlMethod = 'updateVideoStatus';
+		const queryString = `
+			mutation ${gqlMethod} ($video: VideoEnabledInput!) {
+				${gqlMethod}(video: $video ${isDel ? ', isDel: true' : ''}) 
+			}
+		`;
+
+		return await ApiRequest.sendPOST(remoteUrl, {
+			operationName: gqlMethod,
+			query: queryString,
+			variables: { video }
+		}, (response) => {
+			const isSuccess: boolean = response.data.data[gqlMethod];
+			return isSuccess;
+
+		}, ((error) => {
+			console.error(error);
+			return null;
+		}));
+	},
+
+	convertVideo: async (video = {} as IVideo) => {
+
+		// parse category
+		video.categoryIds = [];
+		video.categories = video.categories?.map((item) => {
+			video.categoryIds.push(Number(item.id));
+			return {
+				key: `${item.id}${item.name}`,
+				value: { ...item }
+			};
+		});
+
+		return video;
+	}
 };
 
 export default Service;

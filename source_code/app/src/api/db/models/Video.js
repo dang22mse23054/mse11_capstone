@@ -22,7 +22,9 @@ class Video extends Model {
 			properties: {
 				id: { type: 'integer' },
 				title: { type: 'string', minLength: 1, maxLength: 200 },
-				path: { type: 'string', minLength: 1, maxLength: 500 },
+				isEnabled: { type: 'boolean' },
+				refFileName: { type: 'string', minLength: 1, maxLength: 500 },
+				refFilePath: { type: 'string', minLength: 1, maxLength: 500 },
 
 				deletedAt: { type: ['string', 'null']/*, format: 'date-time'*/ },
 			}

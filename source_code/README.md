@@ -33,3 +33,10 @@ The labels of each face image is embedded in the file name, formated like [age]_
 [gender] is either 0 (male) or 1 (female)
 [race] is an integer from 0 to 4, denoting White, Black, Asian, Indian, and Others (like Hispanic, Latino, Middle Eastern).
 [date&time] is in the format of yyyymmddHHMMSSFFF, showing the date and time an image was collected to UTKFace
+
+## S3 Local
+
+```sh
+# create s3 bucket
+aws --endpoint-url http://localhost:44572 s3api create-bucket --bucket cap-bucket --acl public-read-write --create-bucket-configuration LocationConstraint=ap-northeast-1
+```

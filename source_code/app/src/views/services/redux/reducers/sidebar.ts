@@ -6,7 +6,7 @@ export interface IReducer {
 }
 
 const initialState: IReducer = {
-	openSideBar: true
+	openSideBar: false
 };
 
 const handler = (state = initialState, action: IActionObj) => {

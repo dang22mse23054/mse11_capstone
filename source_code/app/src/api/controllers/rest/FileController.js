@@ -1,4 +1,4 @@
-const { s3Service, taskService, scheduleService, fileService, csvService } = require('apiDir/services');
+const { s3Service, videoService } = require('apiDir/services');
 const LogService = require('commonDir/logger');
 const log = LogService.getInstance();
 const BaseResponse = require('apiDir/dto/BaseResponse');
@@ -6,8 +6,8 @@ const formidable = require('formidable');
 const fs = require('fs');
 const moment = require('moment-timezone');
 const { RoutePaths, Common, ErrorCodes, VideoStatus } = require('commonDir/constants');
-const { _7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, JPEG, PNG, CSV, PPT, PPTX } = Common.FileTypes;
-const ACCETED_TYPES = [_7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, PPT, PPTX, JPEG, PNG, CSV];
+const { _7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, JPEG, PNG, CSV, PPT, PPTX, MP4 } = Common.FileTypes;
+const ACCETED_TYPES = [_7Z, ZIP, MS_OFFICE_FILE, XLS, XLSX, XLSM, DOC, DOCX, PPT, PPTX, JPEG, PNG, CSV, MP4];
 
 module.exports = class FileController {
 
@@ -23,10 +23,6 @@ module.exports = class FileController {
 			formData.parse(req, (err, fields, files) => resolve({ err, fields, files }));
 
 		}).then(async ({ err, fields, files }) => {
-			const { target = Common.FileTargets.Temporary, taskId, taskProcId, updatedAt } = fields;
-			// log.debug(fields);
-			// log.debug(files);
-
 			if (files) {
 				file = files.uploadedFile;
 			}
@@ -58,36 +54,6 @@ module.exports = class FileController {
 				// set file extension
 				let extension = contentTypeInfo.ext;
 
-				// If this file is uploaded for Task
-				if (taskId && target == Common.FileTargets.Task && [_7Z.ext, ZIP.ext, XLS.ext, XLSX.ext].includes(extension)) {
-					// => check whether the file has been set password if ZIP or Excel file
-					if (!await fileService.hasProtectedByPassword(file.path, extension)) {
-						throw (ErrorCodes.FILE.NO_PASSWORD);
-					}
-				}
-
-				// Check Obsolete updatedAt and file name 
-				switch (target) {
-					case Common.FileTargets.Task:
-						// Check Obsolete updatedAt
-						const taskObj = await taskService.getTask(taskId);
-						if (!(taskObj && taskObj.updatedAt.getTime() == updatedAt)) {
-							throw (ErrorCodes.OBSOLETE_DATA);
-						}
-
-						// check whether task's destination is CLIENT => check file name has Client name
-						if (taskObj.destType == Common.DestTypes.CLIENT.id) {
-							const isValidFilename = await fileService.hasClientCompNameInFileName(file.name, taskObj, { minClient: 1 });
-							if (!isValidFilename) {
-								throw (ErrorCodes.FILE.NAME_WITH_CLIENT_NAME);
-							}
-						}
-
-						folderName = `${process.env.S3_TASK_FOLDER}/${taskId}`;
-						break;
-
-				}
-
 				let newName = `${now}_${Math.random().toString(36).substring(3)}.${extension}`;
 				const filePath = `${folderName}/${newName}`;
 
@@ -95,19 +61,6 @@ module.exports = class FileController {
 				await s3Service.saveFile(file.path, process.env.S3_BUCKET, folderName, newName)
 					.then(async (result) => {
 						// log.debug(JSON.stringify(result));
-
-						// Save uploaded file to DB if Task or TaskProcess
-						switch (target) {
-							case Common.FileTargets.Task:
-								// save to Task table
-								result = await taskService.saveFile({ taskId, fileName, filePath });
-								break;
-
-							case Common.FileTargets.TaskProcess:
-								// save to Task table
-								result = await taskService.saveFile({ taskId, taskProcId, fileName, filePath });
-								break;
-						}
 
 						respObj.setData({
 							fileName,
@@ -146,33 +99,13 @@ module.exports = class FileController {
 	remove = async (req, res) => {
 		let respObj = new BaseResponse();
 		let respStatus = 200;
-		const { target, taskId, taskProcId, scheduleId, updatedAt } = req.body;
+		const { target, videoId } = req.body;
 
 		let result = null;
 		try {
-			// Save uploaded file to DB if Task or TaskProcess
 			switch (target) {
-				case Common.FileTargets.Task:
-					// Check Obsolete updatedAt
-					const taskObj = await taskService.getTask(taskId);
-					if (!(taskObj && taskObj.updatedAt.getTime() == updatedAt)) {
-						throw (ErrorCodes.OBSOLETE_DATA);
-					}
-
-					result = await taskService.removeFile({ taskId });
-					break;
-
-				case Common.FileTargets.TaskProcess:
-					const taskProc = await taskService.getProcesses(taskId, taskProcId);
-					if (!(taskProc && taskProc.updatedAt.getTime() == updatedAt)) {
-						throw (ErrorCodes.OBSOLETE_DATA);
-					}
-
-					result = await taskService.removeFile({ taskId, taskProcId });
-					break;
-
-				case Common.FileTargets.Schedule:
-					result = await scheduleService.removeFile(scheduleId);
+				case Common.FileTargets.Video:
+					result = await videoService.removeFile(videoId);
 					break;
 			}
 
@@ -196,8 +129,7 @@ module.exports = class FileController {
 		const parts = objKey.split('/');
 		/*
 			Temporary: 	[S3_TMP_FOLDER]/filename
-			Schedule: 	[S3_SCHEDULE_FOLDER]/<s_id>/filename
-			Task: 		[S3_TASK_FOLDER]/<t_id>/filename
+			Video: 	[S3_VIDEO_FOLDER]/<s_id>/filename
 		*/
 		const folderName = parts[0];
 		let fileName = null;
@@ -206,40 +138,12 @@ module.exports = class FileController {
 				fileName = parts[1];
 				break;
 
-			case process.env.S3_TASK_FOLDER:
-				const taskId = parts[1];
+			case process.env.S3_VIDEO_FOLDER:
+				const vid = parts[1];
+				const video = await videoService.getVideo(vid);
 
-				if (parts.length > 3) {
-					// Download TaskProc file
-					const procId = parts[3];
-					const taskProc = await taskService.getProcesses(taskId, procId);
-
-					if (taskProc) {
-						fileName = taskProc.fileName;
-					}
-				} else {
-					// Download Task file 
-					// get task info 
-					const task = await taskService.getTask(taskId);
-
-					if (task) {
-						fileName = task.fileName;
-						//Update donwload counter
-						await taskService.updateDownCount({
-							taskId: task.id,
-							downCount: task.status == VideoStatus.STOPPED ? task.downCount + 1 : undefined
-						});
-					}
-				}
-
-				break;
-
-			case process.env.S3_SCHEDULE_FOLDER:
-				const sid = parts[1];
-				const schedule = await scheduleService.getSchedule(sid);
-
-				if (schedule) {
-					fileName = schedule.refFileName;
+				if (video) {
+					fileName = video.refFileName;
 				}
 				break;
 
@@ -283,68 +187,5 @@ module.exports = class FileController {
 				res.end(`Auto clear [${process.env.S3_TMP_FOLDER}] folder: ${isErr ? 'Fail' : 'Success'}`);
 			});
 	}
-
-
-
-	// copyImage(req, res) {
-	// 	s3Service.copyFiles([{
-	// 		srcUri: 'daka-test/tmp/demo.png',
-	// 		tarUri: 'daka-test/img/demo.png',
-	// 	}]).then((result) => {
-	// 		console.log(result);
-	// 	}).catch((err, data) => {
-	// 		console.error(err);
-	// 		console.log(data);
-	// 	});
-	// 	res.statusCode = 200;
-	// 	res.type('text');
-	// 	res.end('copy OK');
-	// }
-
-	// deleteImage(req, res) {
-	// 	s3Service.removeFiles([
-	// 		'daka-test/tmp/demo.png',
-	// 		'daka-test/img/demo.png',
-	// 	])
-	// 		.then((result) => {
-	// 			console.log(result);
-	// 		})
-	// 		.catch((err, data) => {
-	// 			console.error(err);
-	// 			console.log(data);
-	// 		});
-	// 	res.statusCode = 200;
-	// 	res.type('text');
-	// 	res.end('remove OK');
-	// }
-
-	// deleteFolder(req, res) {
-	// 	s3Service.removeFolder(process.env.S3_BUCKET, process.env.S3_TMP_FOLDER)
-	// 		.then((result) => {
-	// 			console.log(result);
-
-	// 			res.statusCode = 200;
-	// 			res.type('text');
-	// 			res.end('remove OK');
-	// 		})
-	// 		.catch((err, data) => {
-	// 			console.error(err);
-	// 			console.log(data);
-	// 		});
-	// }
-
-	// createFolder(req, res) {
-	// 	s3Service.createFolder(process.env.S3_BUCKET, 'te/le/ne')
-	// 		.then((result) => {
-	// 			console.log(result);
-	// 		})
-	// 		.catch((err, data) => {
-	// 			console.error(err);
-	// 			console.log(data);
-	// 		});
-	// 	res.statusCode = 200;
-	// 	res.type('text');
-	// 	res.end('crete OK');
-	// }
 
 };

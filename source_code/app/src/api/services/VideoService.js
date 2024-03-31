@@ -10,12 +10,20 @@ const log = LogService.getInstance();
 const Database = require('dbDir');
 // const { ValidationError } = require('objection');
 const moment = require('moment-timezone');
-const ErrorObject = require('apiDir/dto/ErrorObject');
+const S3Service = require('apiDir/services/S3Service');
 
-module.exports = class TaskService {
+class CustomError extends Error {
+	constructor(message, ...options) {
+		// Needs to pass both `message` and `options` to install the "cause" property.
+		super(message, options);
+	}
+}
+
+module.exports = class Videoervice {
 
 	constructor(outsideTransaction) {
 		this.outTrx = outsideTransaction;
+		this.s3Service = new S3Service();
 	}
 
 	getVideo = (id) => {
@@ -37,7 +45,6 @@ module.exports = class TaskService {
 	 */
 	searchVideos = async (options, cursor, limit) => {
 		const videoBO = new VideoBO();
-		console.log('hehehehehe')
 
 		try {
 			// options = {
@@ -66,7 +73,6 @@ module.exports = class TaskService {
 	insertOrUpdate = async (
 		video,
 		userInfo,
-		alsoCreateTasks = true
 	) => {
 
 		// New transaction
@@ -74,6 +80,12 @@ module.exports = class TaskService {
 		const videoBO = new VideoBO(trx);
 		const videoCategoryBO = new VideoCategoryBO(trx);
 		const rmFilesAfterFinished = []
+
+		const respObj = {
+			id: null,
+			hasErr: false,
+			message: null
+		}
 
 		try {
 
@@ -92,8 +104,8 @@ module.exports = class TaskService {
 				// check refFile
 				const { rmFilePath, newFilePath } = this.processRefFile(
 					videoId,
-					currVideo.path,
-					video.path
+					currVideo.refFilePath,
+					video.refFilePath
 				);
 				// if has old file
 				if (rmFilePath) {
@@ -106,7 +118,7 @@ module.exports = class TaskService {
 					...video,
 					id: videoId,
 					// update refFilePath again
-					path: newFilePath,
+					refFilePath: newFilePath,
 				});
 
 				await videoCategoryBO.delete({ videoId: videoId });
@@ -125,7 +137,7 @@ module.exports = class TaskService {
 				const { rmFilePath, newFilePath } = this.processRefFile(
 					videoId,
 					null,
-					video.path
+					video.refFilePath
 				);
 
 				if (rmFilePath) {
@@ -135,7 +147,7 @@ module.exports = class TaskService {
 				await videoBO.update(
 					Video.filterPropsData({
 						id: videoId,
-						path: newFilePath,
+						refFilePath: newFilePath,
 					})
 				);
 			}
@@ -143,9 +155,9 @@ module.exports = class TaskService {
 
 			//#region === Add related data of Video ===
 
-			// add schedule's media
+			// add video's categories
 			await videoCategoryBO.upsertMulti(
-				video.categories.map((categoryId) =>
+				video.categoryIds.map((categoryId) =>
 					VideoCategory.filterPropsData(
 						{
 							videoId,
@@ -161,28 +173,51 @@ module.exports = class TaskService {
 			await this.s3Service.removeFiles(rmFilesAfterFinished);
 
 			trx.commit();
-			sids.push(videoId);
+			respObj.id = videoId;
 
 		} catch (error) {
-			const ind = schedule.inputIndex || index;
-			let errorObj = {
-				name: `Error when handling index ${ind}`,
-				errMsg: 'Input value causes error'
-			};
 			if (error instanceof CustomError) {
 				// Only return error msg of known error 
 				// and hide the detail info since the security risk.
 				errorObj.errMsg = `${error.message}`;
 			}
 			console.error(error);
-			failScheds.push(errorObj);
 			trx.rollback(Error(error.message));
+			
+			respObj.hasErr = true;
+			respObj.message = error.message;
 		}
+
+		return respObj;
 	};
 
-	processRefFile = (scheduleId, currFilePath, newFilePath) => {
+	updateVideoStatus = (videoInput, isDel = false) => {
+		return Database.transaction(async (trx) => {
+			try {
+				const videoBO = new VideoBO(trx);
+
+				if (isDel) {
+					// Update video
+					await videoBO.delete([videoInput.id]);
+				} else {
+					// Update video
+					await videoBO.update({
+						id: videoInput.id,
+						isEnabled: videoInput.isEnabled,
+					});
+				}
+
+				return trx.commit({ id: videoInput.id });
+			} catch (error) {
+				trx.rollback(error);
+			}
+			return null;
+		});
+	};
+
+	processRefFile = (videoId, currFilePath, newFilePath) => {
 		// (NOTE: value of NULL can be updated, not accept `undefined`)
-		if (newFilePath !== undefined && scheduleId) {
+		if (newFilePath !== undefined && videoId) {
 			//  ALREADY existed => set removed file later
 			let rmFilePath = newFilePath != currFilePath ? currFilePath : null;
 
@@ -199,9 +234,9 @@ module.exports = class TaskService {
 
 					// If newFilePath not NULL
 					if (newFilePath) {
-						// move from `tmp/` to `schedule/` and update newFilePath again
+						// move from `tmp/` to `video/` and update newFilePath again
 						const srcUri = `${process.env.S3_BUCKET}/${newFilePath}`;
-						newFilePath = `${process.env.S3_SCHEDULE_FOLDER}/${scheduleId}/${parts[1]}`;
+						newFilePath = `${process.env.S3_VIDEO_FOLDER}/${videoId}/${parts[1]}`;
 
 						// TODO -> move to video folder
 						this.s3Service.copyFile(srcUri, `${process.env.S3_BUCKET}/${newFilePath}`);
@@ -231,5 +266,33 @@ module.exports = class TaskService {
 			log.error(err);
 		}
 		return null;
+	};
+
+	removeFile = (videoId) => {
+		return Database.transaction(async (trx) => {
+			try {
+				if (videoId) {
+					const videoBO = new VideoBO(trx);
+					const video = videoBO.getById(videoId);
+
+					await videoBO.update({
+						id: videoId,
+						refFileName: null,
+						refFilePath: null,
+					});
+
+					// remove file from S3
+					await this.s3Service.removeFile(
+						`${process.env.S3_BUCKET}/${video.refFilePath}`
+					);
+
+					return trx.commit(true);
+				}
+				return null;
+			} catch (error) {
+				log.error(error);
+				return trx.rollback(error);
+			}
+		});
 	};
 };

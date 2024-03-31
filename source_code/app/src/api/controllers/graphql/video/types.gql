@@ -1,7 +1,9 @@
 type Video implements Node {
 	id: ID!
 	title: String!
-	path: String!
+
+	refFileName: String!
+	refFilePath: String!
 	
 	status: Int
 	isEnabled: Boolean
@@ -14,17 +16,19 @@ type Video implements Node {
 	updatedAt: String
 }
 
-input VideoStatusInput {
-	id: ID
-	status: Int
-	updatedAt: String
+input VideoEnabledInput {
+	id: ID!
+	isEnabled: Boolean!
 }
 
 input VideoInput {
-	id: ID!
+	id: ID
 	title: String!
-	path: String!
-	isEnabled: Boolean!
+
+	refFileName: String!
+	refFilePath: String!
+
+	isEnabled: Boolean
 	
 	categoryIds: [Int]!
 

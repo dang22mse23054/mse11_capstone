@@ -1,9 +1,10 @@
 import Page, { IDispatchToProps, IStateToProps } from './Page';
 import { connect } from 'react-redux';
 import { Actions } from 'servDir/redux/actions';
-import { Utils, VideoService, CategoryService } from 'servDir';
+import { Utils, VideoService, CategoryService, Validator } from 'servDir';
 import { Paging } from 'constDir';
 import { toast } from 'material-react-toastify';
+import { VideoInput } from 'inputModelDir';
 
 
 function mapStateToProps(store): IStateToProps {
@@ -65,6 +66,11 @@ function mapDispatchToProps(dispatch, ownProps): IDispatchToProps {
 			});
 		},
 
+		loadSetting: async (modalTypeId: number, videoId: number) => {
+			const video: IVideo = await VideoService.convertVideo(videoId > 0 ? await VideoService.getVideo(Number(videoId)) : {});
+			return dispatch(Actions.VideoAction.SettingPage.setVideoInfo(video));
+		},
+
 		// options is IVideoSearchOpt type
 		doSearch: async ({ options, cursor, limit }) => {
 			dispatch(Actions.VideoAction.ListPage.setLoading());
@@ -113,6 +119,72 @@ function mapDispatchToProps(dispatch, ownProps): IDispatchToProps {
 				});
 			});
 
+		},
+
+		changeEnabled: async (video: any, callback, options: any = {}) => {
+			dispatch(async (dispatch, getState) => {
+				const { list } = getState().videoReducer as IVideoReducer;
+				const { pageInfo } = list;
+
+				await VideoService.updateVideoStatus(video)
+					.then(result => {
+						if (result) {
+							// === Search video === //
+							dpToProps.doPaging(pageInfo.currentPage);
+						}
+						return result;
+					})
+					.then(callback);
+			});
+		},
+
+		deleteVideo: async (video: any, callback, options: any = {}) => {
+			dispatch(async (dispatch, getState) => {
+				const { list } = getState().videoReducer as IVideoReducer;
+				const { pageInfo } = list;
+
+				await VideoService.updateVideoStatus(video, true)
+					.then(result => {
+						if (result) {
+							// === Search video === //
+							dpToProps.doPaging(pageInfo.currentPage);
+						}
+						return result;
+					})
+					.then(callback);
+			});
+		},
+
+		onSubmitVideo: async () => {
+			return dispatch(async (dispatch, getState) => {
+				const { setting, list } = getState().videoReducer as IVideoReducer;
+				const { pageInfo } = list;
+				const video = {
+					...setting,
+				};
+
+				return VideoService.insertOrUpdateVideo(new VideoInput(video))
+					.then(result => {
+						if (result) {
+							// === Search video === //
+							dpToProps.doPaging(pageInfo.currentPage);
+						}
+						return result;
+					});
+			});
+		},
+
+		validateVideo: async () => {
+			return dispatch(async (dispatch, getState) => {
+				const { setting } = getState().videoReducer as IVideoReducer;
+
+				const video: IVideoSettingAO = {
+					...setting,
+				};
+				const result = Validator.isValidVideo(video);
+				dispatch(Actions.VideoAction.SettingPage.setVideoError(result));
+				return result == true;
+			});
 		},
 	};
 }

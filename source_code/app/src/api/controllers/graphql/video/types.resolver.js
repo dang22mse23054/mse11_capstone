@@ -5,14 +5,16 @@ const { videoService } = require('apiDir/services');
 const Type = {
 
 	categoryIds: (obj, args, context, info) => {
-		if (obj.categoryIds === undefined) {
-			return videoService.getCategoryIds(obj.videoId);
+		const videoId = obj.id;
+		if (obj.categoryIds == null) {
+			return videoService.getCategoryIds(videoId);
 		}
 		return obj.categoryIds.split(',');
 	},
 
 	categories: async (obj, args, context, info) => {
-		const categoryIds = obj.categoryIds === undefined ? await videoService.getCategoryIds(obj.videoId) : (obj.categoryIds && obj.categoryIds.split(','));
+		const videoId = obj.id;
+		const categoryIds = obj.categoryIds === undefined ? await videoService.getCategoryIds(videoId) : (obj.categoryIds && obj.categoryIds.split(','));
 		if (categoryIds) {
 			return context.categoryLoader.many(categoryIds);
 		}

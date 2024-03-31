@@ -6,6 +6,7 @@ const LogService = require('commonDir/logger');
 const log = LogService.getInstance();
 const { PVideo, SVideo } = Video;
 const { Sorting, VideoStatus } = require('commonDir/constants');
+const Utils = require('commonDir/utils/Utils');
 
 const readonlyDb = Database.getROInstance();
 
@@ -95,7 +96,7 @@ module.exports = class VideoBO {
 		const trx = this.outTrx ? this.outTrx : await Database.transaction();
 
 		try {
-			let stm = trx(Video.TABLE_NAME).update({ deletedAt: new Date() });
+			let stm = trx(Video.tableName).update({ deletedAt: new Date() });
 
 			if (ids && ids.length > 0) {
 				stm.whereIn('id', ids);
@@ -201,8 +202,8 @@ module.exports = class VideoBO {
 			stm.withGraphFetched(eagerLoad);
 		}
 
-		subQuery.orderBy('v.id');
-		subQuery.orderBy('v.isEnabled', 'desc');
+		stm.orderBy('v.deletedAt');
+		stm.orderBy('v.isEnabled', 'desc');
 
 		// for objection-cursor
 		// Default is desc sorting

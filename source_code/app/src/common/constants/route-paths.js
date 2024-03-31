@@ -5,9 +5,8 @@ const RoutePaths = {
 		GRAPHQL_TOOL: 'graphiql',
 		LOCAL: 'local',
 		ERROR: 'error',
-		DOWNLOAD: 'download',
-		STATISTIC: 'statistic',
-		OLD_SYSTEM: 'old-system'
+		REST_API: 'api',
+		S3: 's3',
 	},
 	INDEX: 'index',
 	LOGIN: 'login',

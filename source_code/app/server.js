@@ -20,6 +20,8 @@ const AuthMiddleware = require('authDir/middlewares/Authorization');
 const GraphQL = require('apiDir/middlewares/graphql');
 const ClientRoutes = require('routeDir/client-routes');
 const AuthRoutes = require('routeDir/auth-routes');
+const ApiRoutes = require('routeDir/api-routes');
+const S3Routes = require('routeDir/s3-routes');
 
 // NextJS folder
 const nextApp = next({ dir: './src/views', dev: (NEXT_PUBLIC_NODE_ENV == 'development') });
@@ -130,6 +132,14 @@ nextApp.prepare().then(() => {
 		next();
 
 	}, GraphQL.instance);
+
+
+	// ========= rest api API  ========= //
+	
+	server.use(`/${RoutePaths.PREFIX.S3}`, new S3Routes(nextApp, new express.Router({ mergeParams: true })).getInstance());
+	server.use(`/${RoutePaths.PREFIX.REST_API}`, async (req, res, next) => {
+		return authMiddleware.verifyApiAuth(req, res, next);
+	}, new ApiRoutes(nextApp, new express.Router({ mergeParams: true })).getInstance());
 
 	// matching URL between NextJs with Express
 	server.use('/', new ClientRoutes(nextApp, new express.Router({ mergeParams: true })).getInstance());

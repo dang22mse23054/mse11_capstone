@@ -16,10 +16,20 @@ class S3Service {
 		} else if (process.env.NEXT_PUBLIC_NODE_ENV == 'development') {
 			this.credential = new AWS.SharedIniFileCredentials({ profile: process.env.S3_PROFILE });
 		}
+
+		this.profileObj = { credentials: this.credential || undefined }
+
+		if (process.env.NEXT_PUBLIC_NODE_ENV == 'development' && process.env.S3_PROFILE == 'localstack') {
+			this.profileObj = {
+				credentials: this.credential || undefined,
+				endpoint: 'http://s3.localhost.localstack.cloud:44572',
+				region: 'ap-northeast-1'
+			}
+		}
 	}
 
 	async createFolder(bucketName, prefix) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 
 		return new Promise(function (resolve, reject) {
 			s3.putObject({
@@ -30,7 +40,7 @@ class S3Service {
 	}
 
 	async removeFolder(bucketName, prefix) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 
 		// get all items by prefix
 		const objects = await s3.listObjects({
@@ -49,7 +59,7 @@ class S3Service {
 	}
 
 	saveFile(filePath, bucketName, keyPrefix, fileName = path.basename(filePath)) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 
 		// ex: /path/to/my-picture.png becomes my-picture.png
 		var fileStream = fs.createReadStream(filePath);
@@ -74,7 +84,7 @@ class S3Service {
 	async copyFile(srcUri, tarUri) {
 		let parts = tarUri.split('/');
 		if (parts.length > 1) {
-			let s3 = new AWS.S3({ credentials: this.credential || undefined });
+			let s3 = new AWS.S3(this.profileObj);
 			let tarBucket = parts[0];
 			let tarFile = tarUri.slice(tarUri.indexOf(parts[1]));
 
@@ -112,7 +122,7 @@ class S3Service {
 		if (delUri) {
 			let parts = delUri.split('/');
 			if (parts.length > 1) {
-				let s3 = new AWS.S3({ credentials: this.credential || undefined });
+				let s3 = new AWS.S3(this.profileObj);
 				let bucket = parts[0];
 				let delFile = delUri.slice(bucket.length + 1);
 
@@ -133,7 +143,7 @@ class S3Service {
 	}
 
 	async getPolicy(bucketName) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 		return new Promise(function (resolve, reject) {
 			s3.getBucketPolicy({
 				Bucket: bucketName
@@ -142,7 +152,7 @@ class S3Service {
 	}
 
 	async changePolicy(bucketName, policy) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 		return new Promise(function (resolve, reject) {
 			s3.putBucketPolicy({
 				Bucket: bucketName,
@@ -152,7 +162,7 @@ class S3Service {
 	}
 
 	getMetaData(params /* { bucketName, objectKey } */) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 
 		return new Promise((resolve, reject) => {
 			// get file info
@@ -169,7 +179,7 @@ class S3Service {
 	}
 
 	async downStreamFile(bucketName, objectKey, res) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 		const params = {
 			Bucket: bucketName,
 			Key: objectKey
@@ -187,7 +197,7 @@ class S3Service {
 	}
 
 	upStreamFile(bucketName, objectKey) {
-		let s3 = new AWS.S3({ credentials: this.credential || undefined });
+		let s3 = new AWS.S3(this.profileObj);
 		// create Duplex stream to read & write
 		var upStream = new stream.PassThrough();
 

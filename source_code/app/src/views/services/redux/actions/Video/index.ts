@@ -7,57 +7,37 @@ export class VideoAction {
 
 		setVideoInfo: (setting: any): IActionObj => {
 			return {
-				type: ActionTypes.SET_VIDEO_INFO,
+				type: ActionTypes.settingPage.setInfo,
 				setting
 			};
 		},
 
 		setVideoError: (error: IVideoError): IVideoSettingAO => {
 			return {
-				type: ActionTypes.SET_VIDEO_ERROR,
+				type: ActionTypes.settingPage.setError,
 				error
 			};
 		},
 
-		changeName: (name: string): IActionObj => {
+		changeTitle: (title: string): IActionObj => {
 			return {
-				type: ActionTypes.SET_VIDEO_NAME,
-				name
+				type: ActionTypes.settingPage.changeVideoTitle,
+				title
 			};
 		},
 
-		changeDeadline: (deadline: number): IActionObj => {
+		changeCategories: (categories: Array<number>): IVideoSettingAO => {
 			return {
-				type: ActionTypes.SET_VIDEO_DEADLINE,
-				deadline
+				type: ActionTypes.settingPage.changeCategories,
+				categories,
 			};
 		},
 
-		changeOwner: (owner: any): IActionObj => {
+		changeRefFile: (fileInfo: IFile): IVideoSettingAO => {
 			return {
-				type: ActionTypes.SET_VIDEO_OWNER,
-				owner
-			};
-		},
-
-		changeProcesses: (processes: any): IActionObj => {
-			return {
-				type: ActionTypes.SET_VIDEO_PROCESS,
-				processes
-			};
-		},
-
-		changeMentionUsers: (mentionUsers: any): IVideoSettingAO => {
-			return {
-				type: ActionTypes.SET_VIDEO_MENTION_USERS,
-				mentionUsers,
-			};
-		},
-
-		changeMentionContent: (mentionContent: string): IVideoSettingAO => {
-			return {
-				type: ActionTypes.SET_VIDEO_MENTION_CONTENT,
-				mentionContent
+				type: ActionTypes.settingPage.changeRefFile,
+				refFileName: fileInfo.fileName,
+				refFilePath: fileInfo.filePath
 			};
 		},
 	}
@@ -66,25 +46,18 @@ export class VideoAction {
 
 		setLoading: (isLoading = true): IActionObj => {
 			return {
-				type: ActionTypes.SET_VIDEO_LIST_LOADING,
+				type: ActionTypes.listPage.setIsLoading,
 				isLoading
 			};
 		},
 
 		showSearchResult: (searchInput, videoList: Array<IVideo>, pageInfo: any): IVideoSearchAO => {
 			return {
-				type: ActionTypes.SHOW_VIDEO_LIST,
+				type: ActionTypes.listPage.search.show,
 				searchInput,
 				videoList,
 				pageInfo
 			};
 		},
-
-		changeVideoList: (videoList: Array<any>): IActionObj => {
-			return {
-				type: ActionTypes.SET_VIDEO_LIST,
-				videoList
-			};
-		}
 	}
 }

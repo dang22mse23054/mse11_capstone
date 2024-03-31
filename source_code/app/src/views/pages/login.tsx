@@ -40,9 +40,9 @@ class Login extends React.Component {
 		const regexp = /^[a-zA-Z0-9_.-]+$/;
 		let errMsg = '';
 		if (userId === '') {
-			errMsg = 'ユーザーIDを入力してください';
+			errMsg = 'Please enter UserID';
 		} else if (!regexp.test(userId)) {
-			errMsg = '入力されたユーザーID形式が間違っています';
+			errMsg = 'UserID is invalid format';
 		}
 
 		if (errMsg) {
@@ -60,11 +60,11 @@ class Login extends React.Component {
 			let errMsg = '';
 			switch (Number(this.props.resCode)) {
 				case ErrorCodes.NOT_EXISTED_USER:
-					errMsg = 'ユーザーIDが存在しません';
+					errMsg = 'Invalid User. Please try again!';
 					break;
 
 				case ErrorCodes.DELETED_USER:
-					errMsg = 'ユーザーが削除されました';
+					errMsg = 'Your account has been deleted!';
 					break;
 
 				default:

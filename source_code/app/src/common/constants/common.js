@@ -76,9 +76,7 @@ module.exports = {
 
 	FileTargets: {
 		Temporary: 'tmp',
-		Schedule: 'schedule',
-		Task: 'task',
-		TaskProcess: 'task_proc',
+		Video: 'video',
 	},
 
 	FileTypes: {
@@ -152,6 +150,10 @@ module.exports = {
 		PPTX: {
 			ext: 'pptx',
 			val: ['application/vnd.openxmlformats-officedocument.presentationml.presentation']
+		},
+		MP4: {
+			ext: 'mp4',
+			val: ['video/mp4']
 		},
 	}
 };

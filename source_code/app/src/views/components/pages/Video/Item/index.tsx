@@ -4,7 +4,7 @@ import tableCss from 'compDir/Theme/tableCss';
 import commonCss from 'compDir/Theme/commonCss';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import MDIcon from '@mdi/react';
-import { mdiAlertOctagram, mdiCheck, mdiChevronDown, mdiChevronUp, mdiPencil, mdiRestore, mdiSend } from '@mdi/js';
+import { mdiAlertOctagram, mdiCheck, mdiChevronDown, mdiChevronUp, mdiCogOutline, mdiPencil, mdiRestore, mdiSend } from '@mdi/js';
 import ColorButton from 'compDir/Button';
 import UploadButton from 'compDir/Button/Upload';
 import {
@@ -28,7 +28,7 @@ export interface IDispatchToProps {
 	initData(_comp: React.Component): any
 }
 interface IProps extends IDispatchToProps, IStateToProps {
-	
+	onChangeStatus: (video: any) => void;
 }
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -51,6 +51,8 @@ const VideoItem: FC<IProps> = (props: IProps) => {
 	const [open, setOpen] = React.useState(false);
 	const classes = useStyles();
 
+	const targetStatusBtn = props.status == VideoStatus.PLAYING.value ? VideoStatus.PAUSED : VideoStatus.PLAYING;
+
 	return (
 		<Fragment>
 			<TableRow hover className={clsx(classes.root, classes.row, open ? 'active' : '')}>
@@ -58,6 +60,19 @@ const VideoItem: FC<IProps> = (props: IProps) => {
 					<Grid container spacing={1} direction='column' wrap='nowrap' alignItems='center'>{props.id}</Grid>
 				</TableCell>
 				<TableCell style={{ minWidth: 250 }}><Box>{props.title}</Box></TableCell>
+				<TableCell style={{ minWidth: 250 }}>
+					<UploadButton size='small' variant='outlined' btnColor='secondary'
+						displayOnly={true}
+						dispType='link'
+						accept='*.*'
+						onClick={props.onReviewVideo}
+						fileInfo={{
+							fileName: props.refFileName,
+							filePath: props.refFilePath
+						}}
+					>ファイル追加</UploadButton>
+
+				</TableCell>
 				<TableCell style={{ minWidth: 200 }}>
 					{
 						props.categories && props.categories.length > 0 ?
@@ -83,7 +98,7 @@ const VideoItem: FC<IProps> = (props: IProps) => {
 					{
 						props.status != VideoStatus.STOPPED.value && (
 							<Fragment>
-								{
+								{/* {
 									props.status == VideoStatus.PLAYING.value ? (
 										<Fragment>
 											<Tooltip title="Pause">
@@ -101,13 +116,40 @@ const VideoItem: FC<IProps> = (props: IProps) => {
 											</ColorButton>
 										</Tooltip>
 									)
-								}
+								} */}
+								<Tooltip title={targetStatusBtn.btnLabel}>
+									<ColorButton btnType="icon" 
+										btnColor={targetStatusBtn == VideoStatus.PLAYING ? 'blue' : 'grey'}
+										onClick={() => {
+											props.onChangeStatus({
+												...props,
+												isEnabled: targetStatusBtn == VideoStatus.PLAYING,
+											});
+										}}>
+										<MDIcon size={'18px'} path={targetStatusBtn.iconName} />
+									</ColorButton>
+								</Tooltip>
 								
 								<Tooltip title="Stop">
 									<ColorButton btnType="icon" btnColor="red"
-										onClick={() => {  }}>
+										onClick={() => { 
+											props.onStop({
+												...props,
+												isEnabled: targetStatusBtn == VideoStatus.PLAYING,
+											});
+										}}>
 										<MDIcon size={'18px'} path={VideoStatus.STOPPED.iconName} />
 									</ColorButton>
+								</Tooltip>
+
+								<Tooltip title="Edit">
+									<Box component='span'>
+										<ColorButton btnType="icon" btnColor="secondary"
+											disabled={props.status == VideoStatus.PLAYING.value}
+											onClick={props.onClickEdit}>
+											<MDIcon size={'18px'} path={mdiCogOutline} />
+										</ColorButton>
+									</Box>
 								</Tooltip>
 							</Fragment>
 						)

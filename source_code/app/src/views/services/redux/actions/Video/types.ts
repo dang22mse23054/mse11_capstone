@@ -1,18 +1,23 @@
 export default {
-	SET_VIDEO_SETTING_LOADING: 'SET_VIDEO_SETTING_LOADING',
-	SET_VIDEO_LIST_LOADING: 'SET_VIDEO_LIST_LOADING',
-	SET_VIDEO_LIST: 'SET_VIDEO_LIST',
 
-	SET_VIDEO_INFO: 'SET_VIDEO_INFO',
-	SET_VIDEO_ERROR: 'SET_VIDEO_ERROR',
-	SET_VIDEO_NAME: 'SET_VIDEO_NAME',
-	SET_VIDEO_DEADLINE: 'SET_VIDEO_DEADLINE',
-	SET_VIDEO_OWNER: 'SET_VIDEO_OWNER',
-	SET_VIDEO_PROCESS: 'SET_VIDEO_PROCESS',
-	SET_VIDEO_MENTION_USERS: 'SET_VIDEO_MENTION_USERS',
-	SET_VIDEO_MENTION_CONTENT: 'SET_VIDEO_MENTION_CONTENT',
+	listPage: {
+		search: {
+			show: 'Video|listPage|search|show',
+		},
+		setIsLoading: 'Video|listPage|setIsLoading',
+	},
 
-	// Task list
-	SHOW_VIDEO_LIST: 'SHOW_VIDEO_LIST',
-	RESET_VIDEO_LIST: 'RESET_VIDEO_LIST',
+	settingPage: {
+		setIsLoading: 'Video|settingPage|setIsLoading',
+
+		// Video setting
+		changeVideoTitle: 'Video|settingPage|changeVideoTitle',
+		changeCategories: 'Video|settingPage|changeCategories',
+		changeRefFile: 'Video|settingPage|changeRefFile',
+
+		// Video setting modal
+		setInfo: 'Video|settingPage|setInfo',
+		setError: 'Video|settingPage|setInfoError',
+		resetSettingForm: 'Video|settingPage|resetSettingForm',
+	}
 };

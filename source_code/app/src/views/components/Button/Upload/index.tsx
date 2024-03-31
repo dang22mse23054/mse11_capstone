@@ -8,7 +8,7 @@ import { green, red } from '@material-ui/core/colors';
 import { ApiRequest, Utils } from 'servDir';
 import { Status } from 'constDir';
 import { CircularProgress } from '@material-ui/core';
-import { AttachFile, FiberNew } from '@material-ui/icons';
+import { Movie, FiberNew } from '@material-ui/icons';
 import Modal from 'compDir/Modal';
 import { IFile } from 'interfaceDir';
 
@@ -182,7 +182,7 @@ const UploadButton: FC<IProps> = (props: IProps) => {
 				(error) => {
 					console.error(error);
 					setProcessing(false);
-					setErrMsg('削除が失敗しました');
+					setErrMsg('Cannot delete file');
 					return onError(error, 'delete:exception');
 				}
 			);
@@ -203,7 +203,7 @@ const UploadButton: FC<IProps> = (props: IProps) => {
 		setConfirmBox(null);
 	};
 
-	const IconType = dispType == 'chip' ? (fileStatus == Status.NEW ? FiberNew : AttachFile) : AttachFile;
+	const IconType = dispType == 'chip' ? (fileStatus == Status.NEW ? FiberNew : Movie) : Movie;
 	const iconColor = dispType == 'chip' && fileStatus == Status.NEW ? { color: green[500] } : null;
 
 	return (
@@ -216,11 +216,11 @@ const UploadButton: FC<IProps> = (props: IProps) => {
 				{
 					confirmBox && (
 						<Modal fullWidth divider={false} maxWidth='xs'
-							title='削除確認'
-							content={`「${fileName}」のファイルを削除してよろしいですか？`}
+							title='Delete confirmation'
+							content={`Are you sure to delete this file「${fileName}」？`}
 							handleClose={(e) => closeConfirmBox(e)}
 							handleSubmit={(e) => closeConfirmBox(e, true)}
-							submitLabel='削除' closeLabel='キャンセル'></Modal>
+							submitLabel='Delete' closeLabel='Cancel'></Modal>
 					)
 				}
 				{
@@ -243,7 +243,7 @@ const UploadButton: FC<IProps> = (props: IProps) => {
 									icon={dispType == 'chip' ? (
 										<IconType style={{ margin: 4, ...iconColor }} />
 									) : (
-										<AttachFile style={{ margin: 0 }} />
+										<Movie style={{ margin: 0 }} />
 									)}
 									label={<Box component='span'>{fileName}</Box>}
 									onClick={onClick}

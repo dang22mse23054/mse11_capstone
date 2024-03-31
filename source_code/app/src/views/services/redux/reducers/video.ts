@@ -27,9 +27,35 @@ const initialState: IVideoReducer = {
 const handler = (state = initialState, action: IActionObj) => {
 	switch (action.type) {
 		//-------- Video list action --------//
-		case ActionTypes.Video.SHOW_VIDEO_LIST:
+		case ActionTypes.Video.listPage.search.show:
 			const { searchInput, videoList, pageInfo } = (action as IVideoSearchAO);
 			return showList(state, searchInput, videoList, pageInfo);
+			break;
+
+		case ActionTypes.Video.listPage.setIsLoading:
+			return setListLoading(state, (action as IVideoSearchAO).isLoading);
+			break;
+		
+		//-------- Video setting action --------//
+		case ActionTypes.Video.settingPage.setInfo:
+			return setVideo(state, action);
+
+		case ActionTypes.Video.settingPage.changeVideoTitle:
+			return SettingPage.setTitle(state, (action as IVideoSettingAO).title);
+			break;
+
+		case ActionTypes.Video.settingPage.setError:
+			const { error } = action as IVideoSettingAO;
+			return SettingPage.setError(state, error);
+			break;
+		
+		case ActionTypes.Video.settingPage.changeCategories:
+			return SettingPage.setCategories(state, (action as IVideoSettingAO).categories);
+			break;
+
+		case ActionTypes.Video.settingPage.changeRefFile:
+			const { refFileName, refFilePath } = action as IVideoSettingAO;
+			return SettingPage.setRefFile(state, refFileName, refFilePath);
 			break;
 
 		default:
@@ -134,6 +160,85 @@ const setVideoError = (state, error): IVideoReducer => {
 			error
 		}
 	};
+};
+
+const SettingPage = {
+	setLoading: (state: IVideoReducer, isLoading): IVideoReducer => {
+		return {
+			...state,
+			setting: {
+				...state.setting,
+				isLoading,
+			},
+		};
+	},
+	setTitle: (state: IVideoReducer, title) => {
+		const setting: IVideoSettingAO = {
+			...state.setting,
+			title,
+		};
+
+		return {
+			...state,
+			setting,
+		};
+	},
+	
+	setCategories: (state: IVideoReducer, categories) => {
+		const setting: IVideoSettingAO = {
+			...state.setting,
+			categories,
+			categoryIds: categories.map((item, id) => Number(item.value.id)),
+		};
+
+		return {
+			...state,
+			setting,
+		};
+	},
+	
+	setRefFile: (state: IVideoReducer, refFileName, refFilePath) => {
+		const setting: IVideoSettingAO = state.setting;
+		return {
+			...state,
+			setting: {
+				...setting,
+				refFileName,
+				refFilePath,
+			},
+		};
+	},
+	
+	resetCreateOrUpdateForm: (state) => {
+		return {
+			...state,
+			setting: {},
+		};
+	},
+	loadInfo: (state: IVideoReducer, action) => {
+		const setting: IVideoSettingAO = action.setting;
+		return {
+			...state,
+			setting: {
+				...setting,
+				// sort process by order
+				processes: setting?.processes?.sort(
+					(a, b) => (a.order || 0) - (b.order || 0)
+				),
+			},
+		};
+	},
+	setError: (state: IVideoReducer, error) => {
+		const setting: IVideoSettingAO = state.setting;
+		return {
+			...state,
+			setting: {
+				...setting,
+				error,
+			},
+		};
+	},
+	
 };
 
 

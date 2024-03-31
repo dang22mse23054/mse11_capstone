@@ -6,5 +6,6 @@ extend type Mutation {
 
 	# Your code here
 	insertOrUpdateVideo(video: VideoInput!): ResponseObj
+	updateVideoStatus(video: VideoEnabledInput!, isDel: Boolean): Boolean
 
 }

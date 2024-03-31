@@ -3,6 +3,7 @@ import AuthService from './authentication';
 import ApiRequest from './api-request';
 import VideoService from './video';
 import CategoryService from './category';
+import * as Validator from './validation';
 
 export {
 	AuthService,
@@ -10,4 +11,5 @@ export {
 	CategoryService,
 	ApiRequest,
 	Utils,
+	Validator,
 };
