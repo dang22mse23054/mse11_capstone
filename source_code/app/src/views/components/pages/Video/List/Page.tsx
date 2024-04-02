@@ -207,10 +207,10 @@ class Page extends Component<IProps, IState> {
 			this.props.onSubmitVideo()
 				.then((result) => {
 					if (result) {
-						toast.success(`Videoの${this.state.settingModal.label}が成功しました`);
+						toast.success(`${this.state.settingModal.label} video successfully`);
 						this.closeModal();
 					} else {
-						toast.error(`Videoの${this.state.settingModal.label}が失敗しました.`);
+						toast.error(`Cannot ${this.state.settingModal.label} video`);
 					}
 				})
 				.catch(error => toast.error(error.message));
@@ -407,7 +407,7 @@ class Page extends Component<IProps, IState> {
 							handleClose={() => this.toggleReviewVideoModal()} closeLabel='Close'
 							justifyActionBtn='space-between'
 							slide='down' custClasses={{ paper: classes.modal }}>
-							<video controls width="400">
+							<video controls style={{maxWidth: 500, maxHeight: 500}}>
 								<source src={`/s3/${this.state.reviewVideo.refFilePath}`} type="video/mp4" />
 							</video>
 						</Modal>
@@ -417,7 +417,7 @@ class Page extends Component<IProps, IState> {
 					confirmBox && (
 						<Modal fullWidth divider={false} maxWidth='xs'
 							title={`${confirmBox.type} confirmation`}
-							content={`Are you sure to ${confirmBox.type} this file？`}
+							content={`Are you sure to ${confirmBox.type} this video?`}
 							handleClose={(e) => this.closeConfirmBox(e)}
 							handleSubmit={(e) => this.closeConfirmBox(e, true)}
 							submitLabel={confirmBox.type} closeLabel='Cancel'></Modal>

@@ -4,8 +4,10 @@ exports.up = function (knex, Promise) {
 		.createTable('video', function (table) {
 			table.increments('id').primary();
 			table.string('title', 200).notNullable();
-			table.string('path', 500).notNullable();
-			table.boolean('isEnabled').notNullable().defaultTo(true);
+			table.string('refFileName', 500).notNullable();
+			table.string('refFilePath', 500).notNullable();
+
+			table.boolean('isEnabled').notNullable().defaultTo(false);
 
 			table.timestamp('deletedAt').nullable();
 			// table.timestamps(); // this option cannot set default value to createdAt & updatedAt columns

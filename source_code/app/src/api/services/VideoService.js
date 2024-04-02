@@ -128,7 +128,7 @@ module.exports = class Videoervice {
 			//#region Create new video
 			else {
 
-				video.isEnabled = true;
+				video.isEnabled = false;
 				const newVideo = await videoBO.insert(
 					Video.filterPropsData(video)
 				);

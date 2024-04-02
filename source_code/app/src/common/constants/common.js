@@ -5,9 +5,7 @@ module.exports = {
 	isEnabled: 1,
 
 	BannedAPI: [
-		'insertOrUpdateSchedule',
-		'updateTask',
-		// 'updateTaskProc'
+		'insertOrUpdate',
 	],
 
 	RequestLimit: 50,
@@ -20,44 +18,6 @@ module.exports = {
 	JobNotiTypes: {
 		Chatwork: 1,
 		Slack: 2,
-	},
-
-	SystemRoles: {
-		NORMAL: { label: '一般ユーザー', value: 1 },
-		ADMIN: { label: 'システム管理者', value: 2 },
-		MANAGER: { label: 'マネジャー', value: 3 },
-	},
-
-	ScheduleTypes: {
-		SPOT: { id: 1, display: 'スポット' },
-		REGULAR: { id: 2, display: '定例' },
-	},
-
-	DestTypes: {
-		CLIENT: { id: 1, display: 'クライアント' },
-		HANDLE_USER: { id: 2, display: '担当者' },
-		DIVISION: { id: 3, display: '局' },
-	},
-
-	RequestChannel: {
-		CHATWORK: { id: 1, display: 'Chatwork' },
-		FORM: { id: 2, display: 'フォーム' },
-		TASK_MANAGER: { id: 3, display: 'タスクマネージャー' },
-		MAIL: { id: 4, display: 'メール' },
-		SLACK: { id: 5, display: 'Slack' },
-		BACKLOG: { id: 6, display: 'Backlog' },
-		FACEBOOK: { id: 7, display: 'Facebook' },
-	},
-
-	FrequencyTypes: {
-		WEEKLY: { id: 1, display: '週次' },
-		MONTHLY_BY_WEEK: { id: 2, display: '月次(週)' },
-		MONTHLY_BY_DATE: { id: 3, display: '月次(日)' },
-	},
-	FrequencyTypeIds: {
-		WEEKLY: 1,
-		MONTHLY_BY_WEEK: 2,
-		MONTHLY_BY_DATE: 3,
 	},
 
 	DayOfWeek: [
