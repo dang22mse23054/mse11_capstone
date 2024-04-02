@@ -38,5 +38,5 @@ The labels of each face image is embedded in the file name, formated like [age]_
 
 ```sh
 # create s3 bucket
-aws --endpoint-url http://localhost:44572 s3api create-bucket --bucket cap-bucket --acl public-read-write --create-bucket-configuration LocationConstraint=ap-northeast-1
+aws --endpoint-url http://localhost:44572 s3api create-bucket --bucket capstone-bucket --acl public-read-write --create-bucket-configuration LocationConstraint=ap-northeast-1
 ```
