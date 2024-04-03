@@ -93,17 +93,25 @@ def predict_all(file_list, model):
 
 if __name__ == "__main__":
 
-	FODLER_PATH = './raw/fer2013-org/test'
-	subfolder_list = os.listdir(FODLER_PATH)
-	file_list = []
-	for folder_name in subfolder_list:
-		folder_path = f'{FODLER_PATH}/{folder_name}'
+	# FODLER_PATH = './raw/fer2013-org/test'
+	# subfolder_list = os.listdir(FODLER_PATH)
+	# file_list = []
+	# for folder_name in subfolder_list:
+	# 	folder_path = f'{FODLER_PATH}/{folder_name}'
 
-		if folder_name.startswith('.'):
-			continue
+	# 	if folder_name.startswith('.'):
+	# 		continue
 		
-		files = random.sample(os.listdir(folder_path), k=1)
-		file_list.append(f'{folder_path}/{files[0]}')
+	# 	files = random.sample(os.listdir(folder_path), k=1)
+	# 	file_list.append(f'{folder_path}/{files[0]}')
+
+
+	folder_path = './raw/daka'
+	file_list = []
+	files = random.sample(os.listdir(folder_path), k=24)
+	for idx, file_path in enumerate(files):
+		file_list.append(f'{folder_path}/{file_path}')
+	print(file_list)
 
 	model = init_model()
 	
