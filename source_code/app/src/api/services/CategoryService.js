@@ -14,16 +14,6 @@ module.exports = class CategoryService {
 	// 	return null;
 	// }
 
-	getBy = (conditions) => {
-		let categoryBO = new CategoryBO();
-		try {
-			return categoryBO.getBy(conditions);
-		} catch (err) {
-			log.error(err);
-		}
-		return null;
-	}
-
 	getCategories = () => {
 		let categoryBO = new CategoryBO();
 		try {

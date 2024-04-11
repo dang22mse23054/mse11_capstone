@@ -1,6 +1,7 @@
 const { raw } = require('objection');
 const Video = require('modelDir/Video');
 const VideoCategory = require('modelDir/VideoCategory');
+const Category = require('modelDir/Category');
 const Database = require('dbDir');
 const LogService = require('commonDir/logger');
 const log = LogService.getInstance();
@@ -14,6 +15,31 @@ module.exports = class VideoBO {
 	constructor(outsideTransaction) {
 		this.outTrx = outsideTransaction;
 	}
+
+	getBy = ({age, gender} = {}, isEnabled = true) => {
+		let stm = Video.query(readonlyDb).alias('v')
+			.distinct([
+				'v.refFileName',
+			])
+			// VideoCategory
+			.innerJoin(`${VideoCategory.tableName} as vc`, 'vc.videoId', 'v.id')
+			// Category
+			.innerJoin(`${Category.tableName} as c`, 'vc.categoryId', 'c.id')
+
+		stm.where('isEnabled', isEnabled);
+
+		if (age != null) {
+			stm.where('c.age', age);
+		}
+
+		if (gender != null) {
+			stm.where('c.gender', gender);
+		}
+
+		log.debug(stm.toKnexQuery().toSQL());
+
+		return stm.then(row => row || null);
+	};
 
 	getById = (id) => {
 		let stm = Video.query(readonlyDb).first();

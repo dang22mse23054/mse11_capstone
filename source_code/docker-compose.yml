@@ -41,17 +41,17 @@ services:
   #   networks:
   #     - capstone_network
 
-  py_server:
-    platform: linux/x86_64
-    build:
-      context: .
-      dockerfile: app_py/Dockerfile
-    container_name: py-server
-    command: ["python3", "./server/src/app.js"]
-    ports:
-      - '5000:5000'
-    volumes:
-      - .:/app_py
+  # py_server:
+  #   platform: linux/x86_64
+  #   build:
+  #     context: .
+  #     dockerfile: app_py/Dockerfile
+  #   container_name: py-server
+  #   command: ["python3", "./server/src/app.js"]
+  #   ports:
+  #     - '5000:5000'
+  #   volumes:
+  #     - .:/app_py
 networks:
   capstone_network:
 

@@ -8,6 +8,7 @@ const ErrorCodes = {
 	INVALID_REQUEST: 20000,
 	FILE: {
 		UNSUPPORTED: { code: 11001, message: 'Unsupported file' },
+		NO_FILE: { code: 11002, message: 'Do not have any uploaded file' },
 	},
 	PERMISSION_DENIED: { code: 403, message: 'Permission Denied' },
 	UNKNOW_ERROR: { code: 500, message: 'Unknown Error' },

@@ -2,6 +2,15 @@ class Constants:
 	__slots__ = ()
 
 	FACE_GROUPS =['Background', 'Face']
+ 
+	# ======== Classes ======= #
+	class Models():
+		__slot__ = ()
+		# Read only
+		FACE_MODEL = 1
+		AGE_GENDER_MODEL = 2
+		EMOTION_MODEL = 3 
+ 
 	# ======== Classes ======= #
 
 	class Mode:
@@ -37,10 +46,15 @@ class Constants:
 		ELDERLY = 'elderly (61~120)'
 
 		Groups = {
+      		# CHILDREN: 	(00~12) => 0
 			CHILDREN: {'from': 0, 'to': 12}, 
+			# TEENAGERS: 	(13~17) => 1
 			TEENAGERS: {'from': 13, 'to': 17},
+			# ADULT: 		(18~44) => 2
 			ADULT: {'from': 18, 'to': 44}, 
+			# MIDDLE_AGED:(45~60) => 3
 			MIDDLE_AGED: {'from': 45, 'to': 60},
+			# ELDERLY: 	(61~12) => 4
 			ELDERLY: {'from': 61, 'to': 120},
 		}
 

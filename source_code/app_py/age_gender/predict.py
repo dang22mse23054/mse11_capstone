@@ -96,7 +96,7 @@ if __name__ == "__main__":
 	testPart = int(len(file_list) * TEST_RATIO)
 	# file_list = file_list[len(file_list) - testPart:]
 
-	file_list = random.sample(file_list, k=2)
+	file_list = random.sample(file_list, k=4)
 	# print(file_list)
 
 	# Make predictions for all files in the list

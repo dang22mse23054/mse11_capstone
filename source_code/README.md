@@ -40,3 +40,13 @@ The labels of each face image is embedded in the file name, formated like [age]_
 # create s3 bucket
 aws --endpoint-url http://localhost:44572 s3api create-bucket --bucket capstone-bucket --acl public-read-write --create-bucket-configuration LocationConstraint=ap-northeast-1
 ```
+
+## Start local servers
+
+```sh
+$cd app_py
+$python3 server.py
+
+$cd app
+$yarn dev
+```

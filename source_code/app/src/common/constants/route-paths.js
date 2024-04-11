@@ -7,6 +7,7 @@ const RoutePaths = {
 		ERROR: 'error',
 		REST_API: 'api',
 		S3: 's3',
+		DEVICE_API: 'dapi',
 	},
 	INDEX: 'index',
 	LOGIN: 'login',

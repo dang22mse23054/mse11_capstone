@@ -19,17 +19,21 @@ class CustomError extends Error {
 	}
 }
 
-module.exports = class Videoervice {
+module.exports = class VideoService {
 
 	constructor(outsideTransaction) {
 		this.outTrx = outsideTransaction;
 		this.s3Service = new S3Service();
 	}
 
-	getVideo = (id) => {
+	getVideo = ({id, age, gender} = {}) => {
 		const videoBO = new VideoBO();
 		try {
-			return videoBO.getById(id);
+			if (id) {
+				return videoBO.getById(id);
+			}
+
+			return videoBO.getBy({age, gender})
 		} catch (err) {
 			log.error(err);
 		}

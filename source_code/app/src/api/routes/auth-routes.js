@@ -31,9 +31,6 @@ class AuthRoutes extends BaseRoutes {
 		// (Current only apply for OAuth2-CASSO, TODO in the future: Local, Google...)
 		this.router.get(`/${RoutePaths.PREFIX.AUTH}/check`, this.authController.checkSession);
 
-		// verification login code (OAuth2)
-		this.router.post(process.env.CALLBACK_PATH, this.authMiddleware.verifyCAssoCode);
-
 		// logout
 		this.router.get(`/${RoutePaths.LOGOUT}`, this.authController.logout);
 		// ========= END Routing ========= //

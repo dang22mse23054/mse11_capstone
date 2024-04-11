@@ -140,7 +140,7 @@ module.exports = class FileController {
 
 			case process.env.S3_VIDEO_FOLDER:
 				const vid = parts[1];
-				const video = await videoService.getVideo(vid);
+				const video = await videoService.getVideo({id: vid});
 
 				if (video) {
 					fileName = video.refFileName;

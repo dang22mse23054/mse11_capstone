@@ -21,7 +21,7 @@ const Query = {
 	},
 
 	getVideo: async (obj, {id}, context, info) => {
-		return await videoService.getVideo(id);
+		return await videoService.getVideo({id});
 	},
 };
 

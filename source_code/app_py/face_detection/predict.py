@@ -1,6 +1,4 @@
 import sys
-import argparse
-import os
 sys.path.append('../')
 
 import torch
@@ -10,15 +8,12 @@ from torchvision import transforms
 from PIL import ImageDraw
 from common.constants import Constants
 from dataset import PATHS
-import numpy as np
-import albumentations as albu
-from albumentations.pytorch import ToTensorV2
 
 
 MODE = Constants.Mode()
 
 def init_model():
-	checkpoint = torch.load("checkpoint/epoch=18-val_map=0.4675.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/epoch=9-val_map=0.4393.ckpt", map_location=torch.device('cpu'))
 	model = FaceDetectionModel()
 	model.load_state_dict(checkpoint['state_dict'])
 	
@@ -32,24 +27,15 @@ def predict_all(file_list, model):
 	with torch.no_grad():
 		for file_path in file_list:
 			file_path = f'{PATHS[MODE.TESTDEMO]["img_dir"]}/{file_path}'
-			input_image = Image.open(file_path).convert('RGB')
+			input_image = Image.open(file_path)
 
 			# Preprocess the image using torchvision.transforms
 			preprocess = transforms.Compose([
-				# transforms.Resize((224, 224)),
+				# không hiểu sao dùng cái này thì performance tốt lên 
+				transforms.Grayscale(num_output_channels=1),
 				transforms.ToTensor(),
-				# transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 			])
 			input_tensor = preprocess(input_image)
-
-			# img_size = (224,224)
-			# preprocess = albu.Compose([
-			# 	# albu.Resize(*(np.array(img_size) * 1.25).astype(int)),
-			# 	# albu.CenterCrop(*img_size),
-			# 	albu.Normalize(),
-			# 	ToTensorV2()
-			# ])
-			# input_tensor = preprocess(image=np.array(input_image))['image']
 
 			input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
 			
@@ -73,7 +59,8 @@ def convert_img_to_features(images, model):
 	print(features.keys())
 	return features['0']
 
-def show_bbox(image, prediction, min_score=0.2):
+# số cũ min_score = 0.29
+def show_bbox(image, prediction, min_score=0.8):
 	image_with_bbox = image.copy()
 	draw = ImageDraw.Draw(image_with_bbox)
 	prediction = prediction[0]
@@ -81,7 +68,7 @@ def show_bbox(image, prediction, min_score=0.2):
 
 	for index, bbox in enumerate(prediction['boxes']):
 		if scores[index] > min_score:
-			draw.rectangle(bbox.tolist(), outline="red", width=4)
+			draw.rectangle(bbox.tolist(), outline="red", width=1)
 	image_with_bbox.show()
 
 def extract_faces(image, prediction):
@@ -127,6 +114,5 @@ if __name__ == "__main__":
 		
 		print('---------- FACE features ----------')
 		features = convert_img_to_features([transforms.ToTensor()(input_image)], model)
-		print(features)
 	
 	

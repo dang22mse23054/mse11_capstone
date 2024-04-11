@@ -12,44 +12,6 @@ class Authorization {
 		this.passport = passport;
 	}
 
-	verifyCAssoCode = (req, res, next) => {
-		this.passport.authenticate('CAssoStrategy', function (err, profile, info) {
-			if (err) {
-				console.error(err);
-				err.message = 'CASSO Unauthorized!';
-				err.status = 401;
-				err.data = { redirectUrl: '/login' };
-				return next(err);
-			}
-			if (!profile) {
-				let errCode = info.code > 10000 ? `?code=${info.code}` : '';
-				return res.redirect(`/auth${errCode}`);
-			}
-
-			let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-			let authService = new AuthService();
-
-			// For DEBUG
-			log.debug(JSON.stringify(profile));
-			log.debug(`User ${profile.name} (${profile.uid}) LOGIN from address ${clientIp} at ${new Date()}`);
-
-			res.setHeader('Content-Type', 'application/json');
-			let respData = {
-				userInfo: {
-					uid: profile.uid,
-					email: profile.email,
-					name: profile.name,
-					company: profile.company,
-					roleId: profile.roleId
-				},
-				apiToken: authService.signWebApiToken(profile, clientIp),
-				accessToken: profile.accessToken,
-				refreshToken: profile.refreshToken
-			};
-			res.send(JSON.stringify(respData));
-		})(req, res, next);
-	}
-
 	verifyEmployeeId = (req, res, next) => {
 		this.passport.authenticate('LocalStrategy', function (err, user, info) {
 			let respObj = new BaseResponse();
@@ -90,6 +52,13 @@ class Authorization {
 
 	verifyApiAuth = (req, res, next, byPassOnError = false) => {
 		return this.passport.authenticate('JwtWebApiStrategy', { session: false }, this.handleStrategyResponse(req, res, next, byPassOnError))(req, res, next);
+	}
+
+	verifyDeviceAuth = (req, res, next, byPassOnError = false) => {
+		// TODO implement device auth
+		return (async (req, res, next) => {
+			next()
+		})(req, res, next);
 	}
 
 	/**

@@ -10,11 +10,21 @@ module.exports = class CategoryBO {
 		this.outTrx = outsideTransaction;
 	}
 
-	getById = (id) => {
+	getBy = (condition) => {
 		let stm = Category.query(readonlyDb).first();
 
-		if (id) {
+		const { id = undefined, gender = null, age = null } = condition;
+
+		if (id != null) {
 			stm.where('id', id);
+		}
+
+		if (gender != null) {
+			stm.where('gender', gender);
+		}
+
+		if (age != null) {
+			stm.where('age', age);
 		}
 
 		return stm.then(row => row || null);
