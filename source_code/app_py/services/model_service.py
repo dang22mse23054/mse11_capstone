@@ -34,41 +34,55 @@ class Timer():
 		print(f"{self.label}: {(self.stop_time - self.start_time).total_seconds()} seconds")
   
 class ModelService():
-	def __init__(self):
-		self.models = self.init_model()
-		
-		self.f_model = self.models[MODELS.FACE_MODEL]
-		self.ag_model = self.models[MODELS.AGE_GENDER_MODEL]
-		self.e_model = self.models[MODELS.EMOTION_MODEL]
+	def __init__(self, model_type = None):
 		self.timer = Timer()
+  
+		if (model_type is None):
+			self.models = self.init_models()
+			self.f_model = self.models[MODELS.FACE_MODEL]
+			self.ag_model = self.models[MODELS.AGE_GENDER_MODEL]
+			self.e_model = self.models[MODELS.EMOTION_MODEL]
+		else:
+			if model_type == MODELS.FACE_MODEL:
+				self.f_model = self.init_single_model(model_type)
+			elif model_type == MODELS.AGE_GENDER_MODEL:
+				self.ag_model = self.init_single_model(model_type)
+			elif model_type == MODELS.EMOTION_MODEL:
+				self.e_model = self.init_single_model(model_type)
+  
+	def init_single_model(self, model_type):
+		if model_type == MODELS.FACE_MODEL:
+			print('===== Loading model: Face Detection =====')
+			checkpoint = torch.load("face_detection/checkpoint/epoch=18-val_map=0.4675.ckpt", map_location=torch.device('cpu'))
+			f_model = FaceDetectionModel()
+			f_model.load_state_dict(checkpoint['state_dict'])
+			# Set Models to Evaluation Mode
+			f_model.eval()
+			return f_model
 
-	def init_model(self):
-		print('===== Loading model: Face Detection =====')
-		checkpoint = torch.load("face_detection/checkpoint/epoch=18-val_map=0.4675.ckpt", map_location=torch.device('cpu'))
-		f_model = FaceDetectionModel()
-		f_model.load_state_dict(checkpoint['state_dict'])
+		elif model_type == MODELS.AGE_GENDER_MODEL:
+			print('===== Loading model: Age_Gender Detection =====')
+			checkpoint = torch.load("age_gender/checkpoint/epoch=24-val_acc=0.8411-val_age_acc=0.8013-val_gender_acc=0.8857.ckpt", map_location=torch.device('cpu'))
+			ag_model = AgeGenderDetectionModel()
+			ag_model.load_state_dict(checkpoint['state_dict'])
+			# Set Models to Evaluation Mode
+			ag_model.eval()
+			return ag_model
 
-		# age_gender model
-		print('===== Loading model: Age_Gender Detection =====')
-		checkpoint = torch.load("age_gender/checkpoint/epoch=24-val_acc=0.8411-val_age_acc=0.8013-val_gender_acc=0.8857.ckpt", map_location=torch.device('cpu'))
-		ag_model = AgeGenderDetectionModel()
-		ag_model.load_state_dict(checkpoint['state_dict'])
+		elif model_type == MODELS.EMOTION_MODEL:
+			print('===== Loading model: Emotion Detection =====')
+			checkpoint = torch.load("emotion/checkpoint/inception-epoch=9-val_acc=0.7520.ckpt", map_location=torch.device('cpu'))
+			e_model = EmotionDetectionModel()
+			e_model.load_state_dict(checkpoint['state_dict'])
+			# Set Models to Evaluation Mode
+			e_model.eval()
+			return e_model
 
-		# emotion model
-		print('===== Loading model: Emotion Detection =====')
-		checkpoint = torch.load("emotion/checkpoint/inception-epoch=9-val_acc=0.7520.ckpt", map_location=torch.device('cpu'))
-		e_model = EmotionDetectionModel()
-		e_model.load_state_dict(checkpoint['state_dict'])
-		
-		# Set Models to Evaluation Mode
-		f_model.eval()
-		ag_model.eval()
-		e_model.eval()
-
+	def init_models(self):
 		return {
-			MODELS.FACE_MODEL: f_model, 
-			MODELS.AGE_GENDER_MODEL: ag_model,
-			MODELS.EMOTION_MODEL: e_model
+			MODELS.FACE_MODEL: self.init_single_model(MODELS.FACE_MODEL), 
+			MODELS.AGE_GENDER_MODEL: self.init_single_model(MODELS.AGE_GENDER_MODEL),
+			MODELS.EMOTION_MODEL: self.init_single_model(MODELS.EMOTION_MODEL)
 		}
 
 	def transform_image_for(self, model_type, input_img):

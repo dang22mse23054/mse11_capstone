@@ -238,6 +238,19 @@ def show_bbox(image, faces, screen_name, screen_ratio = 5):
 		bbox = np.array(bbox, dtype=np.int32)
 		label = f"{'Nam' if face['gender'] == 0 else 'Nu'}-{AGES[face['age']]}"
 		cv2.rectangle(image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (0, 0, 255), 2)
+  
+
+		# Sử dụng thuật toán Haar để phát hiện mắt
+		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		eyes = cv2.CascadeClassifier('haarcascade_eye.xml').detectMultiScale(gray)
+
+		print(eyes)
+		# Kiểm tra xem người đó có chú ý camera hay không
+		if len(eyes) == 2:
+			print("Người này đang chú ý camera!")
+		else:
+			print("Người này không chú ý camera!")
+  
 		cv2.putText(
 			image,
 			label,
