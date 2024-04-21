@@ -86,7 +86,7 @@ class ModelService():
 		}
 
 	def transform_image_for(self, model_type, input_img):
-		gray_input_img = input_img if type(input_img).__name__ == 'Image' else Image.open(input_img).convert('RGB')
+		gray_input_img = Image.open(input_img).convert('RGB') if type(input_img).__name__ == 'FileStorage' else input_img
 		output = None
 
 		# Preprocess the image
