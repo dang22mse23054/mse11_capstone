@@ -2,10 +2,15 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import time, math
+from PIL import Image
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
+mp_face_detection = mp.solutions.face_detection
+
+from services.model_service import Constants, ModelService
+model_service = ModelService(Constants.Models.FACE_MODEL)
 
 # For webcam input:
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
@@ -161,232 +166,268 @@ def eyesDistances(landmarks, image=None):
 	return ratio
 
 # ============================================================= #
-
-cap = cv2.VideoCapture(0)
+cap = None
 screen_name = '(MediaPipe) Head_pose & Eyes_tracker'
 cv2.namedWindow(screen_name)        # Create a named window
 cv2.moveWindow(screen_name, 60,30)  # Move it to (60,30)
 
-with mp_face_mesh.FaceMesh(
+face_detection = mp_face_detection.FaceDetection(
+	model_selection=1,
+	min_detection_confidence=0.95
+)
+
+face_mesh = mp_face_mesh.FaceMesh(
 	max_num_faces=1,
 	refine_landmarks=True,
 	min_detection_confidence=0.5,
-	min_tracking_confidence=0.5) as face_mesh:
-  
-	while cap.isOpened():
-		success, image = cap.read()
-		if not success:
-			print("Ignoring empty camera frame.")
-			# If loading a video, use 'break' instead of 'continue'.
-			continue
+	min_tracking_confidence=0.5
+) 
 
-		start = time.time()
+# # Dùng Camera (CAEMRA) ===== BEGIN
+# cap = cv2.VideoCapture(0)
+# while cap.isOpened():
+# 	success, image = cap.read()
+# 	if not success:
+# 		print("Ignoring empty camera frame.")
+# 		# If loading a video, use 'break' instead of 'continue'.
+# 		continue
+# # Dùng Camera (CAEMRA) ===== END
 
-		# To improve performance, optionally mark the image as not writeable to
-		# pass by reference.
-		image.flags.writeable = False
-		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# Dùng TEST folder (TEST_IMAGE) ===== BEGIN
+PATHS = {
+	'img_list': 'face_detection/raw/wider_face_split/wider_face_testdemo_filelist.txt',
+	'img_dir': 'face_detection/raw/WIDER_test/images',
+}
+img_list_file = PATHS["img_list"]
+# Read the list of image files
+with open(img_list_file, 'r') as file:
+	file_list = [line.strip() for line in file.readlines()]
 
-		# https://www.youtube.com/watch?v=-toNMaS4SeQ
-		img_h, img_w, img_c = image.shape
-		face_3d = []
-		face_2d = []
-
-		eye_2d = []
-		eye_3d = []
-
-		results = face_mesh.process(image)
-		
-
-		# Convert the BGR image to RGB before processing.
-		image.flags.writeable = True
-		image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-		
-
-		# Print and draw face mesh landmarks on the image.
-		if results.multi_face_landmarks:
-			for face_landmarks in results.multi_face_landmarks:
-				landmarks = face_landmarks.landmark
-				
-				for idx, lm in enumerate(face_landmarks.landmark):
-					if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
-						if idx == 1:
-							nose_2d = (lm.x * img_w, lm.y * img_h)
-							nose_3d = (lm.x * img_w, lm.y * img_h, lm.z * 3000)
-
-						# tìm tọa độ thực tế của các điểm landmark
-	  					# vì tọa độ trả về từ model là tọa độ dạng % nên cần nhân với chiều rộng và chiều cao của ảnh
-						cx, cy = int(lm.x * img_w), int(lm.y * img_h)
-
-						# get the 2D/3D coordinates
-						face_2d.append([cx, cy])
-						face_3d.append([cx, cy, lm.z])
-
-						# hiện index của tọa độ các điểm landmark cần biết của 
-						drawPoint(image, (cx, cy), label = str(idx))
-				
-					# if idx == 473 or idx == 474 or idx == 475 or idx == 476 or idx == 477:
-					# if idx == 473 or idx == 263 or idx == 362 or idx == 374 or idx == 386:
-					if idx == 263 or idx == 249 or idx == 390 or idx == 373 \
-						or idx == 374 or idx == 380 or idx == 381 or idx == 382 \
-						or idx == 362 or idx == 466 or idx == 388 or idx == 387 \
-						or idx == 386 or idx == 385 or idx == 384 or idx == 398 or idx == 473 \
-						or idx == 474 or idx == 475 or idx == 476 or idx == 477:
-						if idx == 473:
-							iris_2d = (lm.x * img_w, lm.y * img_h)
-							iris_3d = (lm.x * img_w, lm.y * img_h, lm.z * 3000)
-
-						# tìm tọa độ thực tế của các điểm landmark
-						# vì tọa độ trả về từ model là tọa độ dạng % nên cần nhân với chiều rộng và chiều cao của ảnh
-						cx, cy = int(lm.x * img_w), int(lm.y * img_h)
-
-						# get the 2D/3D coordinates
-						eye_2d.append([cx, cy])
-						eye_3d.append([cx, cy, lm.z])
-
-						# hiện index của tọa độ các điểm landmark cần biết của 
-						drawPoint(image, (cx, cy), label = str(idx))
-
-				# tính toán tâm mắt 
-				eye_center = calculate_eye_center(landmarks)
-				print(f'eye_center: {eye_center}')
-				# vex vector từ tâm mắt tới điểm nhìn
-				cv2.arrowedLine(image, eye_center, iris_2d, (0, 255, 0), 2)
-
-				# convert to numpy array
-				face_2d = np.array(face_2d, dtype=np.float64)
-				face_3d = np.array(face_3d, dtype=np.float64)
+for file_path in file_list:
+	file_path = f'{PATHS["img_dir"]}/{file_path}'
+	image = Image.open(file_path)
+# Dùng TEST folder (TEST_IMAGE) ===== END
 
 
-				eye_2d = np.array(eye_2d, dtype=np.float64)
-				eye_3d = np.array(eye_3d, dtype=np.float64)
-
-				# the camera matrix
-				# chỗ này chưa hiểu lắm
-				focal_length = 1 * img_w
-
-				# camera matrix chính là ma trận chiếu hình học của camera
-				# nó bao gồm focal length, principal point, image size, distortion coefficients
-				# focal length là khoảng cách từ tâm camera đến màn hình
-				# img_h/2, img_w/2 là tọa độ của trục x, y của ảnh
-				# việc chia 2 là để lấy tâm của ảnh
-				# số 1 ở cuối là scale factor (đơn vị pixel) chính là độ dài của 1 pixel
-				cam_matrix = np.array([ [focal_length, 0, img_h/2],
-										[0, focal_length, img_w/2],
-										[0, 0, 1]]
-										# , dtype=np.float64
-									)
-				
-				# the distortion matrix
-				dist_matrix = np.zeros((4,1), dtype=np.float64)
-
-				# solve PnP
-				# pnp là phương pháp giải quyết vấn đề 3D-2D dùng để xác định vị trí và hướng của một đối tượng trong không gian 3D từ hình ảnh 2D
-				# cụ thể là xác định vị trí và hướng của khuôn mặt từ hình ảnh 2D
-				# bằng cách sử dụng các điểm landmark của khuôn mặt và các thông số như camera matrix, distortion matrix 
-				# success, rotation_vector, translation_vector = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix, flags=cv2.SOLVEPNP_ITERATIVE)
-				success, rotation_vector, translation_vector = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
-				eye_success, eye_rotation_vector, eye_translation_vector = cv2.solvePnP(eye_3d, eye_2d, cam_matrix, dist_matrix)
-				
-				# kết quả đầu ra là rotation_vector và translation_vector
-				# rotation_vector là vector quay của khuôn mặt
-				# translation_vector là vector dịch chuyển của khuôn mặt
+	# # == Cách 1: dùng model tự train
+	# # NOTE: comment this line if using TEST_IMAGE
+	# image = Image.fromarray(np.uint8(image)).convert('RGB')
+	# output_faces = model_service.predict_for(Constants.Models.FACE_MODEL, image)
+	# if output_faces:
+	# 	for detection in output_faces:
+	# 		# Dạng PIL Image
+	# 		image = detection['face_img']
+	# 		# chuyển sang dạng numpy array để face mesh đọc dc
+	# 		image = np.array(image, dtype=np.uint8)
+	# # ============== Hết cách 1 =============
 	
-				# thông qua rotation vector, ta có thể tìm ra các góc quay của khuôn mặt
-				# get rotation matrix
-				rotation_matrix, jac = cv2.Rodrigues(rotation_vector)
-				eye_rotation_matrix, f_jac = cv2.Rodrigues(eye_rotation_vector)
+	# == Cách 2: dùng model FaceDetection của Mediapipe
+	# chuyển sang dạng numpy array để face mesh đọc dc
+	# NOTE: uncomment this line if using TEST_IMAGE
+	image = np.array(image, dtype=np.uint8)
+	
+	# Perform face detection
+	image.flags.writeable = False
+	# image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-				# kết quả có mtxR, mtxQ, Qx, Qy, Qz là các thông số khác của rotation matrix
-				# cụ thể là các ma trận quay, quay quanh các trục x, y, z
-				# trong đó Qx, Qy, Qz là các góc quay quanh các trục x, y, z
-				# mtx là ma trận quay dùng để quay vật thể từ hệ tọa độ thế giới sang hệ tọa độ camera
-				# mtxQ là ma trận quay dùng để quay vật thể từ hệ tọa độ camera sang hệ tọa độ thế giới
-				# angles là góc quay của vật thể quanh các trục x, y, z
-				# get angles
-				angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rotation_matrix)
-				eye_angles, eye_mtxR, eye_mtxQ, eye_Qx, eye_Qy, eye_Qz = cv2.RQDecomp3x3(eye_rotation_matrix)
+	face_results = face_detection.process(image)
 
-				# get the y rotation degree
-				x = angles[0] * 360
-				y = angles[1] * 360
-				z = angles[2] * 360
+	image.flags.writeable = True
+	# image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+	
+	ih, iw, _ = image.shape
+	origin_image = image
 
-				eye_x = eye_angles[0] * 360
-				eye_y = eye_angles[1] * 360
-				eye_z = eye_angles[2] * 360
-				print(f'x={str(np.round(eye_x, 2)):4} y={str(np.round(eye_y, 2)):4} z={str(np.round(eye_z, 2)):4}')
-				# từ các góc x y z, ta có thể xác định hướng của khuôn mặt
-				# cụ thể là hướng của mũi
+	if face_results.detections:
+		for detection in face_results.detections:
+			
+			bboxC = detection.location_data.relative_bounding_box
+			x, y, w, h = int(bboxC.xmin * iw), int(bboxC.ymin * ih), int(bboxC.width * iw), int(bboxC.height * ih)
+			cv2.rectangle(origin_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-				color = COLOR['GREEN']
-				if y < -3.7:
-					text = "RIGHT"
-					color = COLOR['BLUE']
-				elif y > 3.7:
-					text = "LEFT"
-					color = COLOR['RED']
-				elif x < -1.2:
-					text = "DOWN"
-					color = COLOR['PURPLE']
-				elif x > 4:
-					text = "UP"
-					color = COLOR['YELLOW']
-				else:
-					text = "Forward"
+			# Perform pose estimation using the face region
+			# face_center = (x + w // 2, y + h // 2)
 
+			# frame chứa khuôn mặt thôi
+			image = origin_image[y:y + h, x:x + w]
+	# ============== Hết cách 2 =============
 
-				# display the nose direction
-				# nose_3d_projected, jacobian = cv2.projectPoints(nose_3d, rotation_vector, translation_vector, cam_matrix, dist_matrix)
+			start = time.time()
+
+			# To improve performance, optionally mark the image as not writeable to
+			# pass by reference.
+			image.flags.writeable = False
+			image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+			# https://www.youtube.com/watch?v=-toNMaS4SeQ
+			img_h, img_w, img_c = image.shape
+			face_3d = []
+			face_2d = []
+
+			results = face_mesh.process(image)
+
+			# Convert the BGR image to RGB before processing.
+			image.flags.writeable = True
+			image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+			
+
+			# Print and draw face mesh landmarks on the image.
+			if results.multi_face_landmarks:
+				for face_landmarks in results.multi_face_landmarks:
+					landmarks = face_landmarks.landmark
+					
+					for idx, lm in enumerate(face_landmarks.landmark):
+						if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
+							if idx == 1:
+								nose_2d = (lm.x * img_w, lm.y * img_h)
+								nose_3d = (lm.x * img_w, lm.y * img_h, lm.z)
+								# nose_3d = (lm.x * img_w, lm.y * img_h, lm.z * 3000)
+
+							# tìm tọa độ thực tế của các điểm landmark
+							# vì tọa độ trả về từ model là tọa độ dạng % nên cần nhân với chiều rộng và chiều cao của ảnh
+							cx, cy = int(lm.x * img_w), int(lm.y * img_h)
+
+							# get the 2D/3D coordinates
+							face_2d.append([cx, cy])
+							face_3d.append([cx, cy, lm.z])
+
+							# hiện index của tọa độ các điểm landmark cần biết của 
+							drawPoint(image, (cx, cy), label = str(idx))
 				
-				p1 = (int(nose_2d[0]), int(nose_2d[1]))
-				p2 = (int(nose_2d[0] + y * 10), int(nose_2d[1] - x * 10))
+					# convert to numpy array
+					face_2d = np.array(face_2d, dtype=np.float64)
+					face_3d = np.array(face_3d, dtype=np.float64)
 
-				eye_p1 = (int(iris_2d[0]), int(iris_2d[1]))
-				eye_p2 = (int(iris_2d[0] + eye_y * 10), int(iris_2d[1] - eye_x * 10))
+					# the camera matrix
+					# chỗ này chưa hiểu lắm
+					focal_length = 1 * img_w
 
-				cv2.line(image, p1, p2, COLOR['BLUE'], 3)
-				cv2.line(image, eye_p1, eye_p2, COLOR['PURPLE'], 3)
+					# camera matrix chính là ma trận chiếu hình học của camera
+					# nó bao gồm focal length, principal point, image size, distortion coefficients
+					# focal length là khoảng cách từ tâm camera đến màn hình
+					# img_h/2, img_w/2 là tọa độ của trục x, y của ảnh
+					# việc chia 2 là để lấy tâm của ảnh
+					# số 1 ở cuối là scale factor (đơn vị pixel) chính là độ dài của 1 pixel
+					cam_matrix = np.array([ [focal_length, 0, img_h//2],
+											[0, focal_length, img_w//2],
+											[0, 0, 1]]
+											# , dtype=np.float64
+										)
+					
+					# the distortion matrix
+					dist_matrix = np.zeros((4,1), dtype=np.float64)
 
-				# Add the text on the image
-				cv2.putText(image, f'Face: {text}', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 4)
-				cv2.putText(image, f'Nose: x={str(np.round(x, 2)):4} y={str(np.round(y, 2)):4} z={str(np.round(z, 2)):4}', (500, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['RED'], 2)
-
-				end = time.time()
-				total_time = end - start
-
-				fps = 1/total_time
-				cv2.putText(image, f'FPS: {str(np.round(fps, 2))}', (500, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['RED'], 2)
-
-				# tính toán tỉ lệ mắt để xác định trạng thái mắt đang nhắm hay mở
-				# thêm image vào để vẽ các đường line (if necessary)
-				eyes_ratio = eyesDistances(landmarks, image)
-				cv2.putText(image, f'eyes_ratio: {str(np.round(eyes_ratio, 2))}', (500, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['RED'], 2)
-
-				if eyes_ratio > 5.3:
-					cv2.putText(image, "Nham mat - Blink", (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['YELLOW'], 2)
-
-
-				iris_position, iris_ratio, iris_color = irisDistance(landmarks, image)
-				cv2.putText(image, f'Iris: {iris_position}', (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 2, iris_color, 4)
-				cv2.putText(image, f'(ratio: {str(np.round(iris_ratio, 2))})', (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['GREEN'], 2)
-				
-
-
-				# dùng tool có sẵn của lib để vẽ các connection giữa các điểm landmark
-				# mp_drawing.draw_landmarks(
-				# 	image=image,
-				# 	landmark_list=face_landmarks,
-				# 	connections=mp_face_mesh.FACEMESH_CONTOURS,
-				# 	landmark_drawing_spec=drawing_spec,
-				# 	connection_drawing_spec=drawing_spec
-				# )
-
-
+					# solve PnP
+					# pnp là phương pháp giải quyết vấn đề 3D-2D dùng để xác định vị trí và hướng của một đối tượng trong không gian 3D từ hình ảnh 2D
+					# cụ thể là xác định vị trí và hướng của khuôn mặt từ hình ảnh 2D
+					# bằng cách sử dụng các điểm landmark của khuôn mặt và các thông số như camera matrix, distortion matrix 
+					# success, rotation_vector, translation_vector = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix, flags=cv2.SOLVEPNP_ITERATIVE)
+					success, rotation_vector, translation_vector = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+					
+					# kết quả đầu ra là rotation_vector và translation_vector
+					# rotation_vector là vector quay của khuôn mặt
+					# translation_vector là vector dịch chuyển của khuôn mặt
 		
-		# Flip the image horizontally for a selfie-view display.
-		# cv2.imshow(screen_name, cv2.flip(image, 1))
-		cv2.imshow(screen_name, image)
-		if cv2.waitKey(0) & 0xFF == 27:
-			break
+					# thông qua rotation vector, ta có thể tìm ra các góc quay của khuôn mặt
+					# get rotation matrix
+					rotation_matrix, jac = cv2.Rodrigues(rotation_vector)
+
+					# kết quả có mtxR, mtxQ, Qx, Qy, Qz là các thông số khác của rotation matrix
+					# cụ thể là các ma trận quay, quay quanh các trục x, y, z
+					# trong đó Qx, Qy, Qz là các góc quay quanh các trục x, y, z
+					# mtx là ma trận quay dùng để quay vật thể từ hệ tọa độ thế giới sang hệ tọa độ camera
+					# mtxQ là ma trận quay dùng để quay vật thể từ hệ tọa độ camera sang hệ tọa độ thế giới
+					# angles là góc quay của vật thể quanh các trục x, y, z
+					# get angles
+					angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rotation_matrix)
+
+					# get the y rotation degree
+					# x = angles[0] * 360
+					# y = angles[1] * 360
+					# z = angles[2] * 360
+					x = angles[0] * 35
+					y = angles[1] * 35
+					z = angles[2] * 35
+
+					# từ các góc x y z, ta có thể xác định hướng của khuôn mặt
+					# cụ thể là hướng của mũi
+
+					color = COLOR['GREEN']
+					if y < -3.7:
+						text = "RIGHT"
+						color = COLOR['BLUE']
+					elif y > 3.7:
+						text = "LEFT"
+						color = COLOR['RED']
+					elif x < -1.2:
+						text = "DOWN"
+						color = COLOR['PURPLE']
+					elif x > 4:
+						text = "UP"
+						color = COLOR['YELLOW']
+					else:
+						text = "Forward"
+
+
+					# display the nose direction
+					# nose_3d_projected, jacobian = cv2.projectPoints(nose_3d, rotation_vector, translation_vector, cam_matrix, dist_matrix)
+					
+					p1 = (int(nose_2d[0]), int(nose_2d[1]))
+					p2 = (int(nose_2d[0] + y * 10), int(nose_2d[1] - x * 10))
+
+					cv2.line(image, p1, p2, COLOR['BLUE'], 3)
+
+					# Add the text on the image
+					cv2.putText(image, f'Face: {text}', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 3)
+					txt = f'Nose: x={str(np.round(x, 2)):4} y={str(np.round(y, 2)):4} z={str(np.round(z, 2)):4}'
+					# print(txt + ' => ' + text)
+					cv2.putText(image, txt, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, COLOR['BLUE'], 2)
+
+					end = time.time()
+					total_time = end - start
+
+					fps = 1/total_time
+					cv2.putText(image, f'FPS: {str(np.round(fps, 2))}', (500, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['RED'], 2)
+
+					# tính toán tỉ lệ mắt để xác định trạng thái mắt đang nhắm hay mở
+					# thêm image vào để vẽ các đường line (if necessary)
+					eyes_ratio = eyesDistances(landmarks, image)
+					cv2.putText(image, f'eyes_ratio: {str(np.round(eyes_ratio, 2))}', (500, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['RED'], 2)
+
+					if eyes_ratio > 5.3:
+						cv2.putText(image, "Nham mat - Blink", (20, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR['YELLOW'], 2)
+
+
+					iris_position, iris_ratio, iris_color = irisDistance(landmarks, image)
+					cv2.putText(image, f'Iris: {iris_position}', (20, 170), cv2.FONT_HERSHEY_SIMPLEX, 2, iris_color, 3)
+					cv2.putText(image, f'(ratio: {str(np.round(iris_ratio, 2))})', (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, COLOR['BLUE'], 2)
+					
+
+
+					# dùng tool có sẵn của lib để vẽ các connection giữa các điểm landmark
+					# mp_drawing.draw_landmarks(
+					# 	image=image,
+					# 	landmark_list=face_landmarks,
+					# 	connections=mp_face_mesh.FACEMESH_CONTOURS,
+					# 	landmark_drawing_spec=drawing_spec,
+					# 	connection_drawing_spec=drawing_spec
+					# )
+
+				# Dùng TEST folder (TEST_IMAGE) ===== BEGIN
+				# Flip the image horizontally for a selfie-view display.
+				# cv2.imshow(screen_name, cv2.flip(image, 1))
+				cv2.imshow(screen_name, image)
+				if cv2.waitKey(0) & 0xFF == 27:
+					stop = True
+				# Dùng TEST folder (TEST_IMAGE) ===== END
+				
+	
+		# # Dùng Camera (CAEMRA) ===== BEGIN
+		# # Flip the image horizontally for a selfie-view display.
+		# # cv2.imshow(screen_name, cv2.flip(image, 1))
+		# cv2.imshow(screen_name, image)
+		# if cv2.waitKey(25) & 0xFF == 27:
+		# 	break
+		# # Dùng Camera (CAEMRA) ===== END
+if cap:
 	cap.release()
