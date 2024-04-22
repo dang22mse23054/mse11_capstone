@@ -2,6 +2,14 @@ class Constants:
 	__slots__ = ()
 
 	FACE_GROUPS =['Background', 'Face']
+
+	COLOR = {
+		"RED": (0, 0, 255),
+		"BLUE": (255, 0, 0),
+		"GREEN": (0, 255, 0),
+		"YELLOW": (0, 255, 255),
+		"PURPLE": (255, 0, 255),
+	}
  
 	# ======== Classes ======= #
 	class Models():
@@ -86,4 +94,20 @@ class Constants:
 			NEUTRAL: 2000,
 			HAPPY: 0,
 			SURPRISE: 3500,
+		}
+
+	class Position:
+		__slots__ = ()
+		LEFT = 1
+		RIGHT = 2
+		CENTER = 0
+		UP = 3
+		DOWN = 4
+
+		Label = {
+			UP: 'UP',
+			DOWN: 'DOWN',
+			CENTER: 'CENTER',
+			LEFT: 'LEFT',
+			RIGHT: 'RIGHT',
 		}
