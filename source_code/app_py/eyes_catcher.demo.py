@@ -24,28 +24,6 @@ COLOR = {
 }
 
 # ============================================================= #
-def calculate_eye_center(landmarks):
-	"""
-	Calculates the center of an eye based on its landmark coordinates.
-
-	Args:
-		landmarks: A list of facial landmark coordinates.
-		eye_indices: A list of indices corresponding to the landmarks of the eye.
-
-	Returns:
-		A tuple representing the (x, y) coordinates of the eye center.
-	"""
-
-	# Extract eye landmark coordinates
-	eye_landmarks = np.array([landmarks[i] for i in [263, 362, 386, 374]])
-
-	# Calculate the average of all landmark coordinates to find the eye center
-	eye_center = np.mean(eye_landmarks, axis=0)
-
-	# Return the eye center coordinates
-	return eye_center[0], eye_center[1]
-
-
 def drawPoint(image, point, label = 'unknown'):
 	cv2.putText(image, str(label), point, cv2.FONT_HERSHEY_SIMPLEX, 0.3, COLOR['GREEN'], 1)
 
@@ -176,12 +154,13 @@ face_detection = mp_face_detection.FaceDetection(
 	min_detection_confidence=0.95
 )
 
-face_mesh = mp_face_mesh.FaceMesh(
-	max_num_faces=1,
-	refine_landmarks=True,
-	min_detection_confidence=0.5,
-	min_tracking_confidence=0.5
-) 
+# WARNNG: NOT reuse face_mesh because wrong calc when using inside the loop 
+# face_mesh = mp_face_mesh.FaceMesh(
+# 	max_num_faces=1,
+# 	refine_landmarks=True,
+# 	min_detection_confidence=0.5,
+# 	min_tracking_confidence=0.5
+# )
 
 # # Dùng Camera (CAEMRA) ===== BEGIN
 # cap = cv2.VideoCapture(0)
@@ -205,16 +184,15 @@ with open(img_list_file, 'r') as file:
 
 for file_path in file_list:
 	file_path = f'{PATHS["img_dir"]}/{file_path}'
-	image = Image.open(file_path)
+	ori_img = Image.open(file_path)
 # Dùng TEST folder (TEST_IMAGE) ===== END
-
 
 	# # == Cách 1: dùng model tự train
 	# # NOTE: comment this line if using TEST_IMAGE
-	# image = Image.fromarray(np.uint8(image)).convert('RGB')
-	# output_faces = model_service.predict_for(Constants.Models.FACE_MODEL, image)
+	# pil_image = Image.fromarray(np.uint8(ori_img)).convert('RGB')
+	# output_faces = model_service.predict_for(Constants.Models.FACE_MODEL, pil_image)
 	# if output_faces:
-	# 	for detection in output_faces:
+	# 	for ind, detection in enumerate(output_faces):
 	# 		# Dạng PIL Image
 	# 		image = detection['face_img']
 	# 		# chuyển sang dạng numpy array để face mesh đọc dc
@@ -264,12 +242,17 @@ for file_path in file_list:
 			face_3d = []
 			face_2d = []
 
+			face_mesh = mp_face_mesh.FaceMesh(
+				max_num_faces=1,
+				refine_landmarks=True,
+				min_detection_confidence=0.5,
+				min_tracking_confidence=0.5
+			) 
 			results = face_mesh.process(image)
 
 			# Convert the BGR image to RGB before processing.
 			image.flags.writeable = True
 			image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-			
 
 			# Print and draw face mesh landmarks on the image.
 			if results.multi_face_landmarks:
@@ -345,9 +328,9 @@ for file_path in file_list:
 					# x = angles[0] * 360
 					# y = angles[1] * 360
 					# z = angles[2] * 360
-					x = angles[0] * 35
-					y = angles[1] * 35
-					z = angles[2] * 35
+					x = angles[0] * 30
+					y = angles[1] * 30
+					z = angles[2] * 30
 
 					# từ các góc x y z, ta có thể xác định hướng của khuôn mặt
 					# cụ thể là hướng của mũi
@@ -380,7 +363,7 @@ for file_path in file_list:
 					# Add the text on the image
 					cv2.putText(image, f'Face: {text}', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 3)
 					txt = f'Nose: x={str(np.round(x, 2)):4} y={str(np.round(y, 2)):4} z={str(np.round(z, 2)):4}'
-					# print(txt + ' => ' + text)
+					print(txt + ' => ' + text)
 					cv2.putText(image, txt, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, COLOR['BLUE'], 2)
 
 					end = time.time()
@@ -399,6 +382,7 @@ for file_path in file_list:
 
 
 					iris_position, iris_ratio, iris_color = irisDistance(landmarks, image)
+					print(f'>> Iris: {iris_position} (ratio: {str(np.round(iris_ratio, 2))})')
 					cv2.putText(image, f'Iris: {iris_position}', (20, 170), cv2.FONT_HERSHEY_SIMPLEX, 2, iris_color, 3)
 					cv2.putText(image, f'(ratio: {str(np.round(iris_ratio, 2))})', (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, COLOR['BLUE'], 2)
 					
@@ -417,7 +401,7 @@ for file_path in file_list:
 				# Flip the image horizontally for a selfie-view display.
 				# cv2.imshow(screen_name, cv2.flip(image, 1))
 				cv2.imshow(screen_name, image)
-				if cv2.waitKey(0) & 0xFF == 27:
+				if cv2.waitKey(1500) & 0xFF == 27:
 					stop = True
 				# Dùng TEST folder (TEST_IMAGE) ===== END
 				

@@ -8,7 +8,7 @@ import albumentations as albu
 from PIL import Image
 from torchvision import transforms
 from albumentations.pytorch import ToTensorV2
-from datetime import datetime
+from utils.timer import Timer
 
 from emotion.model import EmotionDetectionModel
 from age_gender.model import AgeGenderDetectionModel
@@ -18,21 +18,8 @@ from common.constants import Constants
 MODELS = Constants.Models()
 AGE = Constants.Age()
 AGES = list(Constants.Age().Groups.keys())
+EMOTION = Constants.Emotion()
 
-class Timer():
-	def __init__(self, label=None):
-		self.start_time = None
-		self.stop_time = None
-		self.label = label
-  
-	def start(self, label=None):
-		self.start_time = datetime.now()
-		self.label = label
-  
-	def stop(self):
-		self.stop_time = datetime.now()
-		print(f"{self.label}: {(self.stop_time - self.start_time).total_seconds()} seconds")
-  
 class ModelService():
 	def __init__(self, model_type = None):
 		self.timer = Timer()
@@ -172,8 +159,13 @@ class ModelService():
 			return output
 				
 		elif model_type == MODELS.EMOTION_MODEL:
-			self.e_model(transformed_img_file)
-
+			self.timer.start(f"({model_type}) predict")
+			prediction = self.e_model(transformed_img_file)
+			pred_emotion = int(torch.argmax(prediction[0]))
+			self.timer.stop()
+			result = {'idx': pred_emotion, 'emotion': EMOTION.Groups[pred_emotion]}
+			print(result)
+			return result
 
 		elif model_type == MODELS.AGE_GENDER_MODEL:
 			self.timer.start(f"({model_type}) predict")
