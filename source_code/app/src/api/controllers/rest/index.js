@@ -1,7 +1,7 @@
 const FileController = require('./FileController');
-const AdsAdviceController = require('./AdsAdviceController');
+const AdsController = require('./AdsController');
 
 module.exports = {
 	fileController: new FileController(),
-	adsAdviceController: new AdsAdviceController(),
+	adsController: new AdsController(),
 };

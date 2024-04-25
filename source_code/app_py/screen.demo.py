@@ -4,6 +4,8 @@ from multiprocessing import Process
 from threading import Thread
 from services.cache_service import CacheService
 from common.constants import Constants
+from PIL import Image
+import traceback
 
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,6 +13,7 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 
 VIDEO_FOLDER = 'video'
+UNKNOWN = 'Unknown'
 DEFAULT_VIDEO = 'default_video.mp4'
 all_ads = os.listdir(VIDEO_FOLDER)
 all_ads.remove(DEFAULT_VIDEO)
@@ -46,17 +49,21 @@ def sync_all_valid_ads_cache():
 		# 'Content-Type': 'multipart/form-data',
 	}
 	while is_running_server():
-		response = requests.get(
-			api_url, 
-			headers=api_headers,
-			# reject self-signed SSL certificates
-			verify=False
-		)
-		data = response.json()['data']
-	
-		if (len(data) > 0):
-			all_valid_ads_cache_service.set(data)
+		try:
+			response = requests.get(
+				api_url, 
+				headers=api_headers,
+				# reject self-signed SSL certificates
+				verify=False
+			)
+			data = response.json()['data']
 		
+			if (len(data) > 0):
+				all_valid_ads_cache_service.set(data)
+			
+		except Exception as e:
+			print(traceback.format_exc())
+
 		time.sleep(5)
 	
 def trigger_ads_player():
@@ -71,13 +78,14 @@ def trigger_ads_player():
  
 	time.sleep(2)
 	while is_running_server():
+		print('====== Play ads ======')
 		# get all valid ads from cache
 		sync_all_ads = all_valid_ads_cache_service.get()
-		print(f'sync_all_ads {sync_all_ads}')
+		print(f'> Loading all Ads (Cached)\n {sync_all_ads}')
 	
 		# If there is no valid ads, play all ads at local folder
 		all_ads = sync_all_ads if len(sync_all_ads) > 0 else all_ads
-		print(f'all_ads {all_ads}')
+		print(f'> Available ads:\n {all_ads}')
 	
 		# Get adviced ads from cache (if any)
 		adviced_ads = advice_ads_cache_service.get()
@@ -87,7 +95,7 @@ def trigger_ads_player():
 			else f"{VIDEO_FOLDER}/{random.choice(all_ads)}" if len(all_ads) > 0 \
 			else DEFAULT_VIDEO
    
-		print(f'Playing {ads_path}')
+		print(f'> Playing {ads_path}')
    
 		# Create a VideoCapture object and read from input file 
 		video_player = cv2.VideoCapture(ads_path)
@@ -155,8 +163,10 @@ def trigger_ads_player():
 	# Closes all the frames 
 	cv2.destroyAllWindows() 
     
-def trigger_cam_tracker():
+def trigger_cam_tracker(using_image = False):
 	screen_name = 'CamTracker'
+	cam_tracker = None
+	the_last_ads = ''
 	cv2.namedWindow(screen_name)        # Create a named window
 	cv2.moveWindow(screen_name, 100,30)  # Move it to (40,30)
  
@@ -164,68 +174,105 @@ def trigger_cam_tracker():
 	api_headers = {
 		# 'Content-Type': 'multipart/form-data',
 	}
- 
-	cam_tracker = cv2.VideoCapture(0)
-	is_success, frame = cam_tracker.read()
+
+	if (using_image):
+		# Dùng TEST folder (TEST_IMAGE) ===== BEGIN
+		PATHS = {
+			'img_list': 'face_detection/raw/wider_face_split/wider_face_testdemo_filelist.txt',
+			'img_dir': 'face_detection/raw/WIDER_test/images',
+		}
+		img_list_file = PATHS["img_list"]
+		# Read the list of image files
+		with open(img_list_file, 'r') as file:
+			file_list = [line.strip() for line in file.readlines()]
+		
+	else:
+		cam_tracker = cv2.VideoCapture(0)
+		is_success, frame = cam_tracker.read()
 
 	while is_running_server():
-		is_success, frame = cam_tracker.read()
-		if not is_success:
-			break
-
-		# Chuyển đổi khung hình thành định dạng chuỗi để gửi qua HTTP
-		_, img_encoded = cv2.imencode('.jpg', frame)
-		frame_as_bytes = img_encoded.tobytes()
-  
-		# height, width = frame.shape[:2]
-		# frame = cv2.resize(frame, (round(width / screen_ratio), round(height / screen_ratio)))  
-		# cv2.imshow(screen_name, frame)
-  
-		# Tạo dữ liệu để gửi
 		try:
-			# phải set tên file, file type thì NodeJS server mới xác định được
-			file_obj = {'uploadedFile': (f"{uuid.uuid4()}.jpg", frame_as_bytes, 'image/jpeg')}
-
-			response = requests.post(
-				api_url, 
-				headers=api_headers,
-				files = file_obj,
-				# reject self-signed SSL certificates
-				verify=False
-			)
-
-			# Lấy thông tin từ response
-			data = response.json()['data']
-			print("Response:", data)
+		
 
 			# only add cache if there is no cache
 			if (advice_ads_cache_service.get() is None):
-				suggested_videos = data.get('videos', None)
-				if (suggested_videos is not None and len(suggested_videos) > 0):
-					advice_ads_cache_service.set(random.choice(suggested_videos))
+				if (using_image):
+					# Randomly select an image
+					file_path = f'{PATHS["img_dir"]}/{random.choice(file_list)}'
+					ori_img = Image.open(file_path)
+					# Chuyển đổi ảnh từ PIL sang OpenCV
+					frame = np.array(ori_img)
+				else:
+					is_success, frame = cam_tracker.read()
+					if not is_success:
+						break
 
-			faces = data['faces']
-			if (len(faces) > 0):
-				show_bbox(frame, faces, screen_name)
+				# Chuyển đổi khung hình thành định dạng chuỗi để gửi qua HTTP
+				_, img_encoded = cv2.imencode('.jpg', frame)
+				frame_as_bytes = img_encoded.tobytes()
+		
+				# height, width = frame.shape[:2]
+				# frame = cv2.resize(frame, (round(width / screen_ratio), round(height / screen_ratio)))  
+				# cv2.imshow(screen_name, frame)
+		
+				# Tạo dữ liệu để gửi
+				try:
+					# phải set tên file, file type thì NodeJS server mới xác định được
+					file_obj = {'uploadedFile': (f"{uuid.uuid4()}.jpg", frame_as_bytes, 'image/jpeg')}
 
-		except requests.exceptions.RequestException as e:
-			print("Error:", e)
-			break
+					response = requests.post(
+						api_url, 
+						headers=api_headers,
+						files = file_obj,
+						# reject self-signed SSL certificates
+						verify=False
+					)
+
+					# Lấy thông tin từ response
+					data = response.json()['data']
+
+					suggested_videos = data.get('videos', None)
+					if (suggested_videos is not None and len(suggested_videos) > 0):
+						majority_age = data.get('majority_age', None)
+						majority_gender = data.get('majority_gender', None)
+						print(f"====== Response ======\n majority_age={AGES[majority_age] if majority_age else UNKNOWN}\n majority_gender={('Female' if majority_gender else 'Male') if majority_gender is not None else UNKNOWN}\n suggested_videos={suggested_videos}")
+
+						# remove ads the same with the last adviced video
+						if the_last_ads in suggested_videos:
+							suggested_videos.remove(the_last_ads)
+						print(f'* the_last_ads = {the_last_ads}')
+						print(f'* suggested_videos = {suggested_videos}')
+
+						s_video = random.choice(suggested_videos)
+						print(f'> Set suggested video: {s_video}')
+						advice_ads_cache_service.set(s_video)
+						the_last_ads = s_video
+
+					faces = data['faces']
+					if (len(faces) > 0):
+						show_bbox(frame, faces, screen_name)
+
+				except requests.exceptions.RequestException as e:
+					print(traceback.format_exc())
+				
+				# cv2.waitKey(2) trả về một giá trị int, nếu giá trị trả về khác 0 thì sẽ chờ x giây, tiếp tục chạy vòng lặp, ngược lại sẽ thoát khỏi vòng lặp
+				# 0xFF nghĩa là 11111111 trong hệ cơ số 2 tức là nó sẽ lấy 8 bit cuối cùng của kết quả trả về từ hàm cv2.waitKey(0) sau đó so sánh với giá trị của phím 'q' trong bảng mã ASCII
+				# ord('q') trả về giá trị của phím 'q' trong bảng mã ASCII, có kiểu dữ liệu là int
+				
+				# Đợi 3 giây trước khi chụp ảnh tiếp theo
+				# Press Q on keyboard to exit 
+				key_press = cv2.waitKey(1000) & 0xFF
+				if key_press == ord('q'): 
+					stop_server()
+					break
 		
-		# cv2.waitKey(2) trả về một giá trị int, nếu giá trị trả về khác 0 thì sẽ chờ x giây, tiếp tục chạy vòng lặp, ngược lại sẽ thoát khỏi vòng lặp
-		# 0xFF nghĩa là 11111111 trong hệ cơ số 2 tức là nó sẽ lấy 8 bit cuối cùng của kết quả trả về từ hàm cv2.waitKey(0) sau đó so sánh với giá trị của phím 'q' trong bảng mã ASCII
-		# ord('q') trả về giá trị của phím 'q' trong bảng mã ASCII, có kiểu dữ liệu là int
-		
-  		# Đợi 3 giây trước khi chụp ảnh tiếp theo
-		# Press Q on keyboard to exit 
-		key_press = cv2.waitKey(22) & 0xFF
-		if key_press == ord('q'): 
-			stop_server()
-			break
-   
-		# time.sleep(2)
-		
-	cam_tracker.release()
+				# time.sleep(2)
+	
+		except Exception as e:
+			print(traceback.format_exc())
+
+	if (cam_tracker):
+		cam_tracker.release()
 	cv2.destroyAllWindows()
 
 	
@@ -238,18 +285,6 @@ def show_bbox(image, faces, screen_name, screen_ratio = 5):
 		bbox = np.array(bbox, dtype=np.int32)
 		label = f"{'Nam' if face['gender'] == 0 else 'Nu'}-{AGES[face['age']]}"
 		cv2.rectangle(image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (0, 0, 255), 2)
-  
-
-		# Sử dụng thuật toán Haar để phát hiện mắt
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		eyes = cv2.CascadeClassifier('haarcascade_eye.xml').detectMultiScale(gray)
-
-		print(eyes)
-		# Kiểm tra xem người đó có chú ý camera hay không
-		if len(eyes) == 2:
-			print("Người này đang chú ý camera!")
-		else:
-			print("Người này không chú ý camera!")
   
 		cv2.putText(
 			image,
@@ -276,7 +311,7 @@ if __name__ == "__main__":
 	
 	sync_all_valid_ads_proc = Process(target=sync_all_valid_ads_cache, args=())
 	ads_player_proc = Process(target=trigger_ads_player, args=())
-	cam_tracker_proc = Process(target=trigger_cam_tracker, args=())
+	cam_tracker_proc = Process(target=trigger_cam_tracker, args=(True,))
 	
 	procs.append(sync_all_valid_ads_proc)
 	procs.append(ads_player_proc)

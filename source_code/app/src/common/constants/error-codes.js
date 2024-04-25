@@ -2,10 +2,12 @@ const ErrorCodes = {
 	NOT_EXISTED_USER: { code: 10002, message: 'User Id is wrong' },
 	DELETED_USER: { code: 10003, message: 'User Id is deleted' },
 	OBSOLETE_DATA: { code: 10005, message: 'Data is out of date. Please try to reload' },
-	EXPRESS_VALIDATOR: {
-		CODE: 20000,
-	},
 	INVALID_REQUEST: 20000,
+	ADS: {
+		INVALID: { code: 20002, message: 'Invalid Ads' },
+		DELETED: { code: 20003, message: 'Deleted Ads' },
+		DISABLED: { code: 20004, message: 'Disabled Ads' },
+	},
 	FILE: {
 		UNSUPPORTED: { code: 11001, message: 'Unsupported file' },
 		NO_FILE: { code: 11002, message: 'Do not have any uploaded file' },

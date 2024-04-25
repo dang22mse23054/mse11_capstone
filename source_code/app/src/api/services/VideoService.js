@@ -4,6 +4,7 @@ const { Common, VideoStatus } = require('commonDir/constants');
 const Video = require('modelDir/Video');
 const VideoCategory = require('modelDir/VideoCategory');
 const VideoBO = require('../db/business/VideoBO');
+const LogBO = require('../db/business/LogBO');
 const VideoCategoryBO = require('../db/business/VideoCategoryBO');
 const LogService = require('commonDir/logger');
 const log = LogService.getInstance();
@@ -289,6 +290,24 @@ module.exports = class VideoService {
 					await this.s3Service.removeFile(
 						`${process.env.S3_BUCKET}/${video.refFilePath}`
 					);
+
+					return trx.commit(true);
+				}
+				return null;
+			} catch (error) {
+				log.error(error);
+				return trx.rollback(error);
+			}
+		});
+	};
+
+	processLog = (logData) => {
+		return Database.transaction(async (trx) => {
+			try {
+				if (logData.videoId && logData) {
+					const logBO = new LogBO(trx);
+
+					await logBO.insert(logData);
 
 					return trx.commit(true);
 				}

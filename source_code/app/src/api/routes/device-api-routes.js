@@ -8,12 +8,13 @@ class DeviceApiRoutes extends BaseRoutes {
 	}
 
 	initRouter() {
-		const { adsAdviceController } = require('../controllers/rest');
+		const { adsController } = require('../controllers/rest');
 
 		// ========= BEGIN Routing ========= //
 		this.router.use('/ads', this.subRoutes(subRouter => {
-			subRouter.post('/advice', adsAdviceController.advice);
-			subRouter.get('/all', adsAdviceController.getAll);
+			subRouter.post('/advice', adsController.advice);
+			subRouter.post('/log/:videoId', adsController.log);
+			subRouter.get('/all', adsController.getAll);
 		}));
 
 		// Default return in case of unknown URL 
