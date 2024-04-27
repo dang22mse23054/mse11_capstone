@@ -75,6 +75,8 @@ def sync_all_valid_ads_cache():
 		# 'Content-Type': 'multipart/form-data',
 	}
 	while is_running_server():
+		print(txt_color('**************** Sync ads ****************', Constants.TXT_COLOR['PINK']))
+
 		try:
 			response = requests.get(
 				'https://mse11-capstone.com.vn/dapi/ads/all', 
@@ -129,6 +131,12 @@ def trigger_ads_player():
 			adviced_ads = (random.choice(all_ads) if adviced_ads is None else adviced_ads).split('|')
 			adviced_ads_id = adviced_ads[0]
 			adviced_ads_name = adviced_ads[1]
+
+			# Nếu có adviced ads mà không phải từ Remote thì phải tạo cache mới (nhằm tại điều kiện để logging cho ads)
+			if (adviced_ads_name):
+				print(f" > [{txt_color('Local', Constants.TXT_COLOR['YELLOW'])}] Set suggested video: {adviced_ads_name}")
+				advice_ads_cache_service.set(f'{adviced_ads_id}|{adviced_ads_name}')
+								
   
 		# Select adviced ads. If there is no adviced ads left, select a random video from all ads. If no ads left, play default video
 		ads_path = f"{VIDEO_FOLDER}/{adviced_ads_name}" if adviced_ads_name is not None else DEFAULT_VIDEO
@@ -308,18 +316,20 @@ def trigger_cam_tracker(using_image = False):
 							print(f'* recently_ads_list = {recently_ads_list}')
 							print(f'* suggested_videos = {suggested_videos}')
 
-						s_video = random.choice(suggested_videos)
-						print(f' > Set suggested video: {s_video}')
+						if (len(suggested_videos) > 0):
+							# Randomly select a video from suggested videos
+							s_video = random.choice(suggested_videos)
+							print(f" > [{txt_color('Remote', Constants.TXT_COLOR['BLUE'])}] Set suggested video: {s_video}")
 
-						# get video name and video id (using for loop because s_video is the dict, not the list)
-						for video_name in s_video:
-							advice_ads_cache_service.set(f'{s_video[video_name]}|{video_name}')
-							
-							# add suggested video to recently ads list
-							recently_ads_list.append(s_video)
-							if (len(recently_ads_list) > 3):
-								# only keep max 3 items in recently ads list
-								recently_ads_list = recently_ads_list[1:]
+							# get video name and video id (using for loop because s_video is the dict, not the list)
+							for video_name in s_video:
+								advice_ads_cache_service.set(f'{s_video[video_name]}|{video_name}')
+								
+								# add suggested video to recently ads list
+								recently_ads_list.append(s_video)
+								if (len(recently_ads_list) > 3):
+									# only keep max 3 items in recently ads list
+									recently_ads_list = recently_ads_list[1:]
 
 					faces = data['faces']
 					if (len(faces) > 0):
@@ -384,7 +394,7 @@ if __name__ == "__main__":
 	
 	sync_all_valid_ads_proc = Process(target=sync_all_valid_ads_cache, args=())
 	ads_player_proc = Process(target=trigger_ads_player, args=())
-	cam_tracker_proc = Process(target=trigger_cam_tracker, args=(True,))
+	cam_tracker_proc = Process(target=trigger_cam_tracker, args=(False,))
 	
 	procs.append(sync_all_valid_ads_proc)
 	procs.append(ads_player_proc)
