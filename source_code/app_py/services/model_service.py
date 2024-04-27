@@ -22,7 +22,7 @@ EMOTION = Constants.Emotion()
 
 class ModelService():
 	def __init__(self, model_type = None):
-		self.timer = Timer()
+		self.timer = Timer(is_enabled=False)
   
 		if (model_type is None):
 			self.models = self.init_models()

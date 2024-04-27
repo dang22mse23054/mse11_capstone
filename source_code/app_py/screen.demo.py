@@ -4,6 +4,7 @@ from multiprocessing import Process
 from threading import Thread
 from services.cache_service import CacheService
 from common.constants import Constants
+from utils.decoder import txt_color
 from PIL import Image
 import traceback
 
@@ -25,6 +26,7 @@ AGES = list(AGE.Groups.keys())
 status_path = f'{VIDEO_FOLDER}/status.cache'
 status_cache_service = CacheService(status_path)
 
+# format: videoId|video_name
 advice_ads_cache_path = f'{VIDEO_FOLDER}/advice_ads.cache'
 advice_ads_cache_service = CacheService(advice_ads_cache_path)
 
@@ -42,16 +44,40 @@ def is_running_server():
 def stop_server():
     status_cache_service.set('Stop')
 
-# Sync all valid ads from server, interval 5s
+def show_bbox(image, faces, screen_name, screen_ratio = 5):
+	# image = image.copy()
+
+	for index, face in enumerate(faces):
+		score = face['score']
+		bbox = face['bbox']
+		bbox = np.array(bbox, dtype=np.int32)
+		label = f"{'Nam' if face['gender'] == 0 else 'Nu'}-{AGES[face['age']]}"
+		cv2.rectangle(image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (0, 0, 255), 2)
+  
+		cv2.putText(
+			image,
+			label,
+			(int(bbox[0]), int(bbox[1]) - 10),
+			fontFace = cv2.FONT_HERSHEY_DUPLEX,
+			fontScale = 2,
+			color = (0,0,255),
+			thickness=3,
+			lineType=cv2.LINE_AA
+		)
+
+	height, width = image.shape[:2]
+	image = cv2.resize(image, (round(width / screen_ratio), round(height / screen_ratio)))  
+	cv2.imshow(screen_name, image)
+
+# ============= Sync all valid ads from server, interval 5s ============= #
 def sync_all_valid_ads_cache():
-	api_url = 'https://mse11-capstone.com.vn/dapi/ads/all'
 	api_headers = {
 		# 'Content-Type': 'multipart/form-data',
 	}
 	while is_running_server():
 		try:
 			response = requests.get(
-				api_url, 
+				'https://mse11-capstone.com.vn/dapi/ads/all', 
 				headers=api_headers,
 				# reject self-signed SSL certificates
 				verify=False
@@ -59,13 +85,19 @@ def sync_all_valid_ads_cache():
 			data = response.json()['data']
 		
 			if (len(data) > 0):
-				all_valid_ads_cache_service.set(data)
+				cache_data = []
+				for video in data:
+					v_name = list(video.keys())[0]
+					cache_data.append(f'{video[v_name]}|{v_name}')
+
+				all_valid_ads_cache_service.set(cache_data)
 			
 		except Exception as e:
 			print(traceback.format_exc())
 
 		time.sleep(5)
-	
+
+# ========================== Ads Player ========================== #
 def trigger_ads_player():
     # Player settings
 	screen_name = 'Advertisement'
@@ -76,7 +108,7 @@ def trigger_ads_player():
 	# Player process
 	video_player = None
  
-	time.sleep(2)
+	time.sleep(3)
 	while is_running_server():
 		print('====== Play ads ======')
 		# get all valid ads from cache
@@ -88,12 +120,20 @@ def trigger_ads_player():
 		print(f'> Available ads:\n {all_ads}')
 	
 		# Get adviced ads from cache (if any)
+		# format: videoId|video_name
+		adviced_ads_id = 0
+		adviced_ads_name = None
 		adviced_ads = advice_ads_cache_service.get()
   
+		if (adviced_ads is not None or len(all_ads) > 0):
+			adviced_ads = (random.choice(all_ads) if adviced_ads is None else adviced_ads).split('|')
+			adviced_ads_id = adviced_ads[0]
+			adviced_ads_name = adviced_ads[1]
+  
 		# Select adviced ads. If there is no adviced ads left, select a random video from all ads. If no ads left, play default video
-		ads_path = f"{VIDEO_FOLDER}/{adviced_ads}"  if adviced_ads is not None \
-			else f"{VIDEO_FOLDER}/{random.choice(all_ads)}" if len(all_ads) > 0 \
-			else DEFAULT_VIDEO
+		ads_path = f"{VIDEO_FOLDER}/{adviced_ads_name}" if adviced_ads_name is not None else DEFAULT_VIDEO
+	
+		print(f'> ads_path = {ads_path}')
    
 		print(f'> Playing {ads_path}')
    
@@ -163,14 +203,18 @@ def trigger_ads_player():
 	# Closes all the frames 
 	cv2.destroyAllWindows() 
     
+# ========================== Camera Tracker ========================== #
 def trigger_cam_tracker(using_image = False):
 	screen_name = 'CamTracker'
 	cam_tracker = None
-	the_last_ads = ''
+	recently_ads_list = []
 	cv2.namedWindow(screen_name)        # Create a named window
 	cv2.moveWindow(screen_name, 100,30)  # Move it to (40,30)
  
-	api_url = 'https://mse11-capstone.com.vn/dapi/ads/advice'
+	log_screen_name = 'AdsLog'
+	cv2.namedWindow(log_screen_name)        # Create a named window
+	cv2.moveWindow(log_screen_name, 600,300)  # Move it to (40,30)
+ 
 	api_headers = {
 		# 'Content-Type': 'multipart/form-data',
 	}
@@ -188,40 +232,50 @@ def trigger_cam_tracker(using_image = False):
 		
 	else:
 		cam_tracker = cv2.VideoCapture(0)
-		is_success, frame = cam_tracker.read()
 
 	while is_running_server():
 		try:
-		
+			# Prepare frame to image for sending to server
+			frame = None
+			if (using_image):
+				# Randomly select an image
+				file_path = f'{PATHS["img_dir"]}/{random.choice(file_list)}'
+				ori_img = Image.open(file_path)
+				# Chuyển đổi ảnh từ PIL sang OpenCV
+				frame = np.array(ori_img)
+			else:
+				is_success, frame = cam_tracker.read()
+				if not is_success:
+					continue
+
+			# Chuyển đổi khung hình thành định dạng chuỗi để gửi qua HTTP
+			_, img_encoded = cv2.imencode('.jpg', frame)
+			frame_as_bytes = img_encoded.tobytes()
+	
+			# height, width = frame.shape[:2]
+			# frame = cv2.resize(frame, (round(width / screen_ratio), round(height / screen_ratio)))  
+			# cv2.imshow(screen_name, frame)
+   
+			# Tạo dữ liệu để gửi
+			# phải set tên file, file type thì NodeJS server mới xác định được
+			file_obj = {'uploadedFile': (f"{uuid.uuid4()}.jpg", frame_as_bytes, 'image/jpeg')}
+   
+			# Default variable value
+			adviced_ads_id = 0
+			adviced_ads_name = None
 
 			# only add cache if there is no cache
-			if (advice_ads_cache_service.get() is None):
-				if (using_image):
-					# Randomly select an image
-					file_path = f'{PATHS["img_dir"]}/{random.choice(file_list)}'
-					ori_img = Image.open(file_path)
-					# Chuyển đổi ảnh từ PIL sang OpenCV
-					frame = np.array(ori_img)
-				else:
-					is_success, frame = cam_tracker.read()
-					if not is_success:
-						break
+			adviced_ads = advice_ads_cache_service.get()
 
-				# Chuyển đổi khung hình thành định dạng chuỗi để gửi qua HTTP
-				_, img_encoded = cv2.imencode('.jpg', frame)
-				frame_as_bytes = img_encoded.tobytes()
-		
-				# height, width = frame.shape[:2]
-				# frame = cv2.resize(frame, (round(width / screen_ratio), round(height / screen_ratio)))  
-				# cv2.imshow(screen_name, frame)
-		
-				# Tạo dữ liệu để gửi
+			# FOR DEBUG
+			# adviced_ads = '12|daka.mp4'
+			# If not have any adviced ads, call API to get adviced ads
+			if (adviced_ads is None):
+				print(txt_color('**************** Get ADVICE ads ****************', Constants.TXT_COLOR['GREEN']))
+				
 				try:
-					# phải set tên file, file type thì NodeJS server mới xác định được
-					file_obj = {'uploadedFile': (f"{uuid.uuid4()}.jpg", frame_as_bytes, 'image/jpeg')}
-
 					response = requests.post(
-						api_url, 
+						'https://mse11-capstone.com.vn/dapi/ads/advice', 
 						headers=api_headers,
 						files = file_obj,
 						# reject self-signed SSL certificates
@@ -232,21 +286,40 @@ def trigger_cam_tracker(using_image = False):
 					data = response.json()['data']
 
 					suggested_videos = data.get('videos', None)
+					print(' > === Suggested videos ===')
+					print(suggested_videos)
 					if (suggested_videos is not None and len(suggested_videos) > 0):
 						majority_age = data.get('majority_age', None)
 						majority_gender = data.get('majority_gender', None)
-						print(f"====== Response ======\n majority_age={AGES[majority_age] if majority_age else UNKNOWN}\n majority_gender={('Female' if majority_gender else 'Male') if majority_gender is not None else UNKNOWN}\n suggested_videos={suggested_videos}")
+
+						logTxt = ' > [Suggestion] === Response data ===\n'
+						logTxt += f"  majority_age={AGES[majority_age] if majority_age else UNKNOWN}\n"
+						logTxt += f"  majority_gender={('Female' if majority_gender else 'Male') if majority_gender is not None else UNKNOWN}\n"
+						logTxt += f"  suggested_videos={suggested_videos}"
+						print(logTxt)
 
 						# remove ads the same with the last adviced video
-						if the_last_ads in suggested_videos:
-							suggested_videos.remove(the_last_ads)
-						print(f'* the_last_ads = {the_last_ads}')
-						print(f'* suggested_videos = {suggested_videos}')
+						# calc recently ads
+						if (len(recently_ads_list) > 0):
+							# if there is any recently ads, remove it from suggested videos
+							for recently_ads in recently_ads_list:
+								if recently_ads in suggested_videos:
+									suggested_videos.remove(recently_ads)
+							print(f'* recently_ads_list = {recently_ads_list}')
+							print(f'* suggested_videos = {suggested_videos}')
 
 						s_video = random.choice(suggested_videos)
-						print(f'> Set suggested video: {s_video}')
-						advice_ads_cache_service.set(s_video)
-						the_last_ads = s_video
+						print(f' > Set suggested video: {s_video}')
+
+						# get video name and video id (using for loop because s_video is the dict, not the list)
+						for video_name in s_video:
+							advice_ads_cache_service.set(f'{s_video[video_name]}|{video_name}')
+							
+							# add suggested video to recently ads list
+							recently_ads_list.append(s_video)
+							if (len(recently_ads_list) > 3):
+								# only keep max 3 items in recently ads list
+								recently_ads_list = recently_ads_list[1:]
 
 					faces = data['faces']
 					if (len(faces) > 0):
@@ -266,7 +339,32 @@ def trigger_cam_tracker(using_image = False):
 					stop_server()
 					break
 		
-				# time.sleep(2)
+			else:
+				# Logging the ads space to server for analytic later
+				adviced_ads_id = adviced_ads.split('|')[0]
+				print(txt_color(f'**************** Log ads ({adviced_ads_id}) to server ****************', Constants.TXT_COLOR['BLUE']))
+				show_bbox(frame, [], log_screen_name)
+
+				response = requests.post(
+					f'https://mse11-capstone.com.vn/dapi/ads/log/{adviced_ads_id}', 
+					headers=api_headers,
+					files = file_obj,
+					# reject self-signed SSL certificates
+					verify=False
+				)
+
+				# Lấy thông tin từ response
+				data = response.json()
+
+				print(f' > [Logging] === Response data ===')
+				print(data)
+				# ko dc dùng time.sleep vì sẽ ko hiện dc cv2 window để show image
+				# time.sleep(5)
+				# Press Q on keyboard to exit 
+				key_press = cv2.waitKey(5000) & 0xFF
+				if key_press == ord('q'): 
+					stop_server()
+					break
 	
 		except Exception as e:
 			print(traceback.format_exc())
@@ -275,32 +373,7 @@ def trigger_cam_tracker(using_image = False):
 		cam_tracker.release()
 	cv2.destroyAllWindows()
 
-	
-def show_bbox(image, faces, screen_name, screen_ratio = 5):
-	# image = image.copy()
-
-	for index, face in enumerate(faces):
-		score = face['score']
-		bbox = face['bbox']
-		bbox = np.array(bbox, dtype=np.int32)
-		label = f"{'Nam' if face['gender'] == 0 else 'Nu'}-{AGES[face['age']]}"
-		cv2.rectangle(image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (0, 0, 255), 2)
-  
-		cv2.putText(
-			image,
-			label,
-			(int(bbox[0]), int(bbox[1]) - 10),
-			fontFace = cv2.FONT_HERSHEY_DUPLEX,
-			fontScale = 2,
-			color = (0,0,255),
-			thickness=3,
-			lineType=cv2.LINE_AA
-		)
-
-	height, width = image.shape[:2]
-	image = cv2.resize(image, (round(width / screen_ratio), round(height / screen_ratio)))  
-	cv2.imshow(screen_name, image)
-
+# ========================== MAIN ========================== #
 if __name__ == "__main__":
 
 	# Reset old cache

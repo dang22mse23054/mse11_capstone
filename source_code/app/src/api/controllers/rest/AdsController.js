@@ -22,7 +22,7 @@ module.exports = class AdsController {
 			// get all enabled videos
 			const videos = await videoService.getVideo();
 			
-			respObj.setData(videos?.map(i => i.refFileName));
+			respObj.setData(videos?.map(i => ({[i.refFileName] : i.id})));
 			return res.status(respStatus).json(respObj);
 		} catch (err) {
 			log.error(err);
@@ -97,7 +97,7 @@ module.exports = class AdsController {
 					gender: finalData.majority_gender
 				});
 
-				finalData.videos = data?.map(i => i.refFileName)
+				finalData.videos = data?.map(i => ({[i.refFileName] : i.id}))
 			}
 			respObj.setData(finalData);
 
@@ -144,7 +144,7 @@ module.exports = class AdsController {
 
 		}).then(async ({ err, fields, files }) => {
 			console.log('========== Request Validation ==========');
-			console.log(files);
+			// console.log(files);
 
 			// Validate file info
 			file = files.uploadedFile;
@@ -160,7 +160,6 @@ module.exports = class AdsController {
 
 			// check file type
 			const contentType = file.type;
-			console.log('Content type: ', contentType)
 			let contentTypeInfo = null;
 			for (let i = 0; i < ACCETED_TYPES.length; i++) {
 				if (ACCETED_TYPES[i].val.includes(contentType)) {
@@ -192,7 +191,6 @@ module.exports = class AdsController {
 
 			// Prepare form data
 			const formData = new FormData();
-			console.log(file.name);
 
 			// khác với client, trên server phải tự tạo đọc stream từ file rồi append vào form-data
 			formData.append('img_file', fs.createReadStream(file.path), {
@@ -213,17 +211,26 @@ module.exports = class AdsController {
 			return axiosResp.data;
 
 		}).then(async (logData) => {
-			logData.gender = JSON.stringify(logData.gender);
-			logData.age = JSON.stringify(logData.age);
-			logData.happy = JSON.stringify(logData.happy);
-			logData.createdAt = new Date(logData.createdAt);
+			let now = moment().tz('UTC').format('YYYYMMDD_HHmm');
+			let id = `${now}_${Math.random().toString(36).substring(3)}`;
 
-			console.log(logData)
+			if (logData.should_skip) {
+				respObj.setData('Skip logging by this frame');
+			} else {
+				logData.id = id;
+				logData.should_skip = logData.should_skip;
+				logData.gender = JSON.stringify(logData.gender);
+				logData.age = JSON.stringify(logData.age);
+				logData.happy = JSON.stringify(logData.happy);
+				logData.createdAt = new Date(logData.createdAt);
+				console.log(logData)
+				
+				// save log to db
+				await videoService.processLog(logData);
+				
+				respObj.setData(logData);
+			}
 
-			// save log to db
-			await videoService.processLog(logData);
-			
-			respObj.setData(logData);
 			return res.status(respStatus).json(respObj);
 
 		}).catch((err) => {

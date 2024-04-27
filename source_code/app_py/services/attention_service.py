@@ -91,7 +91,13 @@ def calc_eyes_distances(landmarks, image=None):
 
 class AttentionService():
 	def __init__(self):
-		self.timer = Timer()
+		self.timer = Timer(is_enabled=False)
+		self.face_mesh = mp_face_mesh.FaceMesh(
+			max_num_faces=1,
+			refine_landmarks=True,
+			min_detection_confidence=0.5,
+			min_tracking_confidence=0.5
+		)
 
 	def predict(self, image):
 
@@ -103,12 +109,7 @@ class AttentionService():
 		# 	min_tracking_confidence=0.5
 		# )
 		try:
-			face_mesh = mp_face_mesh.FaceMesh(
-				max_num_faces=1,
-				refine_landmarks=True,
-				min_detection_confidence=0.5,
-				min_tracking_confidence=0.5
-			)
+			
 			
 			self.timer.start(f"(attention) landmarks detection")
 
@@ -122,7 +123,7 @@ class AttentionService():
 			face_3d = []
 			face_2d = []
 
-			results = face_mesh.process(image)
+			results = self.face_mesh.process(image)
 			
 			# Convert the BGR image to RGB before processing.
 			image.flags.writeable = True
@@ -174,9 +175,9 @@ class AttentionService():
 					# get angles
 					angles, f_mtxR, f_mtxQ, f_Qx, f_Qy, f_Qz = cv2.RQDecomp3x3(rotation_matrix)
 					# get the y rotation degree
-					x = angles[0] * 30
-					y = angles[1] * 30
-					z = angles[2] * 30
+					x = angles[0] * 35
+					y = angles[1] * 35
+					z = angles[2] * 35
 					
 					face_position = None
 					if y < -3.7:

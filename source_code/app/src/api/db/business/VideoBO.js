@@ -19,6 +19,7 @@ module.exports = class VideoBO {
 	getBy = ({age, gender} = {}, isEnabled = true) => {
 		let stm = Video.query(readonlyDb).alias('v')
 			.distinct([
+				'v.id',
 				'v.refFileName',
 			])
 			// VideoCategory

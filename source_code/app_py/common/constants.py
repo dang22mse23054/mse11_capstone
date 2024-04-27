@@ -10,7 +10,15 @@ class Constants:
 		"YELLOW": (0, 255, 255),
 		"PURPLE": (255, 0, 255),
 	}
- 
+
+	TXT_COLOR = {
+		"RED": 31,
+		"BLUE": 34,
+		"GREEN": 32,
+		"YELLOW": 33,
+		"PINK": 35,
+	}
+
 	# ======== Classes ======= #
 	class Models():
 		__slot__ = ()
