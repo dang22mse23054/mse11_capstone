@@ -1,5 +1,6 @@
 import os, random, uuid, time
 import cv2, requests, numpy as np
+from datetime import datetime
 from multiprocessing import Process
 from threading import Thread
 from services.cache_service import CacheService
@@ -12,6 +13,9 @@ import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 urllib3.disable_warnings(InsecureRequestWarning)
 
+
+MAX_RECENTLY_ADS_NUM = 3
+SYNC_INTERVAL = 10
 
 VIDEO_FOLDER = 'video'
 UNKNOWN = 'Unknown'
@@ -75,7 +79,7 @@ def sync_all_valid_ads_cache():
 		# 'Content-Type': 'multipart/form-data',
 	}
 	while is_running_server():
-		print(txt_color('**************** Sync ads ****************', Constants.TXT_COLOR['PINK']))
+		print(txt_color(f'**************** [{datetime.now()}] Sync ads ****************', Constants.TXT_COLOR['PINK']))
 
 		try:
 			response = requests.get(
@@ -97,7 +101,7 @@ def sync_all_valid_ads_cache():
 		except Exception as e:
 			print(traceback.format_exc())
 
-		time.sleep(5)
+		time.sleep(SYNC_INTERVAL)
 
 # ========================== Ads Player ========================== #
 def trigger_ads_player():
@@ -127,6 +131,9 @@ def trigger_ads_player():
 		adviced_ads_name = None
 		adviced_ads = advice_ads_cache_service.get()
   
+		# nếu ads được đề xuất thì làm
+		# hoặc nếu ad ko dc đề xuất nhg vẫn có all_ads 
+  		# => thì chọn ngẫu nhiên 1 ads từ all_ads
 		if (adviced_ads is not None or len(all_ads) > 0):
 			adviced_ads = (random.choice(all_ads) if adviced_ads is None else adviced_ads).split('|')
 			adviced_ads_id = adviced_ads[0]
@@ -242,6 +249,7 @@ def trigger_cam_tracker(using_image = False):
 		cam_tracker = cv2.VideoCapture(0)
 
 	while is_running_server():
+		c_time = datetime.now()
 		try:
 			# Prepare frame to image for sending to server
 			frame = None
@@ -279,7 +287,7 @@ def trigger_cam_tracker(using_image = False):
 			# adviced_ads = '12|daka.mp4'
 			# If not have any adviced ads, call API to get adviced ads
 			if (adviced_ads is None):
-				print(txt_color('**************** Get ADVICE ads ****************', Constants.TXT_COLOR['GREEN']))
+				print(txt_color(f'**************** [{c_time}] Get ADVICE ads ****************', Constants.TXT_COLOR['GREEN']))
 				
 				try:
 					response = requests.post(
@@ -294,7 +302,7 @@ def trigger_cam_tracker(using_image = False):
 					data = response.json()['data']
 
 					suggested_videos = data.get('videos', None)
-					print(' > === Suggested videos ===')
+					print(' > === [Remote] Suggested videos ===')
 					print(suggested_videos)
 					if (suggested_videos is not None and len(suggested_videos) > 0):
 						majority_age = data.get('majority_age', None)
@@ -327,7 +335,9 @@ def trigger_cam_tracker(using_image = False):
 								
 								# add suggested video to recently ads list
 								recently_ads_list.append(s_video)
-								if (len(recently_ads_list) > 3):
+								new_max = np.array([MAX_RECENTLY_ADS_NUM, len(all_ads)]).min()
+								print(f'* new_max = {new_max}')
+								if (len(recently_ads_list) >= new_max):
 									# only keep max 3 items in recently ads list
 									recently_ads_list = recently_ads_list[1:]
 
@@ -352,7 +362,7 @@ def trigger_cam_tracker(using_image = False):
 			else:
 				# Logging the ads space to server for analytic later
 				adviced_ads_id = adviced_ads.split('|')[0]
-				print(txt_color(f'**************** Log ads ({adviced_ads_id}) to server ****************', Constants.TXT_COLOR['BLUE']))
+				print(txt_color(f'**************** [{c_time}] Log ads ({adviced_ads_id}) to server ****************', Constants.TXT_COLOR['BLUE']))
 				show_bbox(frame, [], log_screen_name)
 
 				response = requests.post(
@@ -366,7 +376,7 @@ def trigger_cam_tracker(using_image = False):
 				# Lấy thông tin từ response
 				data = response.json()
 
-				print(f' > [Logging] === Response data ===')
+				print(f' > [Logging - {c_time}] === Response data ===')
 				print(data)
 				# ko dc dùng time.sleep vì sẽ ko hiện dc cv2 window để show image
 				# time.sleep(5)

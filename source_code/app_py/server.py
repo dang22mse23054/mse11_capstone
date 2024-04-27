@@ -75,7 +75,7 @@ def predict():
 			if len(output_faces) > 0:
 				print({
 					'majority_age': AGES[result['majority_age']],
-					'majority_gender': 'Female' if result['majority_age'] else 'Male',
+					'majority_gender': 'Female' if result['majority_gender'] else 'Male',
 				})
 			else:
 				print('No face detected')
