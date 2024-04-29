@@ -3,6 +3,7 @@ import traceback
 import numpy as np
 from services.model_service import Constants, ModelService
 from services.attention_service import AttentionService
+from services.statistic_service import StatisticService
 from utils.decoder import NumpyEncoder, txt_color
 
 from flask import Flask, request, jsonify, make_response, g
@@ -16,6 +17,7 @@ print('Server is running')
 model_service = ModelService()
 POSITION = Constants.Position()
 attention_service = AttentionService()
+statistic_service = StatisticService()
 
 AGE = Constants.Age()
 AGES = list(AGE.Groups.keys())
@@ -23,6 +25,12 @@ AGES = list(AGE.Groups.keys())
 @app.route('/')
 def hello():
 	return 'Hello World!'
+
+@app.route('/statistic', defaults={'cuz_time': None})
+@app.route('/statistic/<cuz_time>')
+def statistic(cuz_time):
+	result = statistic_service.calc_hourly_statistic(cuz_time)
+	return jsonify(result)
 
 
 @app.route('/predict', methods=['POST'])

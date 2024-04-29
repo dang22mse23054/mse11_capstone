@@ -21,9 +21,12 @@ class Statistic extends Model {
 
 			properties: {
 				videoId: { type: 'integer' },
+				group: { type: 'string', minLength: 1, maxLength: 50 },
 				gender: { type: 'string', minLength: 1, maxLength: 200 },
 				age: { type: 'string', minLength: 1, maxLength: 200 },
 				happy: { type: 'string', minLength: 1, maxLength: 500 },
+
+				deletedAt: { type: ['string', 'null']/*, format: 'date-time'*/ },
 			}
 		};
 	}
