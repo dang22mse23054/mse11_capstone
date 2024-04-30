@@ -72,7 +72,7 @@ class DbBase(Base):
         try:
             session.query(model) \
                 .filter(*condition) \
-                .update({"deletedAt": datetime.now()}, synchronize_session=False)
+                .update({"deletedAt": datetime.now(timezone.utc)}, synchronize_session=False)
             session.commit()
             return True
         except Exception as ex:

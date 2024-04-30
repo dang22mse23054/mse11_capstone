@@ -1,16 +1,12 @@
-const { ActionStatus } = require('commonDir/constants');
-const { getUniqueList } = require('commonDir/utils/Utils');
-const { Common, VideoStatus } = require('commonDir/constants');
 const Video = require('modelDir/Video');
 const VideoCategory = require('modelDir/VideoCategory');
 const VideoBO = require('../db/business/VideoBO');
-const LogBO = require('../db/business/LogBO');
+const StatisticBO = require('../db/business/StatisticBO');
 const VideoCategoryBO = require('../db/business/VideoCategoryBO');
 const LogService = require('commonDir/logger');
 const log = LogService.getInstance();
 const Database = require('dbDir');
 // const { ValidationError } = require('objection');
-const moment = require('moment-timezone');
 const S3Service = require('apiDir/services/S3Service');
 
 class CustomError extends Error {
@@ -35,6 +31,20 @@ module.exports = class VideoService {
 			}
 
 			return videoBO.getBy({age, gender})
+		} catch (err) {
+			log.error(err);
+		}
+		return null;
+	}
+
+	getStatistic = (videoId, fromTime = null, toTime = null) => {
+		console.log('getStatistic', videoId, fromTime, toTime)
+		const statisticBO = new StatisticBO();
+		try {
+			if (videoId) {
+				return statisticBO.get(videoId, fromTime, toTime)
+			}
+			
 		} catch (err) {
 			log.error(err);
 		}
