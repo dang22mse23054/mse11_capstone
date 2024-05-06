@@ -202,7 +202,7 @@ for file_path in file_list:
 	# == Cách 2: dùng model FaceDetection của Mediapipe
 	# chuyển sang dạng numpy array để face mesh đọc dc
 	# NOTE: uncomment this line if using TEST_IMAGE
-	image = np.array(image, dtype=np.uint8)
+	image = np.array(ori_img, dtype=np.uint8)
 	
 	# Perform face detection
 	image.flags.writeable = False
