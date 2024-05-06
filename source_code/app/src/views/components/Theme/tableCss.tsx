@@ -1,4 +1,4 @@
-import theme from 'compDir/Theme/tasktracker';
+import theme from 'compDir/Theme/capstone';
 
 export default {
 	tableContainer: {

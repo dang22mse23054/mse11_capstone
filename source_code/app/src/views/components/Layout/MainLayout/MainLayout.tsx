@@ -1,6 +1,6 @@
 import React, { Fragment, FunctionComponent, useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
-import theme from 'compDir/Theme/tasktracker';
+import theme from 'compDir/Theme/capstone';
 import { createStyles, makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import commonCss from 'compDir/Theme/commonCss';
 import MDIcon from '@mdi/react';

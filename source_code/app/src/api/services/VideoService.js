@@ -1,6 +1,7 @@
 const Video = require('modelDir/Video');
 const VideoCategory = require('modelDir/VideoCategory');
 const VideoBO = require('../db/business/VideoBO');
+const LogBO = require('../db/business/LogBO');
 const StatisticBO = require('../db/business/StatisticBO');
 const VideoCategoryBO = require('../db/business/VideoCategoryBO');
 const LogService = require('commonDir/logger');

@@ -41,7 +41,7 @@ class StatisticService():
 				.select_from(l) \
 				.where(and_(l.createdAt >= from_time, l.createdAt < to_time))
 			
-			log_list = DbBase.exec_custom_query(stm, True).fetchall()
+			log_list = DbBase.exec_custom_query(stm, True)
 			video_ids = [log.videoId for log in log_list]
 
 			# Cách 2: Sử dụng ORM

@@ -19,6 +19,36 @@ const getQuery = (type) => `{
 	}
 
 	createdAt
+
+	statistic {
+		group
+		videoId
+		ageDetail{
+			children
+			teenager
+			adult
+			middleAge
+			elderly
+		}
+		genderDetail {
+			male
+			female
+		}
+		happyDetail {
+			gender {
+				male
+				female
+			}
+			age {
+				children
+				teenager
+				adult
+				middleAge
+				elderly
+			}
+		}
+		createdAt
+	}
 }`;
 
 const Service = {

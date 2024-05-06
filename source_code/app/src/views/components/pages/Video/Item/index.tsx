@@ -7,6 +7,7 @@ import MDIcon from '@mdi/react';
 import { mdiAlertOctagram, mdiCheck, mdiChevronDown, mdiChevronUp, mdiCogOutline, mdiPencil, mdiRestore, mdiSend } from '@mdi/js';
 import ColorButton from 'compDir/Button';
 import UploadButton from 'compDir/Button/Upload';
+import Chart from 'compDir/Chart';
 import {
 	Box, Divider, TableCell, TableRow, Link, Tooltip,
 	Chip, Paper, Collapse, Grid, Typography, TextField
@@ -20,6 +21,15 @@ import {
 
 import moment from 'moment-timezone';
 moment.tz.setDefault(TIME_ZONE);
+
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import video from 'rootDir/services/validation/video';
+import { blue } from '@material-ui/core/colors';
+
+
 
 export interface IStateToProps {
 }
@@ -46,13 +56,49 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 	
 }));
 
+const createData = (data) => {
+	return {
+		group: data.group,
+		videoId: data.videoId,
+		date: new Date(data.createdAt),
+
+		total: data.genderDetail.male + data.genderDetail.female,
+		total_happy: data.happyDetail.gender.male + data.happyDetail.gender.female,
+
+		children: data.ageDetail.children,
+		happy_children: data.happyDetail.age.children,
+		
+		teenager: data.ageDetail.teenager,
+		happy_teenager: data.happyDetail.age.teenager,
+		
+		adult: data.ageDetail.adult,
+		happy_adult: data.happyDetail.age.adult,
+		
+		middleAge: data.ageDetail.middleAge,
+		happy_middleAge: data.happyDetail.age.middleAge,
+		
+		elderly: data.ageDetail.elderly,
+		happy_elderly: data.happyDetail.age.elderly,
+		
+		male: data.genderDetail.male,
+		happy_male: data.happyDetail.gender.male,
+		
+		female: data.genderDetail.female,
+		happy_female: data.happyDetail.gender.female,
+	}
+}
+
 // const VideoItem: FC<IProps> = (props: IProps) => {
 const VideoItem: FC<IProps> = (props: IProps) => {
 	const [open, setOpen] = React.useState(false);
 	const classes = useStyles();
 
 	const targetStatusBtn = props.status == VideoStatus.PLAYING.value ? VideoStatus.PAUSED : VideoStatus.PLAYING;
+	let statistic = (props.statistic || []).map((data) => createData(data));
 
+	// statistic = [
+	// 	{ name: '202020204', total: 25, total_happy: 20, children: 0, happy_children: 20, teenager:30, happy_teenager: 40, adult: 18, happy_adult: 16, middleAge: 15, happy_middleAge: 12, elderly: 12, happy_elderly: 12, male: 11, happy_male: 9, female: 14, happy_female: 11, },
+	// ];
 	return (
 		<Fragment>
 			<TableRow hover className={clsx(classes.root, classes.row, open ? 'active' : '')}>
@@ -170,8 +216,68 @@ const VideoItem: FC<IProps> = (props: IProps) => {
 					<Collapse in={open} timeout="auto" unmountOnExit>
 						<Grid className={clsx(classes.subInfo)}>
 							<Grid container spacing={2}>
-								
+								<Grid item xs={4}>
+									<Chart data={statistic}/>
+								</Grid>
+								<Grid item xs={8}>	
+									<TableContainer component={Box} style={{minHeight: 250, maxHeight: 400}}>
+										<Table size="small" stickyHeader aria-label="sticky table">
+											<caption style={{textAlign:'right'}}>
+												Unit: (<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>happy</Box>/total)
+											</caption>
+											<TableHead>
+												<TableRow>
+													<TableCell>Group</TableCell>
+													<TableCell align="right">View</TableCell>
+													<TableCell align="right">male</TableCell>
+													<TableCell align="right">female</TableCell>
+													<TableCell align="right">children</TableCell>
+													<TableCell align="right">teenager</TableCell>
+													<TableCell align="right">adult</TableCell>
+													<TableCell align="right">middleAge</TableCell>
+													<TableCell align="right">elderly</TableCell>
+												</TableRow>
+											</TableHead>
+											<TableBody>
+											{statistic.map((row, index) => (
+												<TableRow key={index}>
+													<TableCell component="th" scope="row">
+														{row.group}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.total_happy}</Box>/{row.total}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_male}</Box>/{row.male}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_female}</Box>/{row.female}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_children}</Box>/{row.children}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_teenager}</Box>/{row.teenager}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_adult}</Box>/{row.adult}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_middleAge}</Box>/{row.middleAge}
+													</TableCell>
+													<TableCell align="right">
+														<Box component='span' fontWeight="fontWeightBold" color={blue[600]}>{row.happy_elderly}</Box>/{row.elderly}
+													</TableCell>
+												</TableRow>
+											))}
+											</TableBody>
+										</Table>
+									</TableContainer>
+								</Grid>								
 							</Grid>
+
+
+							
 						</Grid>
 					</Collapse>
 				</TableCell>

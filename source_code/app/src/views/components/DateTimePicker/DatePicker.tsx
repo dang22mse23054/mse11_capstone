@@ -1,5 +1,5 @@
 import React, { FC, Fragment, useEffect, useRef } from 'react';
-import theme from 'compDir/Theme/tasktracker';
+import theme from 'compDir/Theme/capstone';
 
 // import 'date-fns';
 // import { vi, ja } from 'date-fns/locale';

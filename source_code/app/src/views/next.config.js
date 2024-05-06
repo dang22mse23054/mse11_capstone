@@ -40,6 +40,6 @@ module.exports = {
 	},
 	generateBuildId: async () => {
 		// You can, for example, get the latest git commit hash here
-		return `tasktracker.${UI_VERSION}`;
+		return `capstone.${UI_VERSION}`;
 	},
 };

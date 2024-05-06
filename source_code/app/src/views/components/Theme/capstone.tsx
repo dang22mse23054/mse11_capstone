@@ -20,12 +20,12 @@ const theme = createMuiTheme({
 			main: '#f44336',
 			light: '#FF80AB'
 		},
-		text: {
-			primary: 'rgba(0, 0, 0, 0.87)',
-			secondary: 'rgba(0, 0, 0, 0.60)',
-			disabled: 'rgba(0, 0, 0, 0.38)',
-			hint: 'rgba(0, 0, 0, 0.38)'
-		},
+		// text: {
+		// 	primary: 'rgba(0, 0, 0, 0.87)',
+		// 	secondary: 'rgba(0, 0, 0, 0.60)',
+		// 	disabled: 'rgba(0, 0, 0, 0.38)',
+		// 	hint: 'rgba(0, 0, 0, 0.38)'
+		// },
 		action: {
 			selected: 'rgba(0, 0, 0, 0.16)',
 			// active: '#F57F17'

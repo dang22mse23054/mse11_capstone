@@ -7,8 +7,8 @@ const { typeDefs: statisticTypes } = require('./statistic');
 
 module.exports = mergeTypeDefs([
 	baseTypes,
-	videoTypes,
 	cursorTypes,
-	categoryTypes,
 	statisticTypes,
+	videoTypes,
+	categoryTypes,
 ]);

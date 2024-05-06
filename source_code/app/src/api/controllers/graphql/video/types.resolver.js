@@ -1,5 +1,4 @@
 const { VideoStatus } = require('commonDir/constants');
-// const { taskService } = require('apiDir/services');
 const { videoService } = require('apiDir/services');
 
 const Type = {
@@ -29,6 +28,13 @@ const Type = {
 		} else {
 			return isEnabled ? VideoStatus.PLAYING : VideoStatus.PAUSED;
 		}
+	},
+
+	statistic: (obj, args, context, info) => {
+		const videoId = obj.id;
+		const options = info.variableValues?.options;
+
+		return videoService.getStatistic(videoId, options?.startDate, options?.endDate);
 	},
 };
 
