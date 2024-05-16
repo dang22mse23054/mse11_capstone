@@ -23,7 +23,7 @@ EMOTION = Constants.Emotion()
 TEST_RATIO = 0.1
 
 def init_model():
-	checkpoint = torch.load("checkpoint/inception-epoch=9-val_acc=0.7520.ckpt", map_location=torch.device('cpu'))
+	checkpoint = torch.load("checkpoint/inception-epoch=8-val_acc=0.7529.ckpt", map_location=torch.device('cpu'))
 	model = EmotionDetectionModel()
 	model.load_state_dict(checkpoint['state_dict'])
 	
@@ -81,7 +81,7 @@ def predict_all(file_list, model):
 			# input_image.show()
 			print(f"Emotion = {pred_emotion}")
 
-			axes[idx].set_title(f'{EMOTION.Groups[pred_emotion]} (#{true_label})')
+			axes[idx].set_title(f'{EMOTION.Groups[pred_emotion]} (true={true_label})')
 			axes[idx].imshow(input_image, cmap='gray')
 			axes[idx].axis('off')
 		
@@ -93,25 +93,26 @@ def predict_all(file_list, model):
 
 if __name__ == "__main__":
 
-	# FODLER_PATH = './raw/fer2013-org/test'
-	# subfolder_list = os.listdir(FODLER_PATH)
-	# file_list = []
-	# for folder_name in subfolder_list:
-	# 	folder_path = f'{FODLER_PATH}/{folder_name}'
-
-	# 	if folder_name.startswith('.'):
-	# 		continue
-		
-	# 	files = random.sample(os.listdir(folder_path), k=1)
-	# 	file_list.append(f'{folder_path}/{files[0]}')
-
-
-	folder_path = './raw/daka'
+	FODLER_PATH = './raw/fer2013-org/test'
+	subfolder_list = os.listdir(FODLER_PATH)
 	file_list = []
-	files = random.sample(os.listdir(folder_path), k=24)
-	for idx, file_path in enumerate(files):
-		file_list.append(f'{folder_path}/{file_path}')
-	print(file_list)
+	for folder_name in subfolder_list:
+		folder_path = f'{FODLER_PATH}/{folder_name}'
+
+		if folder_name.startswith('.'):
+			continue
+		
+		files = random.sample(os.listdir(folder_path), k=3)
+		for idx, file_path in enumerate(files):
+			file_list.append(f'{folder_path}/{files[idx]}')
+
+
+	# folder_path = './raw/daka'
+	# file_list = []
+	# files = random.sample(os.listdir(folder_path), k=24)
+	# for idx, file_path in enumerate(files):
+	# 	file_list.append(f'{folder_path}/{file_path}')
+	# print(file_list)
 
 	model = init_model()
 	
@@ -119,11 +120,47 @@ if __name__ == "__main__":
 	# testPart = int(len(file_list) * TEST_RATIO)
 	# file_list = file_list[len(file_list) - testPart:]
 
-	# file_list = random.sample(file_list, k=6)
+	# file_list = random.sample(file_list, k=15)
 	# print(file_list)
 
 	# Make predictions for all files in the list
 	all_predictions = predict_all(file_list, model)
 	# print(all_predictions)
+
+
+# if __name__ == "__main__":
+
+# 	# FODLER_PATH = './raw/fer2013-org/test'
+# 	# subfolder_list = os.listdir(FODLER_PATH)
+# 	# file_list = []
+# 	# for folder_name in subfolder_list:
+# 	# 	folder_path = f'{FODLER_PATH}/{folder_name}'
+
+# 	# 	if folder_name.startswith('.'):
+# 	# 		continue
+		
+# 	# 	files = random.sample(os.listdir(folder_path), k=1)
+# 	# 	file_list.append(f'{folder_path}/{files[0]}')
+
+
+# 	folder_path = './raw/daka'
+# 	file_list = []
+# 	files = random.sample(os.listdir(folder_path), k=24)
+# 	for idx, file_path in enumerate(files):
+# 		file_list.append(f'{folder_path}/{file_path}')
+# 	print(file_list)
+
+# 	model = init_model()
+	
+# 	# splitting dataset
+# 	# testPart = int(len(file_list) * TEST_RATIO)
+# 	# file_list = file_list[len(file_list) - testPart:]
+
+# 	# file_list = random.sample(file_list, k=6)
+# 	# print(file_list)
+
+# 	# Make predictions for all files in the list
+# 	all_predictions = predict_all(file_list, model)
+# 	# print(all_predictions)
 	
 	

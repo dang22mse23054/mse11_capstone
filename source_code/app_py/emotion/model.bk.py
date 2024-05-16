@@ -57,12 +57,19 @@ class EmotionDetectionModel(LightningModule):
 	):
 		super().__init__()
 
+		# bắt buộc phải truyền param vào __init__ và khai báo self.param_name = param_name 
+		# thì khi dùng save_hyperparameters() mới có thể lưu lại được các param này
+		# và để sử dụng được các param này thì phải dùng self.hparams.param_name
 		self.lr = lr 
 		self.momentum = momentum
 		self.weight_decay = weight_decay 
 		self.max_epochs = max_epochs 
 
 		self.save_hyperparameters()
+		
+		# self.model = EmotionResNet50v1()
+		# self.model = EmotionResNet50v2()
+		# self.model = EmotionResNet50v3()
 
 		self.model = EmotionInceptionV3_1()
 		
@@ -71,15 +78,63 @@ class EmotionDetectionModel(LightningModule):
 	def forward(self, x):
 		return self.model(x)
 
+	# version 1
+	# def configure_optimizers(self):
+	# 	optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay / self.hparams.max_epochs)
+	# 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=1e-7)
+	# 	return {
+	# 		'optimizer': optimizer,
+	# 		'lr_scheduler': {
+	# 			'scheduler': scheduler,
+	# 			'monitor': 'val_loss',  # Điều chỉnh monitor theo mục bạn muốn
+	# 		}
+	# 	}
+	
+	# version 2
+	# def configure_optimizers(self):
+	# 	optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+	# 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, min_lr=1e-4)
+	# 	return {
+	# 		'optimizer': optimizer,
+	# 		'lr_scheduler': {
+	# 			'scheduler': scheduler,
+	# 			'monitor': 'val_loss',  # Điều chỉnh monitor theo mục bạn muốn
+	# 		}
+	# 	}
+	
+	# version 3
+	# def configure_optimizers(self):
+	# 	# return optim.Adam(self.parameters(), lr=self.hparams.lr)
+	# 	optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+	# 	scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, min_lr=0.00001)
+	# 	return {
+	# 		'optimizer': optimizer,
+	# 		'lr_scheduler': {
+	# 			'scheduler': scheduler,
+	# 			'monitor': 'val_acc',  # Điều chỉnh monitor theo mục bạn muốn
+	# 		}
+	# 	}
+	
+	# version 4
 	def configure_optimizers(self):
 		# Lấy tất cả các tham số của mô hình
 		params = self.parameters()
 		
-		lr = 1e-3 # Tỉ lệ học tập cho lớp fully connected mới
-		optimizer = torch.optim.Adam(params, lr=lr)
+		# Chia tham số thành 2 nhóm:
+		# 1. Tham số của lớp fully connected mới
+		# 2. Tham số của Inception-v3 pretrained
+		# fc_params = self.base_model.fc.parameters()
+		# other_params = [p for p in params if p not in fc_params]
+		
+		# Sử dụng tỉ lệ học tập khác nhau cho 2 nhóm tham số
+		lr1 = 1e-3 # Tỉ lệ học tập cho lớp fully connected mới
+		lr2 = 1e-4 # Tỉ lệ học tập cho Inception-v3 pretrained
+		
+		# Tạo 2 optimizer, một cho mỗi nhóm tham số
+		optimizer2 = torch.optim.Adam(params, lr=lr1)
 		
 		# Trả về list các optimizer
-		return [optimizer]
+		return [optimizer2]
 	
 	def training_step(self, batch, batch_idx):
 		# if len(batch) == 0 : return torch.tensor(0.)
@@ -93,6 +148,11 @@ class EmotionDetectionModel(LightningModule):
 		
 		# Using nn.CrossEntropyLoss(),
 		loss = self.loss_function (predicted_emotion_id, emotion_id)  # ce
+
+		# # for inception_v3
+		#  # Tính accuracy
+		# preds = torch.argmax(predicted_emotion_id, dim=1)
+		# acc = torch.sum(preds == emotion_id) / len(emotion_id)
 		
 		self.log('train_loss', loss, prog_bar=True, on_step=True, on_epoch=True)
 
@@ -151,6 +211,6 @@ class EmotionDetectionModel(LightningModule):
 	def on_test_epoch_end(self) -> None:
 		final_val_acc = np.mean(self.acc_list)
 
-		self.log('test_acc', final_val_acc, prog_bar=True, on_epoch=True)
+		self.log('val_acc', final_val_acc, prog_bar=True, on_epoch=True)
 
 		self.acc_list.clear()

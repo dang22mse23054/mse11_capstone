@@ -15,7 +15,7 @@ POSITION = Constants.Position()
 mp_face_mesh = mp.solutions.face_mesh
 
 # Utility Functions
-def calc_euclaidean_distance(point, point1, image):
+def calc_euclidean_distance(point, point1, image):
 	img_h, img_w, img_c = image.shape
 
 	x = point.x * img_w
@@ -27,9 +27,9 @@ def calc_euclaidean_distance(point, point1, image):
 	return distance
 
 def calc_iris_position(iris_center, right_point, left_point, image = None):
-	center_to_right = calc_euclaidean_distance(iris_center, right_point, image)
-	center_to_left = calc_euclaidean_distance(iris_center, left_point, image)
-	total = calc_euclaidean_distance(right_point, left_point, image)
+	center_to_right = calc_euclidean_distance(iris_center, right_point, image)
+	center_to_left = calc_euclidean_distance(iris_center, left_point, image)
+	total = calc_euclidean_distance(right_point, left_point, image)
 	ratio = np.round(center_to_right/total, 2)
  
 	position = "" 
@@ -64,8 +64,8 @@ def calc_eyes_distances(landmarks, image=None):
 	lv_bottom = landmarks[374]
 
 	# Finding Distance Left Eye
-	lhDistance = calc_euclaidean_distance(lh_right, lh_left, image)
-	lvDistance = calc_euclaidean_distance(lv_top, lv_bottom, image)
+	lhDistance = calc_euclidean_distance(lh_right, lh_left, image)
+	lvDistance = calc_euclidean_distance(lv_top, lv_bottom, image)
 
 	# === Right eye === #
  
@@ -78,8 +78,8 @@ def calc_eyes_distances(landmarks, image=None):
 
 
 	# Finding Distance Right Eye
-	rhDistance = calc_euclaidean_distance(rh_right, rh_left, image)
-	rvDistance = calc_euclaidean_distance(rv_top, rv_bottom, image)
+	rhDistance = calc_euclidean_distance(rh_right, rh_left, image)
+	rvDistance = calc_euclidean_distance(rv_top, rv_bottom, image)
 
 	# Finding ratio of LEFT and Right Eyes
 	reRatio = rhDistance/rvDistance

@@ -155,17 +155,17 @@ face_detection = mp_face_detection.FaceDetection(
 )
 
 # WARNNG: NOT reuse face_mesh because wrong calc when using inside the loop 
-# face_mesh = mp_face_mesh.FaceMesh(
-# 	max_num_faces=1,
-# 	refine_landmarks=True,
-# 	min_detection_confidence=0.5,
-# 	min_tracking_confidence=0.5
-# )
+face_mesh = mp_face_mesh.FaceMesh(
+	max_num_faces=1,
+	refine_landmarks=True,
+	min_detection_confidence=0.5,
+	min_tracking_confidence=0.5
+)
 
 # # Dùng Camera (CAEMRA) ===== BEGIN
 # cap = cv2.VideoCapture(0)
 # while cap.isOpened():
-# 	success, image = cap.read()
+# 	success, ori_img = cap.read()
 # 	if not success:
 # 		print("Ignoring empty camera frame.")
 # 		# If loading a video, use 'break' instead of 'continue'.
@@ -235,6 +235,11 @@ for file_path in file_list:
 			# To improve performance, optionally mark the image as not writeable to
 			# pass by reference.
 			image.flags.writeable = False
+
+			print(f'len(image) = {len(image)}')
+			if len(image) == 0:
+				continue
+
 			image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 			# https://www.youtube.com/watch?v=-toNMaS4SeQ
@@ -242,12 +247,12 @@ for file_path in file_list:
 			face_3d = []
 			face_2d = []
 
-			face_mesh = mp_face_mesh.FaceMesh(
-				max_num_faces=1,
-				refine_landmarks=True,
-				min_detection_confidence=0.5,
-				min_tracking_confidence=0.5
-			) 
+			# face_mesh = mp_face_mesh.FaceMesh(
+			# 	max_num_faces=1,
+			# 	refine_landmarks=True,
+			# 	min_detection_confidence=0.5,
+			# 	min_tracking_confidence=0.5
+			# ) 
 			results = face_mesh.process(image)
 
 			# Convert the BGR image to RGB before processing.
@@ -410,7 +415,7 @@ for file_path in file_list:
 		# # Flip the image horizontally for a selfie-view display.
 		# # cv2.imshow(screen_name, cv2.flip(image, 1))
 		# cv2.imshow(screen_name, image)
-		# if cv2.waitKey(25) & 0xFF == 27:
+		# if cv2.waitKey(0) & 0xFF == 27:
 		# 	break
 		# # Dùng Camera (CAEMRA) ===== END
 if cap:

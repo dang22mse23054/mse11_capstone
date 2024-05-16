@@ -17,7 +17,7 @@ class EmotionInceptionV3_1(nn.Module):
 		self.base_model.aux_logits = False
 
 		num_ftrs = self.base_model.fc.in_features
-		# lớp Identity này không làm gì cả, chỉ lấy input và trả về chính nó
+		# Thay thế layer cuối bằng linear layer mới
 		self.base_model.fc = nn.Linear(num_ftrs, emotion_classes)
 
 	

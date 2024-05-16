@@ -135,13 +135,14 @@ def trigger_ads_player():
 		# hoặc nếu ad ko dc đề xuất nhg vẫn có all_ads 
   		# => thì chọn ngẫu nhiên 1 ads từ all_ads
 		if (adviced_ads is not None or len(all_ads) > 0):
+			is_local = adviced_ads is None
 			adviced_ads = (random.choice(all_ads) if adviced_ads is None else adviced_ads).split('|')
 			adviced_ads_id = adviced_ads[0]
 			adviced_ads_name = adviced_ads[1]
 
 			# Nếu có adviced ads mà không phải từ Remote thì phải tạo cache mới (nhằm tại điều kiện để logging cho ads)
 			if (adviced_ads_name):
-				print(f" > [{txt_color('Local', Constants.TXT_COLOR['YELLOW'])}] Set suggested video: {adviced_ads_name}")
+				print(f" > [{txt_color('Local' if is_local else 'Remote', Constants.TXT_COLOR['YELLOW'])}] Set suggested video: {adviced_ads_name}")
 				advice_ads_cache_service.set(f'{adviced_ads_id}|{adviced_ads_name}')
 								
   
@@ -340,6 +341,13 @@ def trigger_cam_tracker(using_image = False):
 								if (len(recently_ads_list) >= new_max):
 									# only keep max 3 items in recently ads list
 									recently_ads_list = recently_ads_list[1:]
+						else:
+							print(f" > [{txt_color('Remote', Constants.TXT_COLOR['BLUE'])}] No suggested video")
+							# remove the first item in recently ads list if it has more than 3 items
+							# NOTE: always do this
+							if (len(recently_ads_list) > 0):
+								recently_ads_list = recently_ads_list[1:]
+								
 
 					faces = data['faces']
 					if (len(faces) > 0):
