@@ -13,7 +13,7 @@ class DeviceApiRoutes extends BaseRoutes {
 		// ========= BEGIN Routing ========= //
 		this.router.use('/ads', this.subRoutes(subRouter => {
 			subRouter.post('/advice', adsController.advice);
-			subRouter.post('/log/:videoId', adsController.log);
+			subRouter.post('/log/:videoId/:getDetail?', adsController.log);
 			subRouter.get('/all', adsController.getAll);
 		}));
 

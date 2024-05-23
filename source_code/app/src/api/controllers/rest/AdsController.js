@@ -135,6 +135,8 @@ module.exports = class AdsController {
 		let respObj = new BaseResponse();
 		let respStatus = 200;
 
+		let getDetail = req.params.getDetail;
+
 		let videoId = req.params.videoId;
 		let formData = new formidable.IncomingForm();
 
@@ -198,7 +200,8 @@ module.exports = class AdsController {
 			});
 
 			console.log('========== Request to ML Server ==========');
-			return axios.post(`http://localhost:5001/log/${video.id}`, formData, {
+			getDetail = getDetail ? '/true' : ''
+			return axios.post(`http://localhost:5001/log/${video.id}${getDetail}`, formData, {
 				headers: {
 					// phải tự định nghĩa boundary cho form-data thì data mới gửi đúng request dạng upload files lên server
 					'Content-Type': `multipart/form-data; boundary=${formData._boundary}`

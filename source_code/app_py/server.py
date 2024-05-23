@@ -98,9 +98,10 @@ def predict():
 		print(traceback.format_exc())
 
 
-@app.route("/log/<video_id>", methods=['POST'])
-def log_ads(video_id):
-	print(txt_color(f"----------- LOG ads (video_id {video_id}) -----------", Constants.TXT_COLOR['BLUE']))
+@app.route('/log/<video_id>', defaults={'get_detail': None}, methods=['POST'])
+@app.route('/log/<video_id>/<get_detail>', methods=['POST'])
+def log_ads(video_id, get_detail):
+	print(txt_color(f"----------- LOG ads (video_id {video_id}{'- with Detail' if get_detail == 'true' else ''}) -----------", Constants.TXT_COLOR['BLUE']))
 
 	try:
 		# print(request.data)
@@ -126,7 +127,7 @@ def log_ads(video_id):
 					 np.zeros(5),
 				]
 			}
-			people = []
+			detail = []
 			if (len(output_faces) > 0):
 				i = 0
 				for face_info in output_faces:
@@ -138,6 +139,11 @@ def log_ads(video_id):
 						'is_attention': None,
 						'emotion': None,
 					}
+
+					if (get_detail == 'true'):
+						person_info['bbox'] = face_info['bbox']
+						person_info['score'] = face_info['score']
+
 					face_img = face_info['face_img']
 
 					# Check attention
@@ -177,13 +183,17 @@ def log_ads(video_id):
 								log_item['happy'][1][age_group] += 1
 
 					# Add to list
-					people.append(person_info)
+					detail.append(person_info)
 
-			print(people)
+			print(detail)
 
 			# add should_skip flag
 			log_item['should_skip'] = (log_item['gender'].max() == 0)
-			
+
+			# add detail (if necessary)
+			if (get_detail == 'true'):
+				log_item['detail'] = detail
+
 			log_item = json.dumps(log_item, cls=NumpyEncoder)
 			print(txt_color(log_item))
 			

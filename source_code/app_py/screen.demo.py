@@ -27,6 +27,9 @@ DEFAULT_VIDEO = f'{VIDEO_FOLDER}/{DEFAULT_VIDEO}'
 AGE = Constants.Age()
 AGES = list(AGE.Groups.keys())
 
+EMOTION = Constants.Emotion()
+EMOTIONS = EMOTION.Groups
+
 status_path = f'{VIDEO_FOLDER}/status.cache'
 status_cache_service = CacheService(status_path)
 
@@ -53,9 +56,17 @@ def show_bbox(image, faces, screen_name, screen_ratio = 5):
 
 	for index, face in enumerate(faces):
 		score = face['score']
+		emotion = face.get('emotion', None)
+		is_attention = face.get('is_attention', None)
 		bbox = face['bbox']
 		bbox = np.array(bbox, dtype=np.int32)
 		label = f"{'Nam' if face['gender'] == 0 else 'Nu'}-{AGES[face['age']]}"
+
+		if (emotion is not None):
+			label += f'_{EMOTIONS[emotion]}'
+		if (is_attention is not None):
+			label += f"_{'YES' if is_attention else 'NO'}"
+
 		cv2.rectangle(image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (0, 0, 255), 2)
   
 		cv2.putText(
@@ -371,10 +382,9 @@ def trigger_cam_tracker(using_image = False):
 				# Logging the ads space to server for analytic later
 				adviced_ads_id = adviced_ads.split('|')[0]
 				print(txt_color(f'**************** [{c_time}] Log ads ({adviced_ads_id}) to server ****************', Constants.TXT_COLOR['BLUE']))
-				show_bbox(frame, [], log_screen_name)
 
 				response = requests.post(
-					f'https://mse11-capstone.com.vn/dapi/ads/log/{adviced_ads_id}', 
+					f'https://mse11-capstone.com.vn/dapi/ads/log/{adviced_ads_id}/true', 
 					headers=api_headers,
 					files = file_obj,
 					# reject self-signed SSL certificates
@@ -386,6 +396,15 @@ def trigger_cam_tracker(using_image = False):
 
 				print(f' > [Logging - {c_time}] === Response data ===')
 				print(data)
+
+				data = data.get('data', None)
+
+				faces = []
+				if (data is not None and type(data) == dict):
+					faces = data.get('detail', faces)
+				
+				show_bbox(frame, faces, log_screen_name)
+
 				# ko dc dùng time.sleep vì sẽ ko hiện dc cv2 window để show image
 				# time.sleep(5)
 				# Press Q on keyboard to exit 
