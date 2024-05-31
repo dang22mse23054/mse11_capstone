@@ -1,0 +1,14 @@
+type Mutation 
+
+
+type ResponseObj {
+	id: String!
+	hasErr: Boolean!
+    message: [String]
+}
+
+# === OR ===
+# type Mutation {
+# 	# Must add this line to create non-empty mutation
+# 	_: Boolean
+# }

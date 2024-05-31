@@ -1,0 +1,3 @@
+extend type Query {
+	getCategories(nextCursor: String, limit: Int): [Category]
+}

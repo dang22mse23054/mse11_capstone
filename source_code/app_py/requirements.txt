@@ -1,0 +1,16 @@
+Flask==2.0.1
+werkzeug==2.2.2
+torchvision
+torch
+pycocotools
+Augmentor
+numpy
+albumentations
+matplotlib
+opencv-python
+lightning
+mediapipe==0.10.9
+pandas==1.3.5
+pymysql==1.0.2
+sqlalchemy==1.3.23
+python-dotenv==0.15.0

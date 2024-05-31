@@ -1,8 +1,10 @@
-Papers:
-- https://paperswithcode.com/paper/detecting-and-recognizing-human-object
-- https://paperswithcode.com/paper/mixface-improving-face-verification-focusing
-- 
-
-
 Dataset:
-- https://paperswithcode.com/dataset/hico-det
+- WIDER-Face: 	https://www.kaggle.com/datasets/iamprateek/wider-face-a-face-detection-dataset
+- UTKFace: 		https://www.kaggle.com/datasets/jangedoo/utkface-new
+- FER2013:		https://www.kaggle.com/datasets/msambare/fer2013 (before enrichment)
+				https://www.kaggle.com/datasets/danghhse60726/fer2013 (after enrichment)
+
+Private Kaggle:
+- Face detection: 			https://www.kaggle.com/code/danghhse60726/mse11-capstone-face-detection
+- Age/Gender dectection:	https://www.kaggle.com/code/danghhse60726/mse11-capstone-age-gender
+- Emotion detection: 		https://www.kaggle.com/code/danghhse60726/mse11-capstone-emotion

@@ -1,0 +1,48 @@
+type Video implements Node {
+	id: ID!
+	title: String!
+
+	refFileName: String!
+	refFilePath: String!
+	
+	status: Int
+	isEnabled: Boolean
+	deletedAt: String
+	
+	categoryIds: [Int]
+	categories: [Category]
+
+	createdAt: String
+	updatedAt: String
+
+	statistic: [Statistic]
+}
+
+input VideoEnabledInput {
+	id: ID!
+	isEnabled: Boolean!
+}
+
+input VideoInput {
+	id: ID
+	title: String!
+
+	refFileName: String!
+	refFilePath: String!
+
+	isEnabled: Boolean
+	
+	categoryIds: [Int]!
+
+	status: Int
+	updatedAt: String
+}
+
+input SearchVideoInput {
+	keyword: String
+
+	status: Int
+	categories: [Int]
+	startDate: String
+	endDate: String
+}

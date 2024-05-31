@@ -1,0 +1,62 @@
+version: '3'
+services:
+  mysql:
+    image: 'mysql:8'
+    # linux/x86_64: compatible for apple M1 chip
+    platform: linux/x86_64
+    container_name: capstone-mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: 'capstone'
+      MYSQL_DATABASE: 'capstone'
+      MYSQL_USER: 'capstone'
+      MYSQL_PASSWORD: 'capstone'
+    volumes:
+      # - ./docker/mysql/sql-file:/docker-entrypoint-initdb.d
+      - mysql-volume:/var/lib/mysql
+      # - ./docker/mysql/my.cnf:/etc/my.cnf
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8
+      - --collation-server=utf8_general_ci
+      - --default-storage-engine=innodb
+      - --sql-mode=NO_ENGINE_SUBSTITUTION
+  # s3:
+  #   image: localstack/localstack
+  #   container_name: capstone-s3
+  #   ports:
+  #     - 44572:4566
+  #   environment:
+  #     - SERVICES=s3
+  #     - DEBUG=1
+  #     - DATA_DIR=/tmp/localstack/data
+  #     - AWS_EXECUTION_ENV=True
+  #     - CLEAR_TMP_FOLDER=0
+  #     - LOCALSTACK_DATA_PATH=/tmp/localstack/data
+  #   volumes:
+  #     # - "./s3-local:/tmp/localstack"
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #   networks:
+  #     - capstone_network
+
+  # py_server:
+  #   platform: linux/x86_64
+  #   build:
+  #     context: .
+  #     dockerfile: app_py/Dockerfile
+  #   container_name: py-server
+  #   command: ["python3", "./server/src/app.js"]
+  #   ports:
+  #     - '5000:5000'
+  #   volumes:
+  #     - .:/app_py
+networks:
+  capstone_network:
+
+volumes:
+  mysql-volume:
+    name: capstone-mysql
+    driver: local
+  

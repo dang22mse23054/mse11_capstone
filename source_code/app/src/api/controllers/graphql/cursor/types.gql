@@ -1,0 +1,5 @@
+input CursorInput {
+	cursor: String
+	nextCursor: String
+	prevCursor: String
+}

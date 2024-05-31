@@ -1,0 +1,48 @@
+type Statistic {
+	# id: ID!
+	videoId: Int!
+
+	group: String!
+
+	gender: String
+	genderDetail: GenderDetail
+	
+	age: String
+	ageDetail: AgeDetail
+
+	happy: String
+	happyDetail: HappyDetail
+
+	createdAt: String
+}
+
+type GenderDetail {
+	male: Int
+	female: Int
+}
+
+type AgeDetail {
+	# children (0~12)
+	children: Int
+	# teenagers (13~17)
+	teenager: Int
+	# adult (18~44)
+	adult: Int
+	# middle_aged (45~60)
+	middleAge: Int
+	# elderly (61~120)
+	elderly: Int
+}
+
+type HappyDetail {
+	gender: GenderDetail
+	age: AgeDetail
+	
+}
+
+
+input StatisticInput {
+	videoId: Int!
+	startDate: String
+	endDate: String
+}
