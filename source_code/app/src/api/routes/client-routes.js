@@ -20,7 +20,7 @@ class ClientRoutes extends BaseRoutes {
 
 		// get original URL from shorten URL
 		this.router.get(`/${RoutePaths.LOGIN}`, (req, res) => {
-			if (process.env.NEXT_PUBLIC_NODE_ENV === 'development') {
+			if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production') {
 				return this.app.render(req, res, '/login', { code: req.query.code });
 			} else {
 				return res.redirect('/auth/casso');

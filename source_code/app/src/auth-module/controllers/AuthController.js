@@ -8,7 +8,7 @@ module.exports = class AuthController {
 
 	async checkSession(req, res, next) {
 		let respObj = new BaseResponse();
-		respObj.setData({ redirectUrl: NEXT_PUBLIC_NODE_ENV === 'development' ? '/login' : '/auth/casso' });
+		respObj.setData({ redirectUrl: NEXT_PUBLIC_NODE_ENV !== 'production' ? '/login' : '/auth/casso' });
 
 		let authService = new AuthService();
 
@@ -29,7 +29,7 @@ module.exports = class AuthController {
 		// console.log('-----checkSession-----end')
 
 		if (!apiToken) {
-			if (NEXT_PUBLIC_NODE_ENV !== 'development') {
+			if (NEXT_PUBLIC_NODE_ENV === 'production') {
 				respObj.setData(await authService.regenerateApiToken(decodedAlbToken, req));
 				return res.json(respObj);
 			}
@@ -46,7 +46,7 @@ module.exports = class AuthController {
 		let decodedToken = authService.verifyToken(apiToken);
 
 		if (!decodedToken) {
-			if (NEXT_PUBLIC_NODE_ENV !== 'development') {
+			if (NEXT_PUBLIC_NODE_ENV === 'production') {
 				respObj.setData(await authService.regenerateApiToken(decodedAlbToken, req));
 				return res.json(respObj);
 			}
@@ -61,7 +61,7 @@ module.exports = class AuthController {
 
 		let isExpired = currentTime >= expiredTime;
 		if (isExpired) {
-			if (NEXT_PUBLIC_NODE_ENV !== 'development') {
+			if (NEXT_PUBLIC_NODE_ENV === 'production') {
 				respObj.setData(await authService.regenerateApiToken(decodedAlbToken, req));
 				return res.json(respObj);
 			}

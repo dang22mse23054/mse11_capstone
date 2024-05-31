@@ -22,7 +22,7 @@ class AuthRoutes extends BaseRoutes {
 
 		this.router.get(`/${RoutePaths.PREFIX.AUTH}/casso`, this.passport.authenticate('CAssoStrategy'));
 
-		if (process.env.NEXT_PUBLIC_NODE_ENV === 'development') {
+		if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production') {
 			this.router.post('/auth/userid', this.authMiddleware.verifyEmployeeId);
 		}
 

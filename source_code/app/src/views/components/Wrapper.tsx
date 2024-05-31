@@ -48,7 +48,7 @@ const initWrapper = (ComponentName: React.ComponentType, acceptedRoles = []) => 
 			const parts = queryString.split('?code=');
 			const authCode = parts[1];
 
-			if (process.env.NEXT_PUBLIC_NODE_ENV === 'development' && authCode) {
+			if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production' && authCode) {
 				AuthService.verifyAuthCode(authCode, true)
 					.then(({ error, authData }) => {
 						// redirect to home page

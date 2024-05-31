@@ -69,7 +69,7 @@ nextApp.prepare().then(() => {
 
 	// Aplly security middlewares
 	let validHosts = process.env.ACCEPTED_HOSTS.split('|');
-	if (NEXT_PUBLIC_NODE_ENV == 'development') {
+	if (NEXT_PUBLIC_NODE_ENV !== 'production') {
 		validHosts.push('127.0.0.1:443', `${process.env.NEXT_PUBLIC_SERVER_DOMAIN}:443`);
 	}
 
@@ -85,7 +85,7 @@ nextApp.prepare().then(() => {
 	}));
 
 	//================ For DEV/Test Only ================//
-	if (NEXT_PUBLIC_NODE_ENV != 'production') {
+	if (NEXT_PUBLIC_NODE_ENV !== 'production') {
 
 		// Get Client IP
 		server.use((req, res, next) => {
@@ -254,7 +254,7 @@ nextApp.prepare().then(() => {
 		log.info(`> [${process.env.NEXT_PUBLIC_NODE_ENV}] Server has been already`);
 		log.info(`> Express on ${webUrl}`);
 		log.info(`> GraphQL on ${webUrl}/${RoutePaths.PREFIX.GRAPHQL}`);
-		if (process.env.NEXT_PUBLIC_NODE_ENV != 'production') {
+		if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production') {
 			log.info(`> GraphTool on ${webUrl}/${RoutePaths.PREFIX.GRAPHQL_TOOL}`);
 		}
 		log.info(`> at ${new Date()}`);

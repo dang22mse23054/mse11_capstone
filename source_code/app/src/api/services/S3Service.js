@@ -13,13 +13,13 @@ class S3Service {
 		if (profileName) {
 			this.credential = new AWS.SharedIniFileCredentials({ profile: profileName });
 
-		} else if (process.env.NEXT_PUBLIC_NODE_ENV == 'development') {
+		} else if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production') {
 			this.credential = new AWS.SharedIniFileCredentials({ profile: process.env.S3_PROFILE });
 		}
 
 		this.profileObj = { credentials: this.credential || undefined }
 
-		if (process.env.NEXT_PUBLIC_NODE_ENV == 'development' && process.env.S3_PROFILE == 'localstack') {
+		if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production' && process.env.S3_PROFILE == 'localstack') {
 			this.profileObj = {
 				credentials: this.credential || undefined,
 				endpoint: 'http://s3.localhost.localstack.cloud:44572',

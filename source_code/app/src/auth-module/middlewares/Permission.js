@@ -6,7 +6,7 @@ class Permission {
 	acceptedIpDomains(req, res, next) {
 		// Aplly security middlewares
 		let validIPs = process.env.ACCEPTED_IP_DOMAINS.split('|');
-		if (env == 'development') {
+		if (env != 'production') {
 			validIPs.push('::ffff:127.0.0.1');
 		}
 
