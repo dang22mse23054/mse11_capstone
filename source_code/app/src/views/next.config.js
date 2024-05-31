@@ -6,7 +6,7 @@ const UI_VERSION = 'v.0.1';
 // Load .env content
 env.config({
 	// path: path.resolve(webDir, 'webpack-dev-server/.env'),
-	path: path.resolve(appDir, '../.env'),
+	path: path.resolve(appDir, './.env'),
 	encoding: 'utf8',
 });
 
