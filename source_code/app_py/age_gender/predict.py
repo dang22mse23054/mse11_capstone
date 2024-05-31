@@ -23,7 +23,7 @@ AGES = list(Constants.Age().Groups.keys())
 NUM_OF_AGE_GROUPS = len(AGES)
 
 
-TEST_IMG_PATH = 'raw/test/' #UTK_FACE_PATH
+TEST_IMG_PATH = 'raw/test_1/' #UTK_FACE_PATH
 
 TEST_RATIO = 0.1
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 	testPart = int(len(file_list) * TEST_RATIO)
 	# file_list = file_list[len(file_list) - testPart:]
 
-	file_list = random.sample(file_list, k=4)
+	file_list = random.sample(file_list, k=12)
 	# print(file_list)
 
 	# Make predictions for all files in the list
