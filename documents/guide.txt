@@ -6,10 +6,6 @@ Install Pytoch: (https://pytorch.org/)
 - MacOS: pip3 install torch torchvision torchaudio
 
 
-Dataset:
-- https://paperswithcode.com/dataset/hico-det
-
-
 Summary Pytorch lightning process
 - Dataset
 	Implement torch.utils.data.dataset.Dataset 

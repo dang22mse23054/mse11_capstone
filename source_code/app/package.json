@@ -58,14 +58,8 @@
 		"init-users": "yarn seed:run --specific=init-users.js",
 		"init-category": "yarn seed:run --specific=init-category.js",
 		"dump-data": "yarn seed:run --specific=dump-data.js",
-		"encrypt:env": "cd ./terraform/server && sh ./crypt.sh encrypt $env",
-		"encrypt:dev": "export env=dev && yarn encrypt:env",
-		"encrypt:stg": "export env=stg && yarn encrypt:env",
-		"encrypt:prod": "export env=prod && yarn encrypt:env",
-		"decrypt:env": "cd ./terraform/server && sh ./crypt.sh decrypt $env",
-		"decrypt:dev": "export env=dev && yarn decrypt:env",
-		"decrypt:stg": "export env=stg && yarn decrypt:env",
-		"decrypt:prod": "export env=prod && yarn decrypt:env"
+		"py:server": "cd ../app_py/ && python3 server.py",
+		"py:device": "cd ../app_py/ && python3 screen.demo.py"
 	},
 	"dependencies": {
 		"7zip-min": "^1.4.3",

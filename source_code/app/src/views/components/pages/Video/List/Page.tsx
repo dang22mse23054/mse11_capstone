@@ -43,7 +43,7 @@ export interface IDispatchToProps {
 	updateLimit(limit): any
 	loadSetting(modalTypeId: number, videoId: number): any
 	changeEnabled(video: any, callback: any, options: any): any
-	onStop(video: any, callback: any, options: any): any
+	deleteVideo(video: any, callback: any, options: any): any
 }
 
 interface IProps extends IDispatchToProps, IStateToProps {
@@ -238,7 +238,7 @@ class Page extends Component<IProps, IState> {
 
 	onStop = (video) => {
 		this.openConfirmBox('Delete', () => {
-			this.props.onStop({
+			this.props.deleteVideo({
 				id: video.id,
 				isEnabled: false,
 			}, (result) => {
