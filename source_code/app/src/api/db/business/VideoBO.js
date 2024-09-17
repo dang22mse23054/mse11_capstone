@@ -27,7 +27,8 @@ module.exports = class VideoBO {
 			// Category
 			.innerJoin(`${Category.tableName} as c`, 'vc.categoryId', 'c.id')
 
-		stm.where('isEnabled', isEnabled);
+		stm.where('isEnabled', isEnabled)
+			.whereNull('v.deletedAt');
 
 		if (age != null) {
 			stm.where('c.age', age);
